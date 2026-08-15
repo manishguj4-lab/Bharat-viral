@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Bharat Viral — Admin Dashboard</title>
+<style>
+:root{--red:#d71920;--red2:#b91219;--ink:#171717;--muted:#6b7280;--bg:#f6f7f9;--card:#fff;--line:#e5e7eb;--green:#15803d;--shadow:0 8px 28px rgba(15,23,42,.07)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,textarea,select{font:inherit}.app{min-height:100vh;display:flex}
+.sidebar{width:260px;background:#fff;border-right:1px solid var(--line);position:fixed;inset:0 auto 0 0;z-index:30;padding:20px 14px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:11px;padding:6px 10px 24px;border-bottom:1px solid var(--line)}
+.brand-mark{width:40px;height:40px;border-radius:11px;background:var(--red);color:#fff;display:grid;place-items:center;font-size:20px;font-weight:900;box-shadow:0 5px 15px rgba(215,25,32,.25)}
+.brand b{font-size:17px}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.nav{padding-top:18px}.nav-title{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#9ca3af;font-weight:800;padding:0 12px 8px}
+.nav button{width:100%;border:0;background:transparent;color:#4b5563;text-align:left;padding:11px 12px;border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:11px;margin:3px 0;font-weight:600}
+.nav button:hover,.nav button.active{background:#fff0f1;color:var(--red)}.nav-icon{width:20px;text-align:center}
+.sidebar-bottom{margin-top:auto;border-top:1px solid var(--line);padding-top:14px}.user{display:flex;gap:10px;align-items:center;padding:9px 10px}.avatar{width:34px;height:34px;border-radius:50%;background:#eee;display:grid;place-items:center;font-weight:800}.user small{color:var(--muted)}
+.content{margin-left:260px;width:calc(100% - 260px);min-height:100vh}
+.topbar{height:70px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:20}
+.topbar h1{font-size:18px;margin:0}.top-actions{display:flex;align-items:center;gap:10px}.icon-btn{border:1px solid var(--line);background:#fff;width:38px;height:38px;border-radius:9px;cursor:pointer}
+main{padding:28px;max-width:1450px;margin:auto}.page-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:22px}.page-head h2{margin:0;font-size:26px}.page-head p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.btn{border:0;border-radius:9px;padding:10px 15px;font-weight:800;cursor:pointer}.btn-red{background:var(--red);color:#fff;box-shadow:0 4px 12px rgba(215,25,32,.18)}.btn-light{background:#fff;border:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}.stat-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;font-weight:700}.stat-icon{width:36px;height:36px;border-radius:9px;background:#fff0f1;color:var(--red);display:grid;place-items:center}.stat strong{display:block;font-size:27px;margin-top:12px}.stat-foot{font-size:11px;color:var(--green);margin-top:6px}
+.grid2{display:grid;grid-template-columns:1.45fr .9fr;gap:18px}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}.panel-head{padding:17px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.panel-head h3{margin:0;font-size:15px}.panel-body{padding:19px}
+.empty{padding:34px 15px;text-align:center;color:var(--muted)}.empty .big{font-size:35px;margin-bottom:8px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 15px;border-bottom:1px solid #f0f1f3;font-size:13px}th{font-size:11px;text-transform:uppercase;color:#9ca3af;letter-spacing:.06em}tr:last-child td{border-bottom:0}
+.badge{display:inline-flex;padding:5px 8px;border-radius:20px;font-size:11px;font-weight:800}.published{background:#eaf7ee;color:var(--green)}.draft{background:#f3f4f6;color:#6b7280}.viral{background:#fff0f1;color:var(--red)}
+.hidden{display:none}
+.form-panel{max-width:1100px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px;padding:20px}.full{grid-column:1/-1}.field label{display:block;font-size:12px;font-weight:800;margin-bottom:7px}.field small{display:block;color:#9ca3af;font-size:11px;margin-top:5px}
+input,textarea,select{width:100%;border:1px solid #d9dce1;background:#fff;border-radius:9px;padding:11px 12px;outline:none}input:focus,textarea:focus,select:focus{border-color:#e27b80;box-shadow:0 0 0 3px rgba(215,25,32,.08)}textarea{min-height:145px;resize:vertical}
+.checks{display:flex;flex-wrap:wrap;gap:8px}.check{border:1px solid var(--line);padding:9px 11px;border-radius:8px;background:#fafafa;font-size:12px;cursor:pointer}.check input{width:auto;margin-right:6px;accent-color:var(--red)}
+.tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.tag{background:#fff0f1;color:var(--red);padding:6px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.form-foot{border-top:1px solid var(--line);padding:15px 20px;display:flex;justify-content:flex-end;gap:9px}
+.notice{margin-bottom:18px;border:1px solid #f2dfa2;background:#fff9e6;padding:12px 14px;border-radius:10px;color:#6b5a17;font-size:12px}
+.menu-toggle{display:none}
+@media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+@media(max-width:760px){
+ .sidebar{transform:translateX(-100%);transition:.2s;width:260px}.sidebar.open{transform:translateX(0)}
+ .content{margin-left:0;width:100%}.menu-toggle{display:block}.topbar{padding:0 15px}main{padding:18px}.page-head{align-items:flex-start}.page-head h2{font-size:22px}.stats{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}
+}
+@media(max-width:470px){.stats{grid-template-columns:1fr}.top-actions .icon-btn{display:none}.page-head{flex-direction:column}.btn-red{width:100%}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="brand-mark">★</div><div><b>Bharat Viral</b><small>Publisher Dashboard</small></div></div>
+  <div class="nav">
+    <div class="nav-title">Workspace</div>
+    <button class="active" onclick="show('dashboard',this)">📊 <span>Dashboard</span></button>
+    <button onclick="show('article',this)">📝 <span>New Article</span></button>
+    <button onclick="show('articles',this)">📰 <span>All Articles</span></button>
+    <div class="nav-title" style="margin-top:18px">Manage</div>
+    <button onclick="show('categories',this)">📂 <span>Categories</span></button>
+    <button onclick="show('tagsPage',this)">🏷️ <span>Tags</span></button>
+    <button onclick="show('seo',this)">🔎 <span>SEO</span></button>
+  </div>
+  <div class="sidebar-bottom"><div class="user"><div class="avatar">A</div><div><b style="font-size:12px">Administrator</b><small style="display:block">Bharat Viral</small></div></div></div>
+</aside>
+
+<div class="content">
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:12px"><button class="icon-btn menu-toggle" onclick="toggleMenu()">☰</button><h1 id="topTitle">Dashboard</h1></div>
+  <div class="top-actions"><button class="icon-btn" title="Preview" onclick="previewSite()">↗</button>
+  <button class="icon-btn" title="Notifications" onclick="alert('अभी कोई नई notification नहीं है।')">🔔</button></div>
+</header>
+
+<main>
+<section id="dashboard">
+ <div class="page-head"><div><h2>Dashboard</h2><p>Bharat Viral की publishing activity का overview.</p></div><button class="btn btn-red" onclick="show('article',document.querySelectorAll('.nav button')[1])">＋ New Article</button></div>
+ <div class="notice">यह अभी frontend admin interface है। Supabase authentication, database और storage connect होने के बाद यहाँ live data दिखाई देगा।</div>
+ <div class="stats">
+  <div class="stat"><div class="stat-top">Total Articles <span class="stat-icon">📰</span></div><strong>0</strong><div class="stat-foot">No data yet</div></div>
+  <div class="stat"><div class="stat-top">Published <span class="stat-icon">✓</span></div><strong>0</strong><div class="stat-foot">Ready to publish</div></div>
+  <div class="stat"><div class="stat-top">Total Views <span class="stat-icon">◉</span></div><strong>0</strong><div class="stat-foot">Analytics pending</div></div>
+  <div class="stat"><div class="stat-top">Top Viral <span class="stat-icon">🔥</span></div><strong>0</strong><div class="stat-foot">Ranking pending</div></div>
+ </div>
+ <div class="grid2">
+  <div class="panel"><div class="panel-head"><h3>📰 Recent Articles</h3><span class="muted">Latest</span></div><div class="empty"><div class="big">🗞️</div>No articles published yet.</div></div>
+  <div class="panel"><div class="panel-head"><h3>🔥 Top Viral</h3><span class="muted">By views</span></div><div class="empty"><div class="big">🔥</div>Viral ranking will appear here.</div></div>
+ </div>
+</section>
+
+<section id="article" class="hidden">
+ <div class="page-head"><div><h2>New Article</h2><p>नई खबर publish करने के लिए details भरें.</p></div></div>
+ <div class="panel form-panel">
+  <div class="form-grid">
+   <div class="field full"><label>Article Title *</label><input id="title" placeholder="उदाहरण: भारत में आज की सबसे बड़ी खबर..."></div>
+   <div class="field full"><label>Short Description</label><textarea id="excerpt" placeholder="Google/social preview के लिए संक्षिप्त परिचय"></textarea></div>
+   <div class="field full"><label>Article Content *</label><textarea id="content" style="min-height:240px" placeholder="पूरी खबर यहाँ लिखें..."></textarea></div>
+   <div class="field"><label>Image URL</label><input id="image" placeholder="https://..."><small>बाद में direct image upload भी जोड़ेंगे.</small></div>
+   <div class="field"><label>Author</label><input id="author" placeholder="Author name"></div>
+   <div class="field"><label>Source Name</label><input id="source" placeholder="Official source / publication"></div>
+   <div class="field"><label>Source URL</label><input id="sourceUrl" placeholder="https://..."></div>
+   <div class="field full"><label>Sections</label><div class="checks">
+    <label class="check"><input type="checkbox" value="trending"> Trending</label><label class="check"><input type="checkbox" value="news"> News</label><label class="check"><input type="checkbox" value="entertainment"> Entertainment</label><label class="check"><input type="checkbox" value="cricket"> Cricket</label><label class="check"><input type="checkbox" value="sports"> Sports</label><label class="check"><input type="checkbox" value="technology"> Technology</label><label class="check"><input type="checkbox" value="education"> Education</label><label class="check"><input type="checkbox" value="social-media"> Social Media</label><label class="check"><input type="checkbox" value="fact-check"> Fact Check</label><label class="check"><input type="checkbox" value="explained"> Explained</label><label class="check"><input type="checkbox" value="india"> India</label><label class="check"><input type="checkbox" value="rajasthan"> Rajasthan</label>
+   </div></div>
+   <div class="field full"><label>Tags</label><input id="tagInput" placeholder="Tag लिखें और Enter दबाएँ"><div id="tagList" class="tags"></div></div>
+   <div class="field"><label>Article Type</label><select id="type"><option value="news">News</option><option value="fact_check">Fact Check</option><option value="explained">Explained</option></select></div>
+   <div class="field"><label>Status</label><select id="status"><option value="draft">Draft</option><option value="published">Published</option></select></div>
+   <div class="field full"><label>SEO Title</label><input id="seoTitle" placeholder="Google search result के लिए title"></div>
+   <div class="field full"><label>SEO Description</label><textarea id="seoDescription" placeholder="लगभग 1–2 lines में स्पष्ट description"></textarea></div>
+  </div>
+  <div class="form-foot"><button class="btn btn-light" onclick="save('draft')">Save Draft</button><button class="btn btn-red" onclick="save('published')">Publish Article</button></div>
+ </div>
+</section>
+
+<section id="articles" class="hidden">
+ <div class="page-head"><div><h2>All Articles</h2><p>सभी articles और उनका status यहाँ manage होगा.</p></div><button class="btn btn-red" onclick="show('article',document.querySelectorAll('.nav button')[1])">＋ New Article</button></div>
+ <div class="panel"><table><thead><tr><th>Article</th><th>Category</th><th>Status</th><th>Views</th><th>Updated</th></tr></thead><tbody><tr><td colspan="5"><div class="empty">अभी कोई article नहीं है.</div></td></tr></tbody></table></div>
+</section>
+
+<section id="categories" class="hidden">
+ <div class="page-head"><div><h2>Categories</h2><p>News को सही section में organize करें.</p></div></div>
+ <div class="panel"><div class="panel-body"><div class="checks">
+  <span class="check">Trending</span><span class="check">News</span><span class="check">Entertainment</span><span class="check">Cricket</span><span class="check">Sports</span><span class="check">Technology</span><span class="check">Education</span><span class="check">Social Media</span><span class="check">Fact Check</span><span class="check">Explained</span><span class="check">India</span><span class="check">Rajasthan</span>
+ </div></div></div>
+</section>
+
+<section id="tagsPage" class="hidden">
+ <div class="page-head"><div><h2>Tags</h2><p>Specific topics को organize करने के लिए tags.</p></div></div>
+ <div class="panel"><div class="empty"><div class="big">🏷️</div>Tags database connect होने के बाद यहाँ manage होंगे.</div></div>
+</section>
+
+<section id="seo" class="hidden">
+ <div class="page-head"><div><h2>SEO</h2><p>Search engines के लिए articles optimize करने की settings.</p></div></div>
+ <div class="grid2">
+  <div class="panel"><div class="panel-head"><h3>Article SEO</h3></div><div class="panel-body"><p><b>SEO Title</b><br><span class="muted">Search result में दिखने वाला relevant title.</span></p><p><b>SEO Description</b><br><span class="muted">Article का concise search description.</span></p><p><b>Slug</b><br><span class="muted">Clean URL, जैसे /new-education-rule-2026</span></p></div></div>
+  <div class="panel"><div class="panel-head"><h3>Content quality</h3></div><div class="panel-body"><p>✓ Original information</p><p>✓ Reliable source</p><p>✓ Clear headings</p><p>✓ Relevant tags</p></div></div>
+ </div>
+</section>
+</main>
+</div>
+</div>
+
+<script>
+let tagList=[];
+const titles={dashboard:'Dashboard',article:'New Article',articles:'All Articles',categories:'Categories',tagsPage:'Tags',seo:'SEO'};
+function show(id,btn){
+ document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));
+ document.getElementById(id).classList.remove('hidden');
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+ if(btn)btn.classList.add('active');
+ document.getElementById('topTitle').textContent=titles[id]||'Dashboard';
+ if(innerWidth<=760)document.getElementById('sidebar').classList.remove('open');
+}
+function toggleMenu(){document.getElementById('sidebar').classList.toggle('open')}
+document.getElementById('tagInput').addEventListener('keydown',e=>{
+ if(e.key==='Enter'){e.preventDefault();let v=e.target.value.trim();if(v&&!tagList.includes(v)){tagList.push(v);renderTags()}e.target.value=''}
+});
+function renderTags(){document.getElementById('tagList').innerHTML=tagList.map((t,i)=>`<span class="tag">${esc(t)} <button onclick="removeTag(${i})" style="border:0;background:none;cursor:pointer;color:inherit">×</button></span>`).join('')}
+function removeTag(i){tagList.splice(i,1);renderTags()}
+function esc(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])}
+function previewSite(){
+  window.open('/', '_blank');
+}
+function save(status){
+  const title=document.getElementById('title').value.trim();
+  if(!title){alert('पहले Article Title भरें।');document.getElementById('title').focus();return}
+  document.getElementById('status').value=status;
+  const sections=[...document.querySelectorAll('.checks input:checked')].map(x=>x.value);
+  const data={
+    title,
+    excerpt:document.getElementById('excerpt').value.trim(),
+    content:document.getElementById('content').value.trim(),
+    image:document.getElementById('image').value.trim(),
+    author:document.getElementById('author').value.trim(),
+    source:document.getElementById('source').value.trim(),
+    sourceUrl:document.getElementById('sourceUrl').value.trim(),
+    sections,tags:[...tagList],
+    type:document.getElementById('type').value,
+    status,
+    seoTitle:document.getElementById('seoTitle').value.trim(),
+    seoDescription:document.getElementById('seoDescription').value.trim(),
+    savedAt:new Date().toISOString()
+  };
+  localStorage.setItem('bharatViralDraft',JSON.stringify(data));
+  alert(status==='published'
+    ? 'Article तैयार है। अभी यह demo mode में local browser में save हुआ है; Supabase connect होने पर सच में website पर publish होगा।'
+    : 'Draft सुरक्षित रूप से इस browser में save हो गया।');
+}
+</script>
+</body>
+</html>

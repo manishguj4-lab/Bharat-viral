@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bharat Viral — Admin Panel</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+ --red:#d71920;--red-dark:#b51219;--bg:#f5f6f8;--white:#fff;
+ --text:#171717;--muted:#6b7280;--border:#e5e7eb;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+.sidebar{
+ position:fixed;left:0;top:0;bottom:0;width:255px;background:#fff;
+ border-right:1px solid var(--border);padding:18px 13px;z-index:100;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:7px 9px 22px;border-bottom:1px solid var(--border)}
+.logo{
+ width:40px;height:40px;border-radius:11px;background:var(--red);color:#fff;
+ display:grid;place-items:center;font-size:20px;font-weight:900
+}
+.brand b{font-size:17px}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.nav-title{font-size:10px;color:#9ca3af;font-weight:800;letter-spacing:.12em;margin:20px 10px 7px;text-transform:uppercase}
+.nav-btn{
+ width:100%;border:0;background:transparent;color:#4b5563;text-align:left;
+ padding:11px 12px;border-radius:9px;margin:3px 0;font-weight:700;
+ display:flex;align-items:center;gap:11px
+}
+.nav-btn:hover,.nav-btn.active{background:#fff0f1;color:var(--red)}
+.bottom{position:absolute;left:13px;right:13px;bottom:15px;border-top:1px solid var(--border);padding-top:13px}
+.user{display:flex;align-items:center;gap:9px;padding:6px 8px;font-size:12px}.avatar{width:34px;height:34px;border-radius:50%;background:#eee;display:grid;place-items:center;font-weight:800}
+.user small{display:block;color:var(--muted)}
+.content{margin-left:255px;min-height:100vh}
+.topbar{
+ height:66px;background:#fff;border-bottom:1px solid var(--border);
+ display:flex;align-items:center;justify-content:space-between;padding:0 25px;
+ position:sticky;top:0;z-index:50
+}
+.topbar h1{font-size:18px;margin:0}
+.menu{display:none;border:1px solid var(--border);background:#fff;border-radius:8px;width:38px;height:38px}
+main{max-width:1400px;margin:auto;padding:25px}
+.page-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px}
+.page-head h2{margin:0;font-size:26px}.page-head p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.btn{border:0;border-radius:9px;padding:10px 15px;font-weight:800}
+.btn-red{background:var(--red);color:#fff}.btn-light{background:#fff;border:1px solid var(--border)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
+.card,.panel{background:#fff;border:1px solid var(--border);border-radius:13px;box-shadow:0 4px 18px #00000008}
+.card{padding:18px}.label{color:var(--muted);font-size:12px;font-weight:700}.number{font-size:28px;font-weight:900;margin-top:9px}
+.two{display:grid;grid-template-columns:1.4fr 1fr;gap:17px}.panel{overflow:hidden}.panel-head{padding:16px 18px;border-bottom:1px solid var(--border);font-weight:800}.panel-body{padding:18px}
+.empty{text-align:center;padding:35px 15px;color:var(--muted);font-size:13px}.empty-icon{font-size:34px;margin-bottom:7px}
+.notice{background:#fff9e5;border:1px solid #f0dc9b;border-radius:9px;padding:11px 13px;color:#6b5a17;font-size:12px;margin-bottom:18px}
+.hidden{display:none!important}
+.form-panel{max-width:1100px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px}
+.full{grid-column:1/-1}
+.field label{display:block;font-size:12px;font-weight:800;margin-bottom:7px}
+.field small{display:block;color:#9ca3af;font-size:11px;margin-top:5px}
+input,textarea,select{width:100%;border:1px solid #d5d8dd;border-radius:9px;padding:11px 12px;background:#fff;outline:none}
+input:focus,textarea:focus,select:focus{border-color:#df666b;box-shadow:0 0 0 3px #d7192012}
+textarea{min-height:130px;resize:vertical}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.check{border:1px solid var(--border);background:#fafafa;border-radius:8px;padding:9px 11px;font-size:12px}
+.check input{width:auto;margin-right:5px;accent-color:var(--red)}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.tag{background:#fff0f1;color:var(--red);border-radius:20px;padding:6px 9px;font-size:11px;font-weight:800}
+.form-footer{border-top:1px solid var(--border);padding:15px 20px;display:flex;justify-content:flex-end;gap:9px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px 15px;border-bottom:1px solid #f0f1f3;font-size:12px}th{color:#9ca3af;font-size:10px;text-transform:uppercase}
+@media(max-width:1000px){.cards{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
+@media(max-width:720px){
+ .sidebar{transform:translateX(-100%);transition:.2s}.sidebar.open{transform:translateX(0)}
+ .content{margin-left:0}.menu{display:block}.topbar{padding:0 15px}
+ main{padding:16px}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}
+ .cards{grid-template-columns:1fr 1fr}.page-head{align-items:flex-start}
+}
+@media(max-width:450px){.cards{grid-template-columns:1fr}.page-head{flex-direction:column}.page-head .btn{width:100%}}
+</style>
+
+<style>
+/* Supabase Admin Login */
+#authScreen{
+  position:fixed;inset:0;z-index:9999;background:#f5f6f8;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.auth-box{
+  width:min(430px,100%);background:#fff;border:1px solid #e5e7eb;
+  border-radius:18px;box-shadow:0 12px 40px #00000012;padding:28px;
+}
+.auth-logo{
+  width:52px;height:52px;border-radius:14px;background:#d71920;color:#fff;
+  display:grid;place-items:center;font-size:24px;font-weight:900;margin-bottom:16px;
+}
+.auth-box h2{margin:0 0 7px;font-size:25px}
+.auth-box p{margin:0 0 22px;color:#6b7280;font-size:13px}
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;font-size:12px;font-weight:800;margin-bottom:7px}
+.auth-field input{width:100%;border:1px solid #d5d8dd;border-radius:9px;padding:12px;outline:none}
+.auth-field input:focus{border-color:#df666b;box-shadow:0 0 0 3px #d7192012}
+#loginBtn{width:100%;border:0;border-radius:9px;padding:12px;background:#d71920;color:#fff;font-weight:800}
+#loginBtn:disabled{opacity:.65;cursor:not-allowed}
+#authError{
+  display:none;margin-bottom:14px;padding:10px 12px;border-radius:9px;
+  background:#fff0f1;border:1px solid #f2b8bc;color:#b51219;font-size:12px;
+}
+#authLoading{
+  position:fixed;inset:0;z-index:10000;background:#f5f6f8;
+  display:flex;align-items:center;justify-content:center;font-weight:800;color:#6b7280;
+}
+</style>
+</head>
+
+<body>
+<div id="authLoading">Checking admin login…</div>
+
+<div id="authScreen" style="display:none">
+  <div class="auth-box">
+    <div class="auth-logo">★</div>
+    <h2>Bharat Viral Admin</h2>
+    <p>Admin Panel खोलने के लिए अपना admin email और password डालें।</p>
+
+    <div id="authError"></div>
+
+    <form id="loginForm">
+      <div class="auth-field">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" autocomplete="username" placeholder="Admin email" required>
+      </div>
+
+      <div class="auth-field">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Password" required>
+      </div>
+
+      <button id="loginBtn" type="submit">Login to Admin Panel</button>
+    </form>
+  </div>
+</div>
+<div class="app">
+
+<aside class="sidebar" id="sidebar">
+ <div class="brand">
+  <div class="logo">★</div>
+  <div><b>Bharat Viral</b><small>Admin Dashboard</small></div>
+ </div>
+
+ <div class="nav-title">Main</div>
+ <button class="nav-btn active" data-page="dashboard">📊 Dashboard</button>
+ <button class="nav-btn" data-page="article">📰 Add News</button>
+ <button class="nav-btn" data-page="articles">📚 All Articles</button>
+
+ <div class="nav-title">Manage</div>
+ <button class="nav-btn" data-page="categories">📂 Categories</button>
+ <button class="nav-btn" data-page="tags">🏷️ Tags</button>
+ <button class="nav-btn" data-page="seo">🔎 SEO</button>
+
+ <div class="bottom">
+  <div class="user">
+      <div class="avatar">A</div>
+      <div style="flex:1"><b>Administrator</b><small id="adminEmailLabel">Admin account</small></div>
+      <button id="logoutBtn" type="button" class="btn btn-light" style="padding:7px 9px;font-size:11px">Logout</button>
+    </div>
+ </div>
+</aside>
+
+<div class="content">
+ <header class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+   <button class="menu" id="menuBtn">☰</button>
+   <h1 id="topTitle">Dashboard</h1>
+  </div>
+  <button class="btn btn-light" id="previewBtn">↗ Preview Site</button>
+ </header>
+
+ <main>
+
+ <!-- DASHBOARD -->
+ <section id="page-dashboard">
+  <div class="page-head">
+   <div><h2>Dashboard</h2><p>Bharat Viral publishing overview</p></div>
+   <button class="btn btn-red" id="dashboardAdd">＋ Add News</button>
+  </div>
+
+  <div class="notice">Supabase LIVE: Login के बाद यहाँ से Draft/Publish किया गया article database में save होगा।</div>
+
+  <div class="cards">
+   <div class="card"><div class="label">TOTAL ARTICLES</div><div class="number">0</div></div>
+   <div class="card"><div class="label">PUBLISHED</div><div class="number">0</div></div>
+   <div class="card"><div class="label">TOTAL VIEWS</div><div class="number">0</div></div>
+   <div class="card"><div class="label">TOP VIRAL</div><div class="number">0</div></div>
+  </div>
+
+  <div class="two">
+   <div class="panel"><div class="panel-head">📰 Recent Articles</div><div class="empty"><div class="empty-icon">🗞️</div>अभी कोई article नहीं है।</div></div>
+   <div class="panel"><div class="panel-head">🔥 Top Viral</div><div class="empty"><div class="empty-icon">🔥</div>Viral ranking यहाँ दिखाई देगी।</div></div>
+  </div>
+ </section>
+
+ <!-- ADD NEWS -->
+ <section id="page-article" class="hidden">
+  <div class="page-head">
+   <div><h2>Add News</h2><p>नई खबर तैयार करके section और tags चुनें।</p></div>
+  </div>
+
+  <div class="panel form-panel">
+   <div class="form-grid">
+
+    <div class="field full">
+     <label>Article Title *</label>
+     <input id="title" type="text" placeholder="खबर का शीर्षक लिखें">
+    </div>
+
+    <div class="field full">
+     <label>Short Description</label>
+     <textarea id="excerpt" placeholder="खबर का छोटा परिचय"></textarea>
+    </div>
+
+    <div class="field full">
+     <label>Article Content *</label>
+     <textarea id="content" style="min-height:240px" placeholder="पूरी खबर यहाँ लिखें..."></textarea>
+    </div>
+
+    <div class="field">
+     <label>Article Photo</label>
+     <input id="imageFile" type="file" accept="image/*" style="padding:9px">
+     <div id="imagePreviewBox" style="display:none;margin-top:10px;border:1px solid #e5e7eb;border-radius:10px;padding:8px;background:#fafafa">
+      <img id="imagePreview" alt="Selected photo preview" style="width:100%;max-height:230px;object-fit:cover;border-radius:8px;display:block">
+      <button type="button" id="removeImage" class="btn btn-light" style="margin-top:8px">Remove Photo</button>
+     </div>
+     <small>Photo चुनते ही preview दिखाई देगा। बाद में इसे Supabase Storage पर upload करेंगे।</small>
+    </div>
+
+    <div class="field">
+     <label>Image URL (Optional)</label>
+     <input id="image" type="url" placeholder="https://...">
+     <small>अगर direct image link है तो यहाँ डाल सकते हो।</small>
+    </div>
+
+    <div class="field">
+     <label>Author</label>
+     <input id="author" type="text" placeholder="Author name">
+    </div>
+
+    <div class="field">
+     <label>Source Name</label>
+     <input id="source" type="text" placeholder="Source / publication">
+    </div>
+
+    <div class="field">
+     <label>Source URL</label>
+     <input id="sourceUrl" type="url" placeholder="https://...">
+    </div>
+
+    <div class="field full">
+     <label>Sections</label>
+     <div class="checks">
+      <label class="check"><input type="checkbox" value="trending">Trending</label>
+      <label class="check"><input type="checkbox" value="news">News</label>
+      <label class="check"><input type="checkbox" value="entertainment">Entertainment</label>
+      <label class="check"><input type="checkbox" value="cricket">Cricket</label>
+      <label class="check"><input type="checkbox" value="sports">Sports</label>
+      <label class="check"><input type="checkbox" value="technology">Technology</label>
+      <label class="check"><input type="checkbox" value="education">Education</label>
+      <label class="check"><input type="checkbox" value="social-media">Social Media</label>
+      <label class="check"><input type="checkbox" value="fact-check">Fact Check</label>
+      <label class="check"><input type="checkbox" value="explained">Explained</label>
+      <label class="check"><input type="checkbox" value="india">India</label>
+      <label class="check"><input type="checkbox" value="rajasthan">Rajasthan</label>
+     </div>
+    </div>
+
+    <div class="field full">
+     <label>Tags</label>
+     <input id="tagInput" type="text" placeholder="Tag लिखकर Enter दबाएँ">
+     <div id="tagList" class="tags"></div>
+    </div>
+
+    <div class="field">
+     <label>Article Type</label>
+     <select id="type">
+      <option value="news">News</option>
+      <option value="fact_check">Fact Check</option>
+      <option value="explained">Explained</option>
+     </select>
+    </div>
+
+    <div class="field">
+     <label>Status</label>
+     <select id="status">
+      <option value="draft">Draft</option>
+      <option value="published">Published</option>
+     </select>
+    </div>
+
+    <div class="field full">
+     <label>SEO Title</label>
+     <input id="seoTitle" type="text" placeholder="Google search result के लिए title">
+    </div>
+
+    <div class="field full">
+     <label>SEO Description</label>
+     <textarea id="seoDescription" placeholder="Search result के लिए short description"></textarea>
+    </div>
+
+   </div>
+
+   <div class="form-footer">
+    <button type="button" class="btn btn-light" id="saveDraft">Save Draft</button>
+    <button type="button" class="btn btn-red" id="publishBtn">Publish Article</button>
+   </div>
+  </div>
+ </section>
+
+ <!-- ARTICLES -->
+ <section id="page-articles" class="hidden">
+  <div class="page-head"><div><h2>All Articles</h2><p>सभी news और उनके status.</p></div><button class="btn btn-red" id="articlesAdd">＋ Add News</button></div>
+  <div class="panel"><table><thead><tr><th>Article</th><th>Type</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead><tbody><tr><td colspan="4"><div class="empty">अभी कोई article नहीं है।</div></td></tr></tbody></table></div>
+ </section>
+
+ <!-- CATEGORIES -->
+ <section id="page-categories" class="hidden">
+  <div class="page-head"><div><h2>Categories</h2><p>News को अलग-अलग sections में भेजें।</p></div></div>
+  <div class="panel"><div class="panel-body">
+   <div class="checks">
+    <span class="check">Trending</span><span class="check">News</span><span class="check">Entertainment</span><span class="check">Cricket</span><span class="check">Sports</span><span class="check">Technology</span><span class="check">Education</span><span class="check">Social Media</span><span class="check">Fact Check</span><span class="check">Explained</span><span class="check">India</span><span class="check">Rajasthan</span>
+   </div>
+  </div></div>
+ </section>
+
+ <!-- TAGS -->
+ <section id="page-tags" class="hidden">
+  <div class="page-head"><div><h2>Tags</h2><p>Specific topics को manage करने के लिए।</p></div></div>
+  <div class="panel"><div class="empty"><div class="empty-icon">🏷️</div>Tags database connect होने के बाद यहाँ manage होंगे।</div></div>
+ </section>
+
+ <!-- SEO -->
+ <section id="page-seo" class="hidden">
+  <div class="page-head"><div><h2>SEO</h2><p>Search engine optimization settings.</p></div></div>
+  <div class="two">
+   <div class="panel"><div class="panel-head">Article SEO</div><div class="panel-body">
+    <p><b>SEO Title</b><br><span style="color:#6b7280">Search result में relevant title.</span></p>
+    <p><b>SEO Description</b><br><span style="color:#6b7280">Article का concise description.</span></p>
+    <p><b>Slug</b><br><span style="color:#6b7280">जैसे /new-education-rule-2026</span></p>
+   </div></div>
+   <div class="panel"><div class="panel-head">Content Checklist</div><div class="panel-body">
+    <p>✓ Original information</p><p>✓ Reliable source</p><p>✓ Relevant categories</p><p>✓ Relevant tags</p>
+   </div></div>
+  </div>
+ </section>
+
+ </main>
+</div>
+</div>
+
+
+<script>
+(function(){
+  const SUPABASE_URL = "https://ocarsylhsyxjqpzidndb.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+
+  window.bharatViralSupabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+  const supabaseClient = window.bharatViralSupabase;
+
+  const app = document.querySelector(".app");
+  const authScreen = document.getElementById("authScreen");
+  const authLoading = document.getElementById("authLoading");
+  const loginForm = document.getElementById("loginForm");
+  const loginBtn = document.getElementById("loginBtn");
+  const authError = document.getElementById("authError");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const adminEmailLabel = document.getElementById("adminEmailLabel");
+
+  function showError(message){
+    authError.textContent = message;
+    authError.style.display = "block";
+  }
+
+  function clearError(){
+    authError.textContent = "";
+    authError.style.display = "none";
+  }
+
+  function showPanel(user){
+    authLoading.style.display = "none";
+    authScreen.style.display = "none";
+    app.style.display = "";
+    if(user && user.email){
+      adminEmailLabel.textContent = user.email;
+    }
+  }
+
+  function showLogin(){
+    authLoading.style.display = "none";
+    app.style.display = "none";
+    authScreen.style.display = "flex";
+  }
+
+  loginForm.addEventListener("submit", async function(e){
+    e.preventDefault();
+    clearError();
+
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Logging in…";
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if(error){
+      showError(error.message || "Login failed. Email या password check करें।");
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Login to Admin Panel";
+      return;
+    }
+
+    showPanel(data.user);
+    loginBtn.disabled = false;
+    loginBtn.textContent = "Login to Admin Panel";
+  });
+
+  logoutBtn.addEventListener("click", async function(){
+    const { error } = await supabaseClient.auth.signOut();
+    if(error){
+      alert(error.message || "Logout नहीं हो पाया।");
+      return;
+    }
+    showLogin();
+    document.getElementById("loginPassword").value = "";
+  });
+
+  supabaseClient.auth.onAuthStateChange(function(event, session){
+    if(session && session.user){
+      showPanel(session.user);
+    }else if(event !== "INITIAL_SESSION"){
+      showLogin();
+    }
+  });
+
+  (async function checkSession(){
+    const { data, error } = await supabaseClient.auth.getSession();
+
+    if(error){
+      showLogin();
+      showError("Supabase connection error. Project URL और Publishable key check करें।");
+      return;
+    }
+
+    if(data.session && data.session.user){
+      showPanel(data.session.user);
+    }else{
+      showLogin();
+    }
+  })();
+})();
+</script>
+
+<script>
+(function(){
+ const supabaseClient = window.bharatViralSupabase;
+ if (!supabaseClient) {
+   alert("Supabase library load नहीं हुई। Internet connection और Supabase CDN check करें।");
+   return;
+ }
+ const titles={
+  dashboard:"Dashboard",
+  article:"Add News",
+  articles:"All Articles",
+  categories:"Categories",
+  tags:"Tags",
+  seo:"SEO"
+ };
+
+ const buttons=document.querySelectorAll(".nav-btn");
+ const pages=document.querySelectorAll("main section");
+
+ function openPage(page){
+  pages.forEach(p=>p.classList.add("hidden"));
+  const target=document.getElementById("page-"+page);
+  if(target)target.classList.remove("hidden");
+
+  buttons.forEach(b=>b.classList.remove("active"));
+  const active=document.querySelector('.nav-btn[data-page="'+page+'"]');
+  if(active)active.classList.add("active");
+
+  document.getElementById("topTitle").textContent=titles[page]||"Dashboard";
+
+  if(window.innerWidth<=720){
+   document.getElementById("sidebar").classList.remove("open");
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+ }
+
+ buttons.forEach(btn=>{
+  btn.addEventListener("click",function(){
+   openPage(this.dataset.page);
+  });
+ });
+
+ document.getElementById("dashboardAdd").addEventListener("click",()=>openPage("article"));
+ document.getElementById("articlesAdd").addEventListener("click",()=>openPage("article"));
+
+ document.getElementById("menuBtn").addEventListener("click",()=>{
+  document.getElementById("sidebar").classList.toggle("open");
+ });
+
+ document.getElementById("previewBtn").addEventListener("click",()=>{
+  window.open("/", "_blank");
+ });
+
+ let tags=[];
+ let selectedImageData="";
+
+ const imageFile=document.getElementById("imageFile");
+ const imagePreviewBox=document.getElementById("imagePreviewBox");
+ const imagePreview=document.getElementById("imagePreview");
+ const removeImage=document.getElementById("removeImage");
+
+ imageFile.addEventListener("change",function(){
+  const file=this.files && this.files[0];
+  if(!file)return;
+  if(!file.type.startsWith("image/")){
+   alert("कृपया केवल image file चुनें।");
+   this.value="";
+   return;
+  }
+  if(file.size > 5*1024*1024){
+   alert("Photo 5 MB से छोटी रखें।");
+   this.value="";
+   return;
+  }
+  const reader=new FileReader();
+  reader.onload=function(e){
+   selectedImageData=e.target.result;
+   imagePreview.src=selectedImageData;
+   imagePreviewBox.style.display="block";
+  };
+  reader.readAsDataURL(file);
+ });
+
+ removeImage.addEventListener("click",function(){
+  selectedImageData="";
+  imageFile.value="";
+  imagePreview.src="";
+  imagePreviewBox.style.display="none";
+ });
+
+ document.getElementById("tagInput").addEventListener("keydown",function(e){
+  if(e.key==="Enter"){
+   e.preventDefault();
+   const value=this.value.trim();
+   if(value && !tags.includes(value)){
+    tags.push(value);
+    renderTags();
+   }
+   this.value="";
+  }
+ });
+
+ function renderTags(){
+  document.getElementById("tagList").innerHTML=tags.map((tag,index)=>
+   '<span class="tag">'+escapeHtml(tag)+' <button type="button" data-index="'+index+'" style="border:0;background:none;color:inherit;font-weight:900">×</button></span>'
+  ).join("");
+
+  document.querySelectorAll("#tagList button").forEach(btn=>{
+   btn.addEventListener("click",()=>{
+    tags.splice(Number(btn.dataset.index),1);
+    renderTags();
+   });
+  });
+ }
+
+ function escapeHtml(text){
+  return text.replace(/[&<>"']/g,function(m){
+   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m];
+  });
+ }
+
+ function validate(){
+  const title=document.getElementById("title").value.trim();
+  const content=document.getElementById("content").value.trim();
+  if(!title){alert("पहले Article Title भरें।");document.getElementById("title").focus();return false}
+  if(!content){alert("पहले Article Content भरें।");document.getElementById("content").focus();return false}
+  return true;
+ }
+
+ function collect(status){
+  return {
+   title:document.getElementById("title").value.trim(),
+   excerpt:document.getElementById("excerpt").value.trim(),
+   content:document.getElementById("content").value.trim(),
+   image_url:document.getElementById("image").value.trim(),
+   image_preview_data:selectedImageData,
+   author_name:document.getElementById("author").value.trim(),
+   source_name:document.getElementById("source").value.trim(),
+   source_url:document.getElementById("sourceUrl").value.trim(),
+   article_type:document.getElementById("type").value,
+   status:status,
+   seo_title:document.getElementById("seoTitle").value.trim(),
+   seo_description:document.getElementById("seoDescription").value.trim(),
+   categories:[...document.querySelectorAll('.check input:checked')].map(x=>x.value),
+   tags:[...tags],
+   saved_at:new Date().toISOString()
+  };
+ }
+
+  async function uploadArticleImage() {
+    const file = imageFile.files && imageFile.files[0];
+    if (!file) return document.getElementById("image").value.trim() || null;
+
+    const session = await supabaseClient.auth.getUser();
+    if (!session.data.user) throw new Error("Admin login session नहीं मिली।");
+
+    const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
+    const path = session.data.user.id + "/" + Date.now() + "-" + safeName;
+
+    const upload = await supabaseClient.storage
+      .from("article-images")
+      .upload(path, file, {
+        upsert: false,
+        contentType: file.type
+      });
+
+    if (upload.error) throw upload.error;
+
+    return supabaseClient.storage
+      .from("article-images")
+      .getPublicUrl(path).data.publicUrl;
+  }
+
+  async function saveArticleToSupabase(status) {
+    if (!validate()) return;
+
+    const button = status === "published"
+      ? document.getElementById("publishBtn")
+      : document.getElementById("saveDraft");
+
+    const oldText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Saving…";
+
+    try {
+      const userResult = await supabaseClient.auth.getUser();
+      if (userResult.error || !userResult.data.user) {
+        showLogin();
+        throw new Error("आपका admin session समाप्त हो गया है। दोबारा login करें।");
+      }
+
+      const article = collect(status);
+      delete article.image_preview_data;
+      delete article.saved_at;
+
+      article.image_url = await uploadArticleImage();
+      article.author_id = userResult.data.user.id;
+      article.created_by = userResult.data.user.id;
+      article.published_at = status === "published"
+        ? new Date().toISOString()
+        : null;
+
+      const result = await supabaseClient
+        .from("articles")
+        .insert(article)
+        .select()
+        .single();
+
+      if (result.error) throw result.error;
+
+      alert(
+        status === "published"
+          ? "✅ Article Publish हो गया!\n\nअब यह Homepage पर दिखाई देगा।"
+          : "✅ Draft Supabase में save हो गया।"
+      );
+
+      clearArticleForm();
+      loadArticlesFromDB();
+      loadDashboardFromDB();
+
+    } catch (error) {
+      console.error(error);
+      alert("❌ Save failed:\n" + (error.message || "Unknown error"));
+    } finally {
+      button.disabled = false;
+      button.textContent = oldText;
+    }
+  }
+
+  function clearArticleForm() {
+    ["title","excerpt","content","image","author","source","sourceUrl","seoTitle","seoDescription"]
+      .forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+      });
+
+    document.getElementById("imageFile").value = "";
+    selectedImageData = "";
+    tags = [];
+    renderTags();
+
+    document.querySelectorAll(".check input").forEach(function(x) {
+      x.checked = false;
+    });
+
+    imagePreview.src = "";
+    imagePreviewBox.style.display = "none";
+    document.getElementById("status").value = "draft";
+    document.getElementById("type").value = "news";
+  }
+
+
+  async function loadArticlesFromDB() {
+    const tbody = document.querySelector("#page-articles tbody");
+    if (!tbody) return;
+
+    const result = await supabaseClient
+      .from("articles")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (result.error) {
+      tbody.innerHTML =
+        '<tr><td colspan="5"><div class="empty">Articles load नहीं हुए: ' +
+        escapeHtml(result.error.message) + '</div></td></tr>';
+      return;
+    }
+
+    if (!result.data || !result.data.length) {
+      tbody.innerHTML =
+        '<tr><td colspan="5"><div class="empty">अभी कोई article नहीं है।</div></td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = result.data.map(function(a) {
+      return '<tr>' +
+        '<td><b>' + escapeHtml(a.title || "") + '</b>' +
+        '<br><small style="color:#888">' +
+        escapeHtml((a.excerpt || "").slice(0, 90)) +
+        '</small></td>' +
+        '<td>' + escapeHtml(a.article_type || "") + '</td>' +
+        '<td><span class="tag">' + escapeHtml(a.status || "") + '</span></td>' +
+        '<td>' + Number(a.views || 0) + '</td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button type="button" class="db-edit-btn" data-id="' + escapeHtml(a.id) +
+          '" style="padding:6px 10px;border:1px solid #bbb;border-radius:6px;background:#fff;cursor:pointer;margin-right:5px;">✏️ Edit</button>' +
+          '<button type="button" class="db-delete-btn" data-id="' + escapeHtml(a.id) +
+          '" style="padding:6px 10px;border:0;border-radius:6px;background:#b51219;color:#fff;cursor:pointer;">🗑️ Delete</button>' +
+        '</td>' +
+      '</tr>';
+    }).join("");
+
+    tbody.querySelectorAll(".db-edit-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        openEditArticle(this.dataset.id);
+      });
+    });
+
+    tbody.querySelectorAll(".db-delete-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        deleteArticle(this.dataset.id);
+      });
+    });
+  }
+
+  async function openEditArticle(id) {
+    const result = await supabaseClient
+      .from("articles")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (result.error) {
+      alert("Article load नहीं हुआ:\n" + result.error.message);
+      return;
+    }
+
+    const a = result.data;
+
+    document.getElementById("editArticleId").value = a.id;
+    document.getElementById("editTitle").value = a.title || "";
+    document.getElementById("editExcerpt").value = a.excerpt || "";
+    document.getElementById("editContent").value = a.content || "";
+    document.getElementById("editType").value = a.article_type || "news";
+    document.getElementById("editStatus").value = a.status || "draft";
+    document.getElementById("editAuthor").value = a.author_name || "";
+    document.getElementById("editSource").value = a.source_name || "";
+    document.getElementById("editSourceUrl").value = a.source_url || "";
+    document.getElementById("editImageUrl").value = a.image_url || "";
+    document.getElementById("editImageFile").value = "";
+
+    document.getElementById("editArticleModal").style.display = "block";
+  }
+
+  function closeEditArticle() {
+    document.getElementById("editArticleModal").style.display = "none";
+  }
+
+  async function uploadEditedImage() {
+    const file = document.getElementById("editImageFile").files[0];
+    if (!file) return null;
+
+    const userResult = await supabaseClient.auth.getUser();
+    if (userResult.error || !userResult.data.user) {
+      throw new Error("Admin login session नहीं मिली।");
+    }
+
+    const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
+    const path = userResult.data.user.id + "/" + Date.now() + "-" + safeName;
+
+    const upload = await supabaseClient.storage
+      .from("article-images")
+      .upload(path, file, {
+        upsert: false,
+        contentType: file.type
+      });
+
+    if (upload.error) throw upload.error;
+
+    return supabaseClient.storage
+      .from("article-images")
+      .getPublicUrl(path).data.publicUrl;
+  }
+
+  async function updateArticle() {
+    const id = document.getElementById("editArticleId").value;
+    if (!id) return;
+
+    const button = document.getElementById("updateArticleBtn");
+    const oldText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Updating…";
+
+    try {
+      const userResult = await supabaseClient.auth.getUser();
+      if (userResult.error || !userResult.data.user) {
+        showLogin();
+        throw new Error("Admin login session समाप्त हो गया है।");
+      }
+
+      const newImage = await uploadEditedImage();
+
+      const payload = {
+        title: document.getElementById("editTitle").value.trim(),
+        excerpt: document.getElementById("editExcerpt").value.trim(),
+        content: document.getElementById("editContent").value.trim(),
+        article_type: document.getElementById("editType").value,
+        status: document.getElementById("editStatus").value,
+        author_name: document.getElementById("editAuthor").value.trim(),
+        source_name: document.getElementById("editSource").value.trim(),
+        source_url: document.getElementById("editSourceUrl").value.trim(),
+        image_url: newImage || document.getElementById("editImageUrl").value.trim() || null,
+        published_at: document.getElementById("editStatus").value === "published"
+          ? new Date().toISOString()
+          : null
+      };
+
+      if (!payload.title || !payload.content) {
+        throw new Error("Title और Content जरूरी हैं।");
+      }
+
+      const result = await supabaseClient
+        .from("articles")
+        .update(payload)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (result.error) throw result.error;
+
+      closeEditArticle();
+      await loadArticlesFromDB();
+      await loadDashboardFromDB();
+
+      alert("✅ Article successfully updated.");
+
+    } catch (error) {
+      console.error(error);
+      alert("❌ Update failed:\n" + (error.message || "Unknown error"));
+    } finally {
+      button.disabled = false;
+      button.textContent = oldText;
+    }
+  }
+
+  async function deleteArticle(id) {
+    const ok = confirm(
+      "क्या आप इस article को permanently delete करना चाहते हैं?\n\n" +
+      "यह action वापस नहीं किया जा सकता।"
+    );
+
+    if (!ok) return;
+
+    try {
+      const userResult = await supabaseClient.auth.getUser();
+      if (userResult.error || !userResult.data.user) {
+        showLogin();
+        throw new Error("Admin login session समाप्त हो गया है।");
+      }
+
+      const result = await supabaseClient
+        .from("articles")
+        .delete()
+        .eq("id", id);
+
+      if (result.error) throw result.error;
+
+      await loadArticlesFromDB();
+      await loadDashboardFromDB();
+
+      alert("🗑️ Article delete हो गया।");
+
+    } catch (error) {
+      console.error(error);
+      alert("❌ Delete failed:\n" + (error.message || "Unknown error"));
+    }
+  }
+
+  document.getElementById("closeEditModal").addEventListener("click", closeEditArticle);
+  document.getElementById("cancelEdit").addEventListener("click", closeEditArticle);
+  document.getElementById("updateArticleBtn").addEventListener("click", updateArticle);
+
+  document.getElementById("editArticleModal").addEventListener("click", function(e) {
+    if (e.target === this) closeEditArticle();
+  });
+
+  async function loadDashboardFromDB() {
+    const result = await supabaseClient
+      .from("articles")
+      .select("id,status,views,title")
+      .order("created_at", { ascending: false });
+
+    if (result.error) return;
+
+    const articles = result.data || [];
+    const published = articles.filter(function(a) {
+      return a.status === "published";
+    });
+
+    const totalViews = articles.reduce(function(sum, a) {
+      return sum + Number(a.views || 0);
+    }, 0);
+
+    const numbers = document.querySelectorAll("#page-dashboard .cards .number");
+    if (numbers[0]) numbers[0].textContent = articles.length;
+    if (numbers[1]) numbers[1].textContent = published.length;
+    if (numbers[2]) numbers[2].textContent = totalViews;
+    if (numbers[3]) numbers[3].textContent = published.length;
+
+    const recentPanel =
+      document.querySelector("#page-dashboard .two .panel:first-child");
+
+    if (recentPanel) {
+      const empty = recentPanel.querySelector(".empty");
+
+      if (empty && articles.length) {
+        empty.innerHTML = articles.slice(0, 5).map(function(a, i) {
+          return '<div style="padding:9px 0;border-bottom:1px solid #eee;font-size:12px">' +
+            '<b>' + (i + 1) + '. ' + escapeHtml(a.title || "") + '</b>' +
+            '<br><small style="color:#888">' +
+            escapeHtml(a.status || "") +
+            '</small></div>';
+        }).join("");
+      }
+    }
+  }
+
+  document.getElementById("saveDraft").addEventListener("click", function() {
+    saveArticleToSupabase("draft");
+  });
+
+  document.getElementById("publishBtn").addEventListener("click", function() {
+    saveArticleToSupabase("published");
+  });
+
+  loadArticlesFromDB();
+  loadDashboardFromDB();
+})();
+</script>
+
+<div id="editArticleModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;overflow:auto;padding:20px;">
+  <div style="max-width:900px;margin:30px auto;background:#fff;border-radius:14px;padding:22px;position:relative;">
+    <button id="closeEditModal" type="button" style="position:absolute;right:15px;top:12px;border:0;background:none;font-size:28px;cursor:pointer;">×</button>
+    <h2 style="margin:0 0 6px;">Edit Article</h2>
+    <p style="margin:0 0 18px;color:#777;font-size:13px;">Article में बदलाव करके Update करें।</p>
+
+    <input type="hidden" id="editArticleId">
+
+    <label>Title</label>
+    <input id="editTitle" type="text" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+
+    <label>Excerpt</label>
+    <textarea id="editExcerpt" rows="3" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;"></textarea>
+
+    <label>Content</label>
+    <textarea id="editContent" rows="12" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;"></textarea>
+
+    <label>Category / Type</label>
+    <select id="editType" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+      <option value="news">News</option>
+      <option value="trending">Trending</option>
+      <option value="entertainment">Entertainment</option>
+      <option value="cricket">Cricket</option>
+      <option value="sports">Sports</option>
+      <option value="technology">Technology</option>
+      <option value="education">Education</option>
+      <option value="social-media">Social Media</option>
+      <option value="fact-check">Fact Check</option>
+      <option value="explained">Explained</option>
+      <option value="india">India</option>
+      <option value="rajasthan">Rajasthan</option>
+    </select>
+
+    <label>Status</label>
+    <select id="editStatus" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+      <option value="draft">Draft</option>
+      <option value="published">Published</option>
+    </select>
+
+    <label>Author</label>
+    <input id="editAuthor" type="text" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+
+    <label>Source Name</label>
+    <input id="editSource" type="text" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+
+    <label>Source URL</label>
+    <input id="editSourceUrl" type="url" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+
+    <label>Image URL (optional)</label>
+    <input id="editImageUrl" type="url" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+
+    <label>Replace Image (optional)</label>
+    <input id="editImageFile" type="file" accept="image/*" style="width:100%;padding:10px;margin:6px 0 15px;box-sizing:border-box;">
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button id="cancelEdit" type="button" style="padding:10px 18px;border:1px solid #ccc;border-radius:8px;background:#fff;cursor:pointer;">Cancel</button>
+      <button id="updateArticleBtn" type="button" style="padding:10px 18px;border:0;border-radius:8px;background:#111;color:#fff;cursor:pointer;">Update Article</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

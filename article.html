@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Article | Bharat Viral</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f8fa;color:#171717;font-family:Arial,"Noto Sans Devanagari",sans-serif}.top{height:62px;background:#df111b;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 6%;font-weight:800}.top a{color:#fff;text-decoration:none}.wrap{max-width:950px;margin:30px auto;padding:0 18px}.article{background:#fff;border-radius:14px;box-shadow:0 3px 18px rgba(0,0,0,.08);overflow:hidden}.hero{width:100%;max-height:470px;object-fit:cover;display:block}.body{padding:30px}.cat{display:inline-block;color:#df111b;font-size:12px;font-weight:900;margin-bottom:10px;text-transform:uppercase}.title{font-size:38px;line-height:1.25;margin:0 0 12px}.meta{color:#777;font-size:13px;margin-bottom:24px}.excerpt{font-size:18px;line-height:1.6;font-weight:700;color:#444;border-left:4px solid #df111b;padding-left:14px;margin-bottom:25px}.content{font-size:18px;line-height:1.85;white-space:pre-wrap}.source{margin-top:28px;padding-top:18px;border-top:1px solid #eee;font-size:13px;color:#666}.source a{color:#df111b}.back{display:inline-block;margin-bottom:18px;color:#df111b;font-weight:800;text-decoration:none}@media(max-width:650px){.top{height:52px;padding:0 15px;font-size:13px}.wrap{margin:15px auto;padding:0 10px}.body{padding:20px}.title{font-size:25px}.excerpt{font-size:15px}.content{font-size:16px;line-height:1.75}.hero{max-height:300px}}
+</style>
+</head>
+<body>
+<header class="top"><a href="index.html">← Bharat Viral</a><span>FULL NEWS</span></header>
+<div class="wrap">
+<a class="back" href="index.html">← वापस Homepage पर</a>
+<article class="article" id="articleBox">
+<div id="loading" class="body">Article loading…</div>
+</article>
+</div>
+<script>
+const SUPABASE_URL="https://ocarsylhsyxjqpzidndb.supabase.co";
+const SUPABASE_KEY="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function time(v){if(!v)return '';const d=new Date(v),m=Math.max(1,Math.floor((Date.now()-d)/60000));if(m<60)return m+' मिनट पहले';const h=Math.floor(m/60);if(h<24)return h+' घंटे पहले';return Math.floor(h/24)+' दिन पहले';}
+async function load(){
+ const id=new URLSearchParams(location.search).get('id');
+ const box=document.getElementById('articleBox');
+ if(!id){box.innerHTML='<div class="body"><h2>Article नहीं मिला</h2><p>इस खबर का link सही नहीं है।</p></div>';return;}
+ const r=await db.from('articles').select('*').eq('id',id).eq('status','published').single();
+ if(r.error||!r.data){box.innerHTML='<div class="body"><h2>Article नहीं मिला</h2><p>यह खबर मौजूद नहीं है या अभी published नहीं है।</p></div>';return;}
+ const a=r.data;
+ document.title=(a.seo_title||a.title||'Bharat Viral')+' | Bharat Viral';
+ const image=a.image_url?'<img class="hero" src="'+esc(a.image_url)+'" alt="'+esc(a.title)+'">':'';
+ const category=(Array.isArray(a.categories)&&a.categories[0])?String(a.categories[0]).replace(/-/g,' ').toUpperCase():String(a.article_type||'NEWS').replace(/_/g,' ').toUpperCase();
+ const source=a.source_url?'<a href="'+esc(a.source_url)+'" target="_blank" rel="noopener">'+esc(a.source_name||'Source')+'</a>':esc(a.source_name||'');
+ box.innerHTML=image+'<div class="body"><div class="cat">'+esc(category)+'</div><h1 class="title">'+esc(a.title)+'</h1><div class="meta">'+(a.author_name?'By '+esc(a.author_name)+' • ':'')+esc(time(a.published_at||a.created_at))+'</div>'+(a.excerpt?'<div class="excerpt">'+esc(a.excerpt)+'</div>':'')+'<div class="content">'+esc(a.content)+'</div>'+(source?'<div class="source">Source: '+source+'</div>':'')+'</div>';
+}
+load().catch(e=>{document.getElementById('articleBox').innerHTML='<div class="body"><h2>Article load नहीं हो सकी</h2><p>कृपया थोड़ी देर बाद फिर कोशिश करें।</p></div>';console.error(e);});
+</script>
+</body>
+</html>

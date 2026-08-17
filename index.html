@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0b2a5b">
 <title>Bharat Viral | जो वायरल है, उसकी सच्ची जानकारी</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -1095,8 +1097,19 @@ if("serviceWorker" in navigator){
   window.addEventListener('bvArticlesLoaded',buildKeywords);
   setTimeout(buildKeywords,800);
   setTimeout(buildKeywords,2500);
-})();
+  })();
+  </script>
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js")
+            .then(() => console.log("Bharat Viral Service Worker registered"))
+            .catch(err => console.error("Service Worker registration failed:", err));
+    });
+}
 </script>
 
 </body>
 </html>
+  

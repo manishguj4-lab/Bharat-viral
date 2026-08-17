@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0b2a5b">
 <link rel="manifest" href="/admin-manifest.json">
+<meta name="theme-color" content="#0b2a5b">
 <title>Bharat Viral — Admin Panel</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -3724,6 +3724,20 @@ p,small,.muted{
     if(article) bvAutoAssignArticleTags(article);
   });
 })();
+ </script>
+ 
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/admin-sw.js")
+            .then(function () {
+                console.log("Bharat Viral Admin Service Worker registered");
+            })
+            .catch(function (error) {
+                console.error("Admin Service Worker registration failed:", error);
+            });
+    });
+}
 </script>
 
 </body>

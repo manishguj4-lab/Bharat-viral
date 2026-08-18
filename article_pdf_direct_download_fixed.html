@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Article | Bharat Viral</title>
+<meta name="description" id="metaDescription" content="भारत और दुनिया की ताजा वायरल, ट्रेंडिंग और महत्वपूर्ण खबरें Bharat Viral पर पढ़ें।">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" id="canonicalUrl" href="https://bharat-viral.netlify.app/article.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Bharat Viral">
+<meta property="og:title" id="ogTitle" content="Bharat Viral">
+<meta property="og:description" id="ogDescription" content="Bharat Viral पर ताजा खबरें और वायरल समाचार पढ़ें।">
+<meta property="og:url" id="ogUrl" content="https://bharat-viral.netlify.app/article.html">
+<meta property="og:image" id="ogImage" content="https://bharat-viral.netlify.app/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" id="twitterTitle" content="Bharat Viral">
+<meta name="twitter:description" id="twitterDescription" content="Bharat Viral पर ताजा खबरें और वायरल समाचार पढ़ें।">
+<meta name="twitter:image" id="twitterImage" content="https://bharat-viral.netlify.app/">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f8fa;color:#171717;font-family:Arial,"Noto Sans Devanagari",sans-serif}.top{height:62px;background:#df111b;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 6%;font-weight:800}.top a{color:#fff;text-decoration:none}.wrap{max-width:950px;margin:30px auto;padding:0 18px}.article{background:#fff;border-radius:14px;box-shadow:0 3px 18px rgba(0,0,0,.08);overflow:hidden}.hero{width:100%;max-height:470px;object-fit:cover;display:block}.body{padding:30px}.cat{display:inline-block;color:#df111b;font-size:12px;font-weight:900;margin-bottom:10px;text-transform:uppercase}.title{font-size:38px;line-height:1.25;margin:0 0 12px}.meta{color:#777;font-size:13px;margin-bottom:24px}.excerpt{font-size:18px;line-height:1.6;font-weight:700;color:#444;border-left:4px solid #df111b;padding-left:14px;margin-bottom:25px}.content{font-size:18px;line-height:1.85}.content-link{color:#0066cc;text-decoration:underline;font-weight:700;word-break:break-all}.question-highlight{background:#fff3cd;border-left:4px solid #df111b;padding:3px 8px;border-radius:5px;font-weight:700}.digit-highlight{background:#ffe66d;color:#111;padding:1px 4px;border-radius:4px;font-weight:800}.inline-article-pdf{display:flex;flex-direction:column;gap:12px;margin:28px auto;padding:18px;border:1px solid #e5e7eb;border-radius:12px;background:#f8fafc;max-width:820px}.inline-article-pdf-title{font-weight:800;font-size:18px}.inline-article-pdf-actions{display:flex;gap:10px;flex-wrap:wrap}.inline-article-pdf-actions a{display:inline-block;padding:10px 14px;border-radius:8px;text-decoration:none;font-weight:800;background:#df111b;color:#fff}.inline-article-pdf-actions a.secondary{background:#eee;color:#222}.content .inline-article-image{display:block;width:100%;max-width:820px;height:auto;max-height:620px;object-fit:contain;margin:28px auto;border-radius:12px;background:#f6f6f6}.source{margin-top:28px;padding-top:18px;border-top:1px solid #eee;font-size:13px;color:#666}.source a{color:#df111b}.share{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 8px}.share button{border:0;border-radius:8px;padding:10px 14px;font-weight:800;cursor:pointer}.share .wa{background:#25D366;color:#fff}.share .tg{background:#229ED9;color:#fff}.share .ig{background:#111;color:#fff}.share .copy{background:#eee;color:#222}.views{font-size:13px;color:#777;margin-top:5px}.back{display:inline-block;margin-bottom:18px;color:#df111b;font-weight:800;text-decoration:none}@media(max-width:650px){.top{height:52px;padding:0 15px;font-size:13px}.wrap{margin:15px auto;padding:0 10px}.body{padding:20px}.title{font-size:25px}.excerpt{font-size:15px}.content{font-size:16px;line-height:1.75}.hero{max-height:300px}}
+
+.related-news{margin-top:30px;padding-top:24px;border-top:1px solid #eee}.related-news h2{font-size:24px;margin:0 0 16px}.related-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.related-card{display:block;background:#fff;border:1px solid #eee;border-radius:12px;overflow:hidden;text-decoration:none;color:#171717;box-shadow:0 2px 10px rgba(0,0,0,.05)}.related-card img{width:100%;height:150px;object-fit:cover;display:block}.related-card-body{padding:12px}.related-card-title{font-size:16px;font-weight:800;line-height:1.4;margin:0}.related-card-meta{font-size:12px;color:#777;margin-top:7px}@media(max-width:650px){.related-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.related-card img{height:95px}.related-card-body{padding:7px}.related-card-title{font-size:12px;line-height:1.3}.related-card-meta{font-size:10px}}
+
+</style>
+</head>
+<body>
+<header class="top"><a href="index.html">← Bharat Viral</a><span>FULL NEWS</span></header>
+<div class="wrap"><a class="back" href="index.html">← वापस Homepage पर</a><article class="article" id="articleBox"><div id="loading" class="body">Article loading…</div></article></div>
+<script>
+const SUPABASE_URL="https://ocarsylhsyxjqpzidndb.supabase.co";
+const SUPABASE_KEY="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+function slugify(value){
+ return String(value||"").toLowerCase().trim().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\s-]/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
+}
+let shareUrl=location.href,shareTitle='Bharat Viral';
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function formatArticleText(text){
+ let html=esc(text);
+ const links=[];
+
+ function tokenFor(index){
+  let n=index,s='';
+  do{
+   s=String.fromCharCode(65+(n%26))+s;
+   n=Math.floor(n/26)-1;
+  }while(n>=0);
+  return '___URLTOKEN'+s+'___';
+ }
+
+ html=html.replace(/https?:\/\/[^\s<>"']+/gi,function(url){
+  const token=tokenFor(links.length);
+  links.push('<a class="content-link" href="'+url+'" target="_blank" rel="noopener noreferrer">'+url+'</a>');
+  return token;
+ });
+
+ html=html.replace(/([^.!?\n]{2,}\?)/g,'<span class="question-highlight">$1</span>');
+ html=html.replace(/(\d+)/g,'<span class="digit-highlight">$1</span>');
+
+ links.forEach(function(link,i){
+  html=html.replace(tokenFor(i),link);
+ });
+
+ return html.replace(/\n/g,'<br>');
+}
+
+async function downloadPdfFile(url, filename){
+ try{
+  const response=await fetch(url,{mode:"cors"});
+  if(!response.ok) throw new Error("HTTP "+response.status);
+  const blob=await response.blob();
+  const blobUrl=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=blobUrl;
+  a.download=filename||"document.pdf";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(blobUrl),1000);
+ }catch(error){
+  console.error("PDF download failed:",error);
+  window.open(url,"_blank","noopener,noreferrer");
+ }
+}
+
+
+document.addEventListener("click",function(event){
+ const button=event.target.closest(".pdf-download-btn");
+ if(!button) return;
+ event.preventDefault();
+ downloadPdfFile(button.dataset.pdfUrl,button.dataset.pdfName||"document.pdf");
+});
+
+
+function renderArticleContent(raw){
+ const value=String(raw??'');
+ const tokenRe=/\[\[(IMAGE|PDF)\|([^|\]]+)\|([^\]]*)\]\]/g;
+ let html='',last=0,match;
+
+ while((match=tokenRe.exec(value))!==null){
+  html+=formatArticleText(value.slice(last,match.index));
+
+  let url='',label='';
+  try{url=decodeURIComponent(match[2]);}catch(e){url=match[2];}
+  try{label=decodeURIComponent(match[3]||'');}catch(e){label=match[3]||'';}
+
+  if(/^https?:\/\//i.test(url)){
+   if(match[1]==='IMAGE'){
+    html+='<img class="inline-article-image" src="'+esc(url)+'" alt="'+esc(label||'Article image')+'" loading="lazy" decoding="async">';
+   }else{
+    html+='<div class="inline-article-pdf"><div class="inline-article-pdf-title">📄 '+esc(label||'PDF Document')+'</div><div class="inline-article-pdf-actions"><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">📖 PDF देखें</a><button type="button" class="secondary pdf-download-btn" data-pdf-url="'+esc(url)+'" data-pdf-name="'+esc((label||'PDF Document').replace(/\.pdf$/i,'')+'.pdf')+'">⬇️ Download PDF</button></div></div>';
+   }
+  }
+
+  last=tokenRe.lastIndex;
+ }
+
+ html+=formatArticleText(value.slice(last));
+ return html;
+}
+
+function time(v){if(!v)return '';const d=new Date(v),m=Math.max(1,Math.floor((Date.now()-d)/60000));if(m<60)return m+' मिनट पहले';const h=Math.floor(m/60);if(h<24)return h+' घंटे पहले';return Math.floor(h/24)+' दिन पहले';}
+function setupSEO(a){
+const title=a.seo_title||a.title||'Bharat Viral',description=a.seo_description||a.meta_description||a.excerpt||a.title||'Bharat Viral पर ताजा खबरें और वायरल समाचार पढ़ें。',url=(a.slug ? (location.origin + location.pathname.replace(/article\.html$/,'') + a.slug) : location.href),image=a.image_url||'https://bharat-viral.netlify.app/',published=a.published_at||a.created_at||new Date().toISOString(),modified=a.updated_at||a.updatedAt||a.published_at||a.created_at||published;
+document.title=title+' | Bharat Viral';
+ document.querySelector('meta[name="robots"]')?.setAttribute(
+   'content',
+   String(a.status||'').toLowerCase()==='published'
+     ? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+     : 'noindex, follow'
+ );
+document.getElementById('metaDescription')?.setAttribute('content',description.substring(0,160));
+document.getElementById('canonicalUrl')?.setAttribute('href',url);
+document.getElementById('ogTitle')?.setAttribute('content',title);
+document.getElementById('ogDescription')?.setAttribute('content',description);
+document.getElementById('ogUrl')?.setAttribute('content',url);
+document.getElementById('ogImage')?.setAttribute('content',image);
+document.getElementById('twitterTitle')?.setAttribute('content',title);
+document.getElementById('twitterDescription')?.setAttribute('content',description);
+document.getElementById('twitterImage')?.setAttribute('content',image);
+document.getElementById('articleSchema')?.remove();
+const script=document.createElement('script');script.type='application/ld+json';script.id='articleSchema';
+script.textContent=JSON.stringify({"@context":"https://schema.org","@type":"NewsArticle","mainEntityOfPage":{"@type":"WebPage","@id":url},"headline":title,"description":description,"image":[image],"datePublished":published,"dateModified":modified,"author":{"@type":"Person","name":a.author_name||"Bharat Viral"},"publisher":{"@type":"Organization","name":"Bharat Viral","url":"https://bharat-viral.netlify.app/"},"url":url}).replace(/</g,'\u003c');
+document.head.appendChild(script);
+}
+
+async function loadRelatedNews(currentArticle){
+  try{
+    const categories = Array.isArray(currentArticle.categories) ? currentArticle.categories.filter(Boolean) : [];
+    let related = [];
+
+    if(categories.length){
+      const q = await db.from('articles')
+        .select('id,title,image_url,published_at,created_at,article_type,categories')
+        .eq('status','published')
+        .overlaps('categories', categories)
+        .neq('id', currentArticle.id)
+        .order('published_at',{ascending:false})
+        .limit(6);
+      if(!q.error) related = q.data || [];
+    }
+
+    if(!related.length && currentArticle.article_type){
+      const q = await db.from('articles')
+        .select('id,title,image_url,published_at,created_at,article_type,categories')
+        .eq('status','published')
+        .eq('article_type', currentArticle.article_type)
+        .neq('id', currentArticle.id)
+        .order('published_at',{ascending:false})
+        .limit(6);
+      if(!q.error) related = q.data || [];
+    }
+
+    if(!related.length){
+      const q = await db.from('articles')
+        .select('id,title,image_url,published_at,created_at,article_type,categories')
+        .eq('status','published')
+        .neq('id', currentArticle.id)
+        .order('published_at',{ascending:false})
+        .limit(6);
+      if(!q.error) related = q.data || [];
+    }
+
+    related = related.filter(x => x && x.id && x.title).slice(0,6);
+    if(!related.length) return '';
+
+    const cards = related.map(x => {
+      const href=x.slug ? ('article.html?slug='+encodeURIComponent(x.slug)) : ('article.html?id='+encodeURIComponent(x.id));
+      const img=x.image_url
+        ? '<img src="'+esc(x.image_url)+'" alt="'+esc(x.title)+'" loading="lazy" decoding="async">'
+        : '';
+      const cat=Array.isArray(x.categories)&&x.categories[0]
+        ? String(x.categories[0]).replace(/-/g,' ')
+        : String(x.article_type||'NEWS').replace(/_/g,' ');
+      return '<a class="related-card" href="'+href+'">'+img+
+        '<div class="related-card-body"><div class="related-card-title">'+esc(x.title)+'</div>'+
+        '<div class="related-card-meta">'+esc(cat)+' • '+esc(time(x.published_at||x.created_at))+'</div></div></a>';
+    }).join('');
+
+    return '<section class="related-news"><h2>Related News</h2><div class="related-grid">'+cards+'</div></section>';
+  }catch(e){
+    console.warn('Related News load failed',e);
+    return '';
+  }
+}
+
+async function load(){
+const params=new URLSearchParams(location.search),id=params.get('id'),slug=params.get('slug'),title=params.get('title'),box=document.getElementById('articleBox');
+let query=db.from('articles').select('*').eq('status','published');
+if(slug)query=query.eq('slug',slug).single();else if(id)query=query.eq('id',id).single();else if(title)query=query.eq('title',title).order('created_at',{ascending:false}).limit(1);else{box.innerHTML='<div class="body"><h2>Article नहीं मिला</h2><p>इस खबर का link सही नहीं है।</p></div>';return;}
+const r=await query,a=Array.isArray(r.data)?r.data[0]:r.data;
+if(r.error||!a){box.innerHTML='<div class="body"><h2>Article नहीं मिला</h2><p>यह खबर मौजूद नहीं है या अभी published नहीं है।</p></div>';return;}
+setupSEO(a);
+const image=a.image_url?'<img class="hero" src="'+esc(a.image_url)+'" alt="'+esc(a.title)+'" loading="eager">':'';
+const category=(Array.isArray(a.categories)&&a.categories[0])?String(a.categories[0]).replace(/-/g,' ').toUpperCase():String(a.article_type||'NEWS').replace(/_/g,' ').toUpperCase();
+const source=a.source_url?'<a href="'+esc(a.source_url)+'" target="_blank" rel="noopener noreferrer">'+esc(a.source_name||'Source')+'</a>':esc(a.source_name||'');
+shareUrl=location.href;shareTitle=a.title||'Bharat Viral';
+const relatedHtml=await loadRelatedNews(a);
+box.innerHTML=image+'<div class="body"><div class="cat">'+esc(category)+'</div><h1 class="title">'+esc(a.title)+'</h1><div class="meta">'+(a.author_name?'By '+esc(a.author_name)+' • ':'')+esc(time(a.published_at||a.created_at))+'</div><div class="views">👁 '+Number(a.views||0).toLocaleString('en-IN')+' views</div><div class="share"><button class="wa" onclick="shareWhatsApp()">WhatsApp</button><button class="tg" onclick="shareTelegram()">Telegram</button><button class="ig" onclick="shareInstagram()">Instagram</button><button class="copy" onclick="copyLink()">Copy Link</button></div>'+(a.excerpt?'<div class="excerpt">'+esc(a.excerpt)+'</div>':'')+'<div class="content">'+renderArticleContent(a.content)+'</div>'+(source?'<div class="source">Source: '+source+'</div>':'')+relatedHtml+'</div>';
+addView(a.id);
+}
+async function addView(id){if(!id)return;try{await fetch(SUPABASE_URL+'/rest/v1/rpc/increment_article_view',{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({article_id:id})});}catch(e){console.warn('view count update failed',e);}}
+function shareWhatsApp(){window.open('https://wa.me/?text='+encodeURIComponent(shareTitle+' '+shareUrl),'_blank','noopener');}
+function shareTelegram(){window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl)+'&text='+encodeURIComponent(shareTitle),'_blank','noopener');}
+function shareInstagram(){navigator.clipboard?.writeText(shareUrl).catch(()=>{});alert('News link copy हो गया। अब Instagram पर इसे share कर सकते हैं।');window.open('https://www.instagram.com/','_blank','noopener');}
+async function copyLink(){try{await navigator.clipboard.writeText(shareUrl);alert('News link copy हो गया।');}catch(e){alert(shareUrl);}}
+load().catch(e=>{document.getElementById('articleBox').innerHTML='<div class="body"><h2>Article load नहीं हो सकी</h2><p>कृपया थोड़ी देर बाद फिर कोशिश करें।</p></div>';console.error(e);});
+</script>
+</body>
+</html>

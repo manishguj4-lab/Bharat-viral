@@ -1,0 +1,4328 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/admin-manifest.json">
+<meta name="theme-color" content="#0b2a5b">
+<title>Bharat Viral — Admin Panel</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+ --red:#d71920;--red-dark:#b51219;--bg:#f5f6f8;--white:#fff;
+ --text:#171717;--muted:#6b7280;--border:#e5e7eb;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+.sidebar{
+ position:fixed;left:0;top:0;bottom:0;width:255px;background:#fff;
+ border-right:1px solid var(--border);padding:18px 13px 10px;z-index:100;
+ overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:7px 9px 22px;border-bottom:1px solid var(--border)}
+.logo{
+ width:40px;height:40px;border-radius:11px;background:var(--red);color:#fff;
+ display:grid;place-items:center;font-size:20px;font-weight:900
+}
+.brand b{font-size:17px}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.nav-title{font-size:10px;color:#9ca3af;font-weight:800;letter-spacing:.12em;margin:20px 10px 7px;text-transform:uppercase}
+.nav-btn{
+ width:100%;border:0;background:transparent;color:#4b5563;text-align:left;
+ padding:11px 12px;border-radius:9px;margin:3px 0;font-weight:700;
+ display:flex;align-items:center;gap:11px
+}
+.nav-btn:hover,.nav-btn.active{background:#fff0f1;color:var(--red)}
+.bottom{position:sticky;bottom:0;left:auto;right:auto;margin-top:auto;border-top:1px solid var(--border);padding:13px 0 5px;background:#fff;flex-shrink:0}
+.user{display:flex;align-items:center;gap:9px;padding:6px 8px;font-size:12px}.avatar{width:34px;height:34px;border-radius:50%;background:#eee;display:grid;place-items:center;font-weight:800}
+.user small{display:block;color:var(--muted)}
+.content{margin-left:255px;min-height:100vh}
+.topbar{
+ height:66px;background:#fff;border-bottom:1px solid var(--border);
+ display:flex;align-items:center;justify-content:space-between;padding:0 25px;
+ position:sticky;top:0;z-index:50
+}
+.topbar h1{font-size:18px;margin:0}
+.menu{display:none;border:1px solid var(--border);background:#fff;border-radius:8px;width:38px;height:38px}
+main{max-width:1400px;margin:auto;padding:25px}
+.page-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:20px}
+.page-head h2{margin:0;font-size:26px}.page-head p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.btn{border:0;border-radius:9px;padding:10px 15px;font-weight:800}
+.btn-red{background:var(--red);color:#fff}.btn-light{background:#fff;border:1px solid var(--border)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
+.card,.panel{background:#fff;border:1px solid var(--border);border-radius:13px;box-shadow:0 4px 18px #00000008}
+.card{padding:18px}.label{color:var(--muted);font-size:12px;font-weight:700}.number{font-size:28px;font-weight:900;margin-top:9px}
+.two{display:grid;grid-template-columns:1.4fr 1fr;gap:17px}.panel{overflow:hidden}.panel-head{padding:16px 18px;border-bottom:1px solid var(--border);font-weight:800}.panel-body{padding:18px}
+.empty{text-align:center;padding:35px 15px;color:var(--muted);font-size:13px}.empty-icon{font-size:34px;margin-bottom:7px}
+.notice{background:#fff9e5;border:1px solid #f0dc9b;border-radius:9px;padding:11px 13px;color:#6b5a17;font-size:12px;margin-bottom:18px}
+.hidden{display:none!important}
+.form-panel{max-width:1100px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px}
+.full{grid-column:1/-1}
+.field label{display:block;font-size:12px;font-weight:800;margin-bottom:7px}
+.field small{display:block;color:#9ca3af;font-size:11px;margin-top:5px}
+input,textarea,select{width:100%;border:1px solid #d5d8dd;border-radius:9px;padding:11px 12px;background:#fff;outline:none}
+input:focus,textarea:focus,select:focus{border-color:#df666b;box-shadow:0 0 0 3px #d7192012}
+textarea{min-height:130px;resize:vertical}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.check{border:1px solid var(--border);background:#fafafa;border-radius:8px;padding:9px 11px;font-size:12px}
+.check input{width:auto;margin-right:5px;accent-color:var(--red)}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.tag{background:#fff0f1;color:var(--red);border-radius:20px;padding:6px 9px;font-size:11px;font-weight:800}
+.form-footer{border-top:1px solid var(--border);padding:15px 20px;display:flex;justify-content:flex-end;gap:9px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px 15px;border-bottom:1px solid #f0f1f3;font-size:12px}th{color:#9ca3af;font-size:10px;text-transform:uppercase}
+@media(max-width:1000px){.cards{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
+@media(max-width:720px){
+ .sidebar{transform:translateX(-100%);transition:.2s}.sidebar.open{transform:translateX(0)}
+ .content{margin-left:0}.menu{display:block}.topbar{padding:0 15px}
+ main{padding:16px}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}
+ .cards{grid-template-columns:1fr 1fr}.page-head{align-items:flex-start}
+}
+@media(max-width:450px){.cards{grid-template-columns:1fr}.page-head{flex-direction:column}.page-head .btn{width:100%}}
+</style>
+
+<style>
+/* Supabase Admin Login */
+#authScreen{
+  position:fixed;inset:0;z-index:9999;background:#f5f6f8;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.auth-box{
+  width:min(430px,100%);background:#fff;border:1px solid #e5e7eb;
+  border-radius:18px;box-shadow:0 12px 40px #00000012;padding:28px;
+}
+.auth-logo{
+  width:52px;height:52px;border-radius:14px;background:#d71920;color:#fff;
+  display:grid;place-items:center;font-size:24px;font-weight:900;margin-bottom:16px;
+}
+.auth-box h2{margin:0 0 7px;font-size:25px}
+.auth-box p{margin:0 0 22px;color:#6b7280;font-size:13px}
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;font-size:12px;font-weight:800;margin-bottom:7px}
+.auth-field input{width:100%;border:1px solid #d5d8dd;border-radius:9px;padding:12px;outline:none}
+.auth-field input:focus{border-color:#df666b;box-shadow:0 0 0 3px #d7192012}
+#loginBtn{width:100%;border:0;border-radius:9px;padding:12px;background:#d71920;color:#fff;font-weight:800}
+#loginBtn:disabled{opacity:.65;cursor:not-allowed}
+#authError{
+  display:none;margin-bottom:14px;padding:10px 12px;border-radius:9px;
+  background:#fff0f1;border:1px solid #f2b8bc;color:#b51219;font-size:12px;
+}
+#authLoading{
+  position:fixed;inset:0;z-index:10000;background:#f5f6f8;
+  display:flex;align-items:center;justify-content:center;font-weight:800;color:#6b7280;
+}
+</style>
+
+<style id="bharat-viral-modern-theme">
+:root{
+  --bv-navy:#071a33;--bv-blue:#1167d8;--bv-blue2:#2f8cff;
+  --bv-green:#16a34a;--bv-orange:#f59e0b;--bv-purple:#7c3aed;
+  --bv-bg:#f4f7fb;--bv-card:#fff;--bv-border:#e5eaf1;
+  --bv-text:#13233a;--bv-muted:#718096;--bv-red:#ef4444;
+}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bv-bg)}
+.sidebar{
+  width:240px;background:linear-gradient(180deg,#071a33 0%,#0b2b52 100%);
+  border-right:0;padding:16px 10px;color:#fff;
+}
+.brand{border-bottom:1px solid rgba(255,255,255,.12);padding:8px 9px 20px}
+.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#ff6b35,#0ea5e9 60%,#16a34a);box-shadow:0 8px 20px rgba(0,0,0,.18)}
+.brand b{color:#fff;font-size:16px;letter-spacing:.2px}.brand small{color:#b9c8db}
+.nav-title{color:#8ea4bd;margin-top:20px}
+.nav-btn{color:#d8e4f2;border-radius:9px}
+.nav-btn:hover,.nav-btn.active{background:linear-gradient(90deg,#1167d8,#0d5bbd);color:#fff;box-shadow:0 5px 15px rgba(17,103,216,.25)}
+.bottom{border-top:1px solid rgba(255,255,255,.12)}
+.user{color:#fff}.user small{color:#9eb2c9}.avatar{background:#dcecff;color:#0d4f9c}
+.content{margin-left:240px}
+.topbar{height:68px;padding:0 25px;background:#fff}
+.topbar h1{font-weight:800;color:#13233a}
+main{max-width:1500px;padding:25px}
+.page-head h2{color:#102642;font-weight:850}
+.page-head p{color:#718096}
+.btn{border-radius:9px}.btn-red{background:#1167d8}.btn-red:hover{background:#0d58b9}
+.card,.panel{border:1px solid var(--bv-border);border-radius:14px;box-shadow:0 5px 22px rgba(24,39,75,.06)}
+.card{padding:18px}
+.metric-card{position:relative;overflow:hidden;min-height:118px}
+.metric-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:21px;margin-bottom:12px}
+.metric-blue{background:#e7f1ff;color:#1167d8}.metric-green{background:#e7f8ee;color:#16a34a}
+.metric-purple{background:#f0e9ff;color:#7c3aed}.metric-orange{background:#fff1df;color:#ea8a00}
+.metric-red{background:#ffe8e8;color:#e04444}.metric-teal{background:#e5f8f7;color:#0891a2}
+.metric-card .number{font-size:27px;color:#13233a;margin-top:5px}
+.metric-card .delta{font-size:11px;color:#16a34a;font-weight:800;margin-top:4px}
+.dashboard-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(330px,.85fr);gap:17px}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:15px}
+.quick-action{border:1px solid #e7edf5;background:#f9fbfe;border-radius:12px;padding:15px 8px;text-align:center;font-weight:800;color:#17324f;cursor:pointer}
+.quick-action:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(0,0,0,.06)}
+.quick-action span{display:grid;place-items:center;width:42px;height:42px;margin:0 auto 8px;border-radius:11px;font-size:20px;background:#e7f1ff;color:#1167d8}
+.analytics{padding:15px 18px 17px}
+.chart{height:170px;position:relative;border-bottom:1px solid #dce4ef;background:repeating-linear-gradient(to bottom,transparent 0,transparent 41px,#edf1f6 42px)}
+.chart svg{width:100%;height:100%}
+.chart-labels{display:flex;justify-content:space-between;color:#91a0b3;font-size:10px;margin-top:6px}
+.analytics-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
+.analytics-stat{background:#f8fafc;border-radius:10px;padding:10px}.analytics-stat small{display:block;color:#7c8a9d;font-size:10px}.analytics-stat b{display:block;font-size:17px;margin-top:4px}
+.system-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:15px}
+.system-item{border:1px solid #e7edf5;border-radius:10px;padding:10px}.system-item small{color:#7b8798;display:block;font-size:10px}.online{color:#16a34a;font-weight:800;font-size:11px;margin-top:5px}
+.status-dot{display:inline-block;width:7px;height:7px;background:#16a34a;border-radius:50%;margin-right:5px}
+.panel-head{color:#102642}
+table th{color:#8290a4}
+.tag{background:#e8f7ee;color:#168044}
+.notice{background:#edf6ff;border-color:#cfe3ff;color:#28547f}
+.auth-logo{background:linear-gradient(135deg,#ff6b35,#0ea5e9 60%,#16a34a)}
+#loginBtn{background:#1167d8}
+@media(max-width:1100px){
+  .dashboard-grid{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .sidebar{width:240px}.content{margin-left:0}
+  main{padding:16px}.system-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:450px){
+  .quick-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+<style>
+body.bv-dark{--bv-bg:#0b1220;background:#0b1220;color:#e5edf7}
+body.bv-dark .content,body.bv-dark main{color:#e5edf7}
+body.bv-dark .topbar,body.bv-dark .card,body.bv-dark .panel,body.bv-dark .quick-action,body.bv-dark .analytics-stat,body.bv-dark .system-item{background:#111b2d;color:#e5edf7;border-color:#22304a}
+body.bv-dark .topbar h1,body.bv-dark .page-head h2,body.bv-dark .panel-head,body.bv-dark .metric-card .number{color:#f4f8ff}
+body.bv-dark .label,body.bv-dark .page-head p,body.bv-dark .analytics-stat small,body.bv-dark .system-item small{color:#9fb0c6}
+body.bv-dark .quick-action{color:#e5edf7}
+</style>
+<style id="bv-menu-overlay-css">
+#menuOverlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);
+  z-index:90;backdrop-filter:blur(1px);
+}
+@media(max-width:720px){
+  #menuOverlay.show{display:block}
+  .sidebar{z-index:100;box-shadow:12px 0 30px rgba(0,0,0,.15)}
+  .sidebar.open{transform:translateX(0)}
+}
+</style>
+<style>
+.sidebar::-webkit-scrollbar{width:6px}
+.sidebar::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
+.sidebar::-webkit-scrollbar-track{background:transparent}
+@media(max-width:720px){
+  .sidebar{height:100dvh;max-height:100dvh}
+}
+</style>
+<style id="bv-requested-dashboard-style">
+.bv-top-stats{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;
+  margin:0 0 18px;
+}
+.bv-stat-card{
+  background:#fff;border:1px solid #e5eaf1;border-radius:14px;
+  padding:16px 18px;display:flex;align-items:center;gap:13px;
+  box-shadow:0 5px 22px rgba(24,39,75,.06);
+}
+.bv-stat-card span{display:block;color:#718096;font-size:11px;font-weight:700}
+.bv-stat-card strong{display:block;color:#13233a;font-size:25px;line-height:1.2;margin-top:3px}
+.bv-stat-card small{display:block;color:#9aa7b7;font-size:10px;margin-top:2px}
+.bv-stat-icon{
+  width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
+  font-size:21px;flex:0 0 46px;
+}
+.bv-stat-icon.blue{background:#e7f1ff;color:#1167d8}
+.bv-stat-icon.green{background:#e7f8ee;color:#16a34a}
+.bv-stat-icon.purple{background:#f0e9ff;color:#7c3aed}
+
+.bv-recent-wrap{overflow-x:auto;padding:0 14px 12px}
+.bv-recent-table{width:100%;border-collapse:collapse;min-width:650px}
+.bv-recent-table th{
+  background:#f8fafc;color:#718096;font-size:10px;text-transform:uppercase;
+  letter-spacing:.4px;font-weight:800;text-align:left;padding:12px 10px;
+  border-bottom:1px solid #e7edf5;
+}
+.bv-recent-table td{
+  padding:12px 10px;border-bottom:1px solid #eef1f5;
+  color:#334155;font-size:11px;vertical-align:middle;
+}
+.bv-recent-table tbody tr:hover{background:#f9fbfe}
+.bv-title-cell{font-weight:800;color:#17324f;max-width:320px}
+.bv-category-cell{color:#718096}
+.bv-status{
+  display:inline-flex;align-items:center;padding:5px 9px;border-radius:20px;
+  font-size:10px;font-weight:800;text-transform:capitalize;
+}
+.bv-status.published{background:#e8f7ee;color:#168044}
+.bv-status.draft{background:#fff4df;color:#a76700}
+.bv-status.unknown{background:#eef2f7;color:#64748b}
+.bv-actions{display:flex;gap:6px}
+.bv-action-btn{
+  border:1px solid #dce4ef;background:#fff;border-radius:7px;
+  padding:6px 9px;font-size:10px;font-weight:800;cursor:pointer;
+}
+.bv-action-btn.edit{color:#1167d8}
+.bv-action-btn.delete{color:#dc2626}
+.bv-action-btn:hover{background:#f4f8fd}
+.bv-empty-row{text-align:center!important;color:#8a97a8!important;padding:25px!important}
+@media(max-width:850px){.bv-top-stats{grid-template-columns:1fr}}
+body.bv-dark .bv-stat-card{background:#111b2d;border-color:#22304a}
+body.bv-dark .bv-stat-card strong{color:#f4f8ff}
+body.bv-dark .bv-stat-card span,body.bv-dark .bv-stat-card small{color:#9fb0c6}
+body.bv-dark .bv-recent-table th{background:#0d1727;color:#9fb0c6;border-color:#22304a}
+body.bv-dark .bv-recent-table td{color:#d8e4f2;border-color:#22304a}
+body.bv-dark .bv-title-cell{color:#eaf2ff}
+body.bv-dark .bv-action-btn{background:#111b2d;border-color:#33435c}
+</style>
+<style id="bv-admin-profile-style">
+.bv-admin-profile{
+  position:relative;display:flex;align-items:center;gap:8px;
+  padding:5px 8px 5px 6px;border:1px solid #e4eaf2;background:#fff;
+  border-radius:10px;cursor:pointer;min-width:150px;
+}
+.bv-profile-avatar{
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(135deg,#1167d8,#2f8cff);color:#fff;font-size:13px;font-weight:900;
+}
+.bv-profile-text{line-height:1.15;flex:1}
+.bv-profile-text b{display:block;color:#17324f;font-size:11px}
+.bv-profile-text small{display:block;color:#8a97a8;font-size:9px;margin-top:3px}
+.bv-profile-chevron{color:#7c8a9d;font-size:14px}
+.bv-notification-btn{
+  width:38px;height:38px;border:1px solid #e4eaf2;background:#fff;border-radius:10px;
+  cursor:pointer;font-size:17px;position:relative;
+}
+.bv-notification-dot{
+  position:absolute;right:8px;top:7px;width:7px;height:7px;background:#ef4444;
+  border:2px solid #fff;border-radius:50%;
+}
+.bv-profile-menu{
+  position:fixed;right:22px;top:64px;width:220px;background:#fff;border:1px solid #e3e9f1;
+  border-radius:12px;box-shadow:0 14px 35px rgba(20,35,60,.15);padding:8px;z-index:200;
+  display:none;
+}
+.bv-profile-menu.show{display:block}
+.bv-profile-menu-head{padding:10px;border-bottom:1px solid #eef1f5;margin-bottom:5px}
+.bv-profile-menu-head b{display:block;font-size:12px;color:#17324f}
+.bv-profile-menu-head small{display:block;color:#8a97a8;font-size:10px;margin-top:3px}
+.bv-profile-item{
+  width:100%;text-align:left;border:0;background:transparent;padding:10px;border-radius:8px;
+  cursor:pointer;font-size:11px;color:#334155;font-weight:700;
+}
+.bv-profile-item:hover{background:#f4f8fd}
+.bv-profile-item.logout{color:#dc2626}
+body.bv-dark .bv-admin-profile,body.bv-dark .bv-notification-btn,body.bv-dark .bv-profile-menu{
+  background:#111b2d;border-color:#22304a;
+}
+body.bv-dark .bv-profile-text b,body.bv-dark .bv-profile-menu-head b,body.bv-dark .bv-profile-item{color:#e5edf7}
+body.bv-dark .bv-profile-text small,body.bv-dark .bv-profile-menu-head small{color:#9fb0c6}
+body.bv-dark .bv-profile-item:hover{background:#18263c}
+@media(max-width:560px){
+  .bv-profile-text,.bv-profile-chevron{display:none}
+  .bv-admin-profile{min-width:auto;padding:5px}
+}
+</style>
+<style id="bv-real-analytics-style">
+.bv-analytics-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
+.bv-analytics-range{display:flex;gap:6px;flex-wrap:wrap}
+.bv-range-btn{border:1px solid #dce4ef;background:#fff;border-radius:8px;padding:7px 11px;font-size:10px;font-weight:800;cursor:pointer;color:#475569}
+.bv-range-btn.active{background:#1167d8;color:#fff;border-color:#1167d8}
+.bv-real-chart{height:270px;padding:12px 15px 8px}
+.bv-real-chart svg{width:100%;height:210px;display:block}
+.bv-chart-grid{stroke:#e9eef5;stroke-width:1}
+.bv-chart-line{fill:none;stroke:#1167d8;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.bv-chart-area{fill:#1167d8;opacity:.09}
+.bv-chart-dot{fill:#1167d8}
+.bv-chart-labels{display:flex;justify-content:space-between;color:#8a97a8;font-size:9px;margin:0 4px}
+.bv-real-analytics-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 15px 15px}
+.bv-real-analytics-stat{border:1px solid #e7edf5;border-radius:10px;padding:11px;background:#f8fafc}
+.bv-real-analytics-stat small{display:block;color:#7c8a9d;font-size:9px}
+.bv-real-analytics-stat b{display:block;color:#17324f;font-size:19px;margin-top:4px}
+.bv-top-article{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #edf1f5;font-size:10px}
+.bv-top-article:last-child{border-bottom:0}
+.bv-top-article strong{color:#17324f}
+.bv-top-article span{color:#1167d8;font-weight:800;white-space:nowrap}
+@media(max-width:720px){.bv-real-analytics-stats{grid-template-columns:1fr}.bv-analytics-toolbar{align-items:flex-start;flex-direction:column}}
+body.bv-dark .bv-range-btn,body.bv-dark .bv-real-analytics-stat{background:#111b2d;border-color:#22304a;color:#dce8f7}
+body.bv-dark .bv-real-analytics-stat b,body.bv-dark .bv-top-article strong{color:#f2f7ff}
+body.bv-dark .bv-chart-grid{stroke:#27364d}
+</style>
+<style id="bv-real-dashboard-complete-style">
+.bv-dashboard-range{
+  border:1px solid #dce4ef;background:#fff;color:#526174;border-radius:7px;
+  padding:5px 8px;font-size:9px;font-weight:800;cursor:pointer
+}
+.bv-dashboard-range.active{background:#1167d8;color:#fff;border-color:#1167d8}
+.bv-dashboard-chart{height:170px;position:relative;border-bottom:1px solid #dce4ef}
+.bv-dashboard-chart svg{width:100%;height:100%}
+.bv-dashboard-grid{stroke:#e9eef5;stroke-width:1}
+.bv-dashboard-line{fill:none;stroke:#1167d8;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.bv-dashboard-area{fill:#1167d8;opacity:.09}
+.bv-sidebar-back{
+  width:100%;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);
+  color:#d8e4f2;border-radius:9px;padding:9px 10px;text-align:left;font-weight:800;
+  font-size:11px;cursor:pointer
+}
+.bv-sidebar-back:hover{background:rgba(255,255,255,.12)}
+.bv-real-status{font-weight:800;font-size:11px;margin-top:5px}
+.bv-real-status.online{color:#16a34a}.bv-real-status.offline{color:#dc2626}.bv-real-status.checking{color:#d97706}
+.bv-status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:currentColor}
+body.bv-dark .bv-dashboard-range{background:#111b2d;border-color:#33435c;color:#dce8f7}
+body.bv-dark .bv-dashboard-grid{stroke:#27364d}
+</style>
+<style id="bv-profile-info-style">
+.bv-profile-info{
+  display:flex;justify-content:space-between;gap:10px;padding:7px 10px;
+  color:#8a97a8;font-size:10px
+}
+.bv-profile-info strong{color:#334155;font-size:10px}
+body.bv-dark .bv-profile-info strong{color:#e5edf7}
+</style>
+<style id="bv-category-manager-style">
+.bv-category-manager-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.bv-category-manager-item{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #e5eaf1;border-radius:12px;padding:12px;background:#fff}
+.bv-category-manager-left{display:flex;align-items:center;gap:10px;min-width:0}
+.bv-category-manager-icon{width:38px;height:38px;border-radius:10px;background:#f4f7fb;display:grid;place-items:center;font-size:20px;flex:0 0 auto}
+.bv-category-manager-name{font-weight:800;color:#24364b;font-size:12px}
+.bv-category-manager-slug{font-size:9px;color:#8a97a8;margin-top:3px}
+.bv-category-delete{border:0;background:#fff0f0;color:#d5121b;border-radius:8px;padding:8px 10px;font-size:10px;font-weight:800;cursor:pointer}
+.bv-category-delete:hover{background:#ffe0e0}
+.bv-category-add-box{display:grid;grid-template-columns:1.5fr 1fr 80px auto;gap:8px;align-items:end;margin-bottom:14px;padding:12px;border:1px dashed #cbd5e1;border-radius:12px;background:#f8fafc}
+.bv-category-add-box label{font-size:9px;font-weight:800;color:#66758a;display:block;margin-bottom:5px}
+.bv-category-add-box input{width:100%;box-sizing:border-box;padding:9px;border:1px solid #d9e0e9;border-radius:8px}
+@media(max-width:700px){.bv-category-manager-list{grid-template-columns:1fr}.bv-category-add-box{grid-template-columns:1fr 1fr}.bv-category-add-box .bv-add-full{grid-column:1/-1}}
+body.bv-dark .bv-category-manager-item{background:#111b2d;border-color:#27364d}
+body.bv-dark .bv-category-manager-name{color:#edf5ff}
+body.bv-dark .bv-category-add-box{background:#0f1726;border-color:#33435c}
+</style>
+
+<style>
+/* Bharat Viral Admin - final responsive layer */
+@media (max-width: 1024px){
+  .sidebar{width:230px}
+  .main{margin-left:230px}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .two{grid-template-columns:1fr}
+}
+@media (max-width: 768px){
+  .sidebar{width:78px}
+  .main{margin-left:78px}
+  .sidebar .brand-text,.sidebar .nav-text,.sidebar .user-name{display:none!important}
+  .page{padding:14px}
+  .topbar{padding:10px 12px}
+  .top-actions{gap:5px}
+  .top-actions .btn{font-size:11px!important;padding:6px 8px!important}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .card{padding:12px}
+  .card .number{font-size:22px}
+  table{font-size:12px}
+  .panel-head,.panel-body{padding:12px}
+}
+@media (max-width: 520px){
+  .sidebar{width:0;overflow:hidden}
+  .main{margin-left:0}
+  .cards{grid-template-columns:1fr 1fr}
+  .page-head{gap:8px;flex-wrap:wrap}
+  .page-head h2{font-size:20px}
+  #viewSiteBtn{font-size:11px!important;padding:6px 8px!important}
+  #globalBackBtn{font-size:11px!important;padding:6px 8px!important}
+}
+</style>
+
+<style id="BV-FINAL-COMPLETE-RESPONSIVE">
+/* BV FINAL COMPLETE RESPONSIVE */
+.bv-sidebar-back{
+  width:100%;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06);color:#d8e4f2;
+  border-radius:9px;padding:8px 10px;margin-bottom:8px;
+  font-size:11px;font-weight:800;cursor:pointer;text-align:left;
+}
+.bv-sidebar-back:hover{background:#1167d8;color:#fff}
+.bv-category-manager-list{display:grid;gap:9px}
+.bv-category-manager-item{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  border:1px solid #e7edf5;border-radius:11px;padding:11px 13px;background:#fff
+}
+.bv-category-manager-left{display:flex;align-items:center;gap:10px;min-width:0}
+.bv-category-manager-icon{width:34px;height:34px;border-radius:9px;background:#eef5ff;display:grid;place-items:center}
+.bv-category-manager-name{font-weight:800;font-size:12px;color:#17324f}
+.bv-category-manager-slug{font-size:10px;color:#8a97a8;margin-top:2px}
+.bv-category-delete{
+  border:1px solid #fecaca;background:#fff1f2;color:#dc2626;
+  border-radius:7px;padding:7px 9px;font-size:10px;font-weight:800;cursor:pointer
+}
+.bv-category-loading{font-size:12px;color:#718096;padding:8px}
+.bv-range-btn,.bv-dashboard-range{
+  border:1px solid #dce4ef;background:#fff;color:#64748b;
+  border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;cursor:pointer
+}
+.bv-range-btn.active,.bv-dashboard-range.active{background:#1167d8;color:#fff;border-color:#1167d8}
+@media(max-width:720px){
+  .topbar>div:last-child{gap:5px!important}
+  .topbar #themeBtn{font-size:12px!important;padding:6px 8px!important}
+  #previewBtn{font-size:10px!important;padding:6px 8px!important}
+  .bv-notification-btn{width:34px;height:34px}
+  .bv-admin-profile{min-width:auto!important}
+  .bv-sidebar-back{margin-bottom:7px}
+  .bv-category-manager-item{align-items:flex-start}
+  .bv-category-delete{flex:0 0 auto}
+}
+@media(max-width:450px){
+  .topbar{padding:0 10px!important}
+  .topbar h1{font-size:15px!important}
+  #viewSiteBtn{right:10px!important;bottom:10px!important}
+  .bv-recent-table{min-width:610px}
+}
+body.bv-dark .bv-category-manager-item{background:#111b2d;border-color:#22304a}
+body.bv-dark .bv-category-manager-name{color:#eaf2ff}
+body.bv-dark .bv-category-manager-slug{color:#9fb0c6}
+body.bv-dark .bv-category-delete{background:#2a1720;border-color:#5c2731}
+</style>
+
+
+<style id="bv-clean-guard">
+/* Clean UI guard: no debug/code text should be visible */
+script{display:none!important}
+</style>
+
+<style id="BV-MENU-BACK-FIX">
+#menuOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:9998}
+#menuOverlay.show{display:block}
+#sidebar{z-index:9999}
+@media(max-width:720px){
+  #sidebar{transform:translateX(-100%);transition:transform .22s ease}
+  #sidebar.open{transform:translateX(0)}
+  #menuBtn{display:flex!important;align-items:center;justify-content:center;cursor:pointer;position:relative;z-index:10001}
+  .bv-sidebar-back{width:34px!important;height:34px!important;padding:0!important;display:grid!important;place-items:center!important;font-size:18px!important;border-radius:8px!important}
+}
+</style><style id="BV-HARD-MENU-BACK-CSS">
+@media (min-width:721px){
+ #bvHardMenuBtn{display:none!important}
+ #bvHardBackBtn{display:none!important}
+}
+@media (max-width:720px){
+ #bvHardMenuBtn{display:block!important}
+ #bvHardBackBtn{display:none}
+ #sidebar.open{transform:translateX(0)!important}
+}
+</style><style id="BV-FINAL-UI-FIX">
+/* Final navigation/theme fixes. Existing dynamic admin styles are preserved. */
+#bvPageBack{
+  display:none;
+  width:36px!important;height:36px!important;min-width:36px!important;
+  border:1px solid #d8e1ec!important;border-radius:9px!important;
+  background:#fff!important;color:#17324f!important;
+  font-size:22px!important;font-weight:900!important;line-height:34px!important;
+  cursor:pointer!important;align-items:center!important;justify-content:center!important;
+  box-shadow:0 2px 8px rgba(0,0,0,.08)!important;
+}
+body.bv-dark #bvPageBack{background:#111b2d!important;color:#f4f8ff!important;border-color:#33435c!important}
+/* Make dark mode visibly apply to common controls/content that the older CSS missed. */
+body.bv-dark{background:#0b1220!important;color:#e5edf7!important}
+body.bv-dark .content,body.bv-dark main,body.bv-dark .page,
+body.bv-dark .page-head,body.bv-dark .section,body.bv-dark .table-wrap,
+body.bv-dark .form-card,body.bv-dark .article-card,body.bv-dark .category-card,
+body.bv-dark .settings-card,body.bv-dark .seo-card,body.bv-dark .sitemap-card,
+body.bv-dark .modal-content,body.bv-dark .modal-box{
+  background:#0f1929!important;color:#e5edf7!important;border-color:#26364e!important;
+}
+body.bv-dark input,body.bv-dark textarea,body.bv-dark select{
+  background:#0b1423!important;color:#eef5ff!important;border-color:#33445d!important;
+}
+body.bv-dark input::placeholder,body.bv-dark textarea::placeholder{color:#8193aa!important}
+body.bv-dark table{background:#0f1929!important;color:#e5edf7!important}
+body.bv-dark th{background:#0b1525!important;color:#aebdd0!important}
+body.bv-dark td{color:#dbe6f3!important;border-color:#26364e!important}
+body.bv-dark .sidebar{background:#0d1727!important;color:#e5edf7!important}
+body.bv-dark .sidebar .nav-btn{color:#dce8f7!important}
+body.bv-dark .sidebar .nav-btn.active,body.bv-dark .sidebar .nav-btn:hover{background:#173253!important;color:#fff!important}
+body.bv-dark .topbar{background:#111b2d!important;color:#e5edf7!important;border-color:#26364e!important}
+@media(max-width:720px){
+  #sidebar{width:280px!important;max-width:82vw!important;height:100dvh!important;max-height:100dvh!important;position:fixed!important;left:0!important;top:0!important;bottom:0!important;overflow-y:auto!important;overflow-x:hidden!important;transform:translateX(-105%)!important;transition:transform .22s ease!important;z-index:10001!important}
+  #sidebar.open{transform:translateX(0)!important}
+  #menuBtn{display:none!important}
+  #bvHardMenuBtn{display:flex!important;position:fixed!important;left:10px!important;top:9px!important;z-index:10050!important}
+}
+@media(min-width:721px){#bvHardMenuBtn{display:none!important}}
+</style><style id="BV-ULTIMATE-MOBILE-CONTROLS">
+@media(max-width:720px){
+  #bvHardMenuBtn{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    position:fixed!important;left:0!important;top:0!important;
+    width:52px!important;height:52px!important;border-radius:0 0 12px 0!important;
+    z-index:10050!important;
+    border:0!important;outline:0!important;box-shadow:none!important;
+  }
+  #bvHardMenuBtn.bv-menu-open{
+    opacity:0!important;pointer-events:none!important;
+  }
+  #bvFloatingBack{
+    display:none;
+  }
+  #sidebar{
+    display:flex!important;
+    width:290px!important;max-width:84vw!important;
+    position:fixed!important;left:0!important;top:0!important;bottom:0!important;
+    height:100dvh!important;max-height:100dvh!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    z-index:10001!important;
+    transform:translate3d(-110%,0,0)!important;
+    visibility:visible!important;opacity:1!important;
+    transition:transform .22s ease!important;
+  }
+  #sidebar.bv-forced-open{
+    transform:translate3d(0,0,0)!important;
+  }
+  #menuOverlay{
+    z-index:10000!important;
+  }
+  #menuOverlay.bv-forced-show{
+    display:block!important;
+  }
+  #themeBtn{
+    width:42px!important;height:42px!important;
+    min-width:42px!important;padding:0!important;
+    display:grid!important;place-items:center!important;
+    font-size:20px!important;cursor:pointer!important;
+  }
+  #bvPageBack{display:none!important}
+}
+@media(min-width:721px){
+  #bvHardMenuBtn,#bvFloatingBack{display:none!important}
+}
+body.bv-dark #bvFloatingBack{
+  background:#111b2d!important;color:#f4f8ff!important;border-color:#33435c!important;
+}
+/* All Articles: keep Edit/Delete reachable on mobile by horizontal swipe. */
+#page-articles .panel{
+  width:100%;
+  max-width:100%;
+  overflow-x:auto !important;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+#page-articles table{
+  width:100%;
+  min-width:760px;
+}
+#page-articles th:last-child,
+#page-articles td:last-child{min-width:180px;}
+@media(max-width:720px){
+  #page-articles .panel{overflow-x:auto !important;scrollbar-width:thin;}
+  #page-articles table{min-width:720px;}
+  #page-articles td:first-child{min-width:250px;}
+  #page-articles td:last-child{min-width:180px;}
+}
+</style>
+<style id="BV-MOBILE-FINAL-FIX">
+/* Mobile layout: use the complete device width and prevent the dashboard
+   from becoming a narrow desktop canvas. Existing dynamic functionality is untouched. */
+html, body {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.content {
+  width: calc(100% - 240px);
+  min-width: 0;
+}
+
+main {
+  width: 100%;
+  max-width: 1500px;
+  min-width: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bv-recent-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.bv-recent-table {
+  width: 100%;
+}
+
+/* Keep the menu in the extreme top-left and give it the blue glow requested. */
+@media (max-width: 720px) {
+  .content {
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin-left: 0 !important;
+    min-width: 0 !important;
+  }
+
+  .topbar {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding-left: 64px !important;
+    padding-right: 10px !important;
+    min-width: 0 !important;
+  }
+
+  main {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    padding: 14px 12px !important;
+  }
+
+  .page-head {
+    width: 100%;
+  }
+
+  .dashboard-grid,
+  .two {
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+  }
+
+  .cards {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+
+  .quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+  }
+
+  .panel, .card, .notice, .quick-action,
+  .metric-card, .bv-recent-panel {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* The table may scroll inside its own box, never push the whole page wide. */
+  .bv-recent-wrap {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  .bv-recent-table {
+    min-width: 610px;
+  }
+
+  #bvHardMenuBtn {
+    left: 0 !important;
+    top: 0 !important;
+    width: 54px !important;
+    height: 54px !important;
+    border: 0 !important;
+    outline: 0 !important;
+    border-radius: 0 0 13px 0 !important;
+    box-shadow: 0 7px 20px rgba(17,103,216,.42) !important;
+    background: linear-gradient(135deg,#1976e8,#1167d8) !important;
+  }
+
+  #bvHardMenuBtn.bv-menu-open {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  #sidebar {
+    width: 290px !important;
+    max-width: 84vw !important;
+  }
+}
+
+@media (max-width: 450px) {
+  main {
+    padding: 12px 10px !important;
+  }
+
+  .quick-grid {
+    gap: 8px !important;
+  }
+
+  .quick-action {
+    padding: 13px 6px !important;
+  }
+
+  .bv-recent-table {
+    min-width: 590px;
+  }
+}
+</style>
+
+<style id="BV-RED-WHITE-MENU">
+@media (max-width: 720px) {
+  #bvHardMenuBtn {
+    left: 0 !important;
+    top: 0 !important;
+    width: 54px !important;
+    height: 54px !important;
+    border: 0 !important;
+    outline: 0 !important;
+    border-radius: 0 0 13px 0 !important;
+    background: #e30613 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  #bvHardMenuBtn:hover,
+  #bvHardMenuBtn:active,
+  #bvHardMenuBtn:focus {
+    background: #c9000b !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+  }
+
+  #sidebar {
+    background: #fff !important;
+    border-right: 1px solid #e30613 !important;
+  }
+
+  #sidebar .nav-btn.active,
+  #sidebar .nav-btn:hover {
+    background: #e30613 !important;
+    color: #fff !important;
+  }
+
+  #sidebar .nav-btn {
+    color: #202020 !important;
+  }
+
+  #sidebar .nav-btn i,
+  #sidebar .nav-btn span {
+    color: inherit !important;
+  }
+
+  #menuOverlay {
+    background: rgba(0,0,0,.48) !important;
+  }
+}
+</style>
+
+<style id="BV-DARK-BLUE-WHITE-FINAL">
+:root{
+  --bv-blue:#123a63;
+  --bv-blue-2:#0d2f52;
+  --bv-light:#f5f8fc;
+  --bv-white:#ffffff;
+  --bv-border:#d9e2ec;
+  --bv-text:#102a43;
+  --bv-muted:#627d98;
+}
+
+/* Overall dark-blue + white theme */
+body{
+  background:var(--bv-light)!important;
+  color:var(--bv-text)!important;
+}
+.topbar{
+  background:#fff!important;
+  color:var(--bv-text)!important;
+  border-bottom:1px solid var(--bv-border)!important;
+}
+.topbar h1,.topbar .title,.topbar span{
+  color:var(--bv-text)!important;
+}
+
+/* Main buttons/cards */
+button.primary,
+.btn-primary,
+#addNewsBtn,
+.add-btn,
+button[onclick*="add"],
+.quick-action:hover{
+  background:var(--bv-blue)!important;
+  color:#fff!important;
+  border-color:var(--bv-blue)!important;
+}
+button.primary:hover,
+.btn-primary:hover,
+#addNewsBtn:hover{
+  background:var(--bv-blue-2)!important;
+}
+
+/* Cards/panels */
+.panel,.card,.metric-card,.quick-action,.notice,
+.bv-recent-panel{
+  background:#fff!important;
+  border-color:var(--bv-border)!important;
+  color:var(--bv-text)!important;
+}
+h1,h2,h3,h4,h5,h6{
+  color:var(--bv-text)!important;
+}
+p,small,.muted{
+  color:var(--bv-muted)!important;
+}
+
+/* Mobile menu button: WHITE area, dark-blue icon */
+@media(max-width:720px){
+  #bvHardMenuBtn{
+    left:0!important;
+    top:0!important;
+    width:54px!important;
+    height:54px!important;
+    border:0!important;
+    outline:1px solid var(--bv-border)!important;
+    border-radius:0 0 13px 0!important;
+    background:#fff!important;
+    color:var(--bv-blue)!important;
+    box-shadow:0 5px 16px rgba(16,42,67,.14)!important;
+  }
+  #bvHardMenuBtn:hover,
+  #bvHardMenuBtn:active,
+  #bvHardMenuBtn:focus{
+    background:#fff!important;
+    color:var(--bv-blue)!important;
+    box-shadow:0 5px 16px rgba(16,42,67,.14)!important;
+  }
+
+  /* Sidebar */
+  #sidebar{
+    background:#fff!important;
+    border-right:1px solid var(--bv-border)!important;
+  }
+  #sidebar .nav-btn{
+    color:var(--bv-text)!important;
+  }
+  #sidebar .nav-btn.active,
+  #sidebar .nav-btn:hover{
+    background:var(--bv-blue)!important;
+    color:#fff!important;
+  }
+
+  /* Overlay */
+  #menuOverlay{
+    background:rgba(13,47,82,.42)!important;
+  }
+
+  /* Keep mobile content white/blue instead of old red/blue accents */
+  .content,main{
+    background:var(--bv-light)!important;
+  }
+}
+
+/* Remove old red theme accents where common selectors are used */
+.red,.danger,.accent-red{
+  color:var(--bv-blue)!important;
+}
+</style>
+
+<style id="bv-admin-v3-settings-css">
+#page-settings .form-grid,#page-website .form-grid,#page-ads .form-grid,#page-notices .form-grid,#page-ad-slots .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#page-settings .field,#page-website .field,#page-ads .field,#page-notices .field,#page-ad-slots .field{min-width:0}
+#page-settings .field.full,#page-website .field.full,#page-ads .field.full,#page-notices .field.full,#page-ad-slots .field.full{grid-column:1/-1}
+#page-settings input,#page-settings textarea,#page-settings select,#page-website input,#page-website textarea,#page-website select,#page-ads input,#page-ads textarea,#page-ads select,#page-notices input,#page-notices textarea,#page-notices select,#page-ad-slots input,#page-ad-slots textarea,#page-ad-slots select{width:100%;box-sizing:border-box}
+@media(max-width:720px){
+ #page-settings .form-grid,#page-website .form-grid,#page-ads .form-grid,#page-notices .form-grid,#page-ad-slots .form-grid{grid-template-columns:1fr}
+ #page-settings .field.full,#page-website .field.full,#page-ads .field.full,#page-notices .field.full,#page-ad-slots .field.full{grid-column:auto}
+}
+</style>
+
+</head>
+
+<body>
+
+<button id="bvHardMenuBtn" type="button" aria-label="Open menu"
+      style="display:none;position:fixed;left:10px;top:9px;z-index:10050;width:52px;height:52px;border:0!important;border-radius:0 0 12px 0;background:#1167d8;color:#fff;font-size:22px;font-weight:900;line-height:38px;text-align:center;box-shadow:none!important;outline:0!important">☰</button>
+<button id="bvFloatingBack" type="button" aria-label="Back" title="Back"
+      style="display:none;position:fixed;left:12px;top:78px;z-index:10020;width:42px;height:42px;border:1px solid #d8e1ed;border-radius:11px;background:#fff;color:#17324f;font-size:25px;font-weight:900;line-height:38px;text-align:center;box-shadow:0 5px 18px rgba(0,0,0,.16)">←</button>
+<div id="menuOverlay" aria-hidden="true"></div>
+
+<div class="bv-profile-menu" id="bvProfileMenu">
+  <div class="bv-profile-menu-head">
+    <b>Admin Profile</b>
+    <small>Hello Manish</small>
+    <small id="bvProfileEmail">Admin account</small>
+  </div>
+  <div class="bv-profile-info">
+    <span>Role</span><strong>Administrator</strong>
+  </div>
+  <div class="bv-profile-info">
+    <span>Access</span><strong>Full Admin Access</strong>
+  </div>
+  <button class="bv-profile-item logout" id="bvProfileLogout">↪ Logout</button>
+</div>
+
+<div id="authLoading">Checking admin login…</div>
+
+<div id="authScreen" style="display:none">
+  <div class="auth-box">
+    <div class="auth-logo">★</div>
+    <h2>Bharat Viral Admin</h2>
+    <p>Admin Panel खोलने के लिए अपना admin email और password डालें।</p>
+
+    <div id="authError"></div>
+
+    <form id="loginForm">
+      <div class="auth-field">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" autocomplete="username" placeholder="Admin email" required>
+      </div>
+
+      <div class="auth-field">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Password" required>
+      </div>
+
+      <button id="loginBtn" type="submit">Login to Admin Panel</button>
+    </form>
+  </div>
+</div>
+<div class="app">
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="logo">BV</div>
+    <div><b>BHARAT VIRAL</b><small>Viral News, Authentic Info</small></div>
+  </div>
+
+  <div class="nav-title">Main</div>
+  <button class="nav-btn active" data-page="dashboard">🏠 Dashboard</button>
+
+  <div class="nav-title">Content Management</div>
+  <button class="nav-btn" data-page="article">📰 Posts / Articles</button>
+  <button class="nav-btn" data-page="articles">📚 All Articles</button>
+  <button class="nav-btn" data-page="categories">📂 Categories</button>
+  <button class="nav-btn" data-page="tags">🏷️ Tags</button>
+  <button class="nav-btn" data-page="breaking-news">📌 Breaking News</button>
+  <button class="nav-btn" data-page="auto-news">🤖 Auto News</button>
+  <button class="nav-btn" data-page="notices">📢 Manual Notice</button>
+
+  <div class="nav-title">SEO & Analytics</div>
+  <button class="nav-btn" data-page="seo">🔎 SEO Tools</button>
+  <button class="nav-btn" data-page="sitemap">🗺️ Sitemap</button>
+  <button class="nav-btn" data-page="analytics">📊 Analytics</button>
+
+  <div class="nav-title">Settings</div>
+  <button class="nav-btn" data-page="settings">⚙️ General Settings</button>
+  <button class="nav-btn" data-page="website">🌐 Website Settings</button>
+  <button class="nav-btn" data-page="ads">📢 Ad Management</button>
+  <button class="nav-btn" data-page="ad-slots">💰 Advertisement Slots</button>
+
+  <div class="bottom">
+    <button class="bv-sidebar-back" id="bvSidebarBack" type="button" title="Back" aria-label="Back">←</button>
+    <div style="font-size:10px;color:#8ea4bd;padding:8px 8px 3px">Bharat Viral Admin Panel</div>
+  </div>
+</aside>
+
+<div class="content">
+ <header class="topbar">
+  <div style="display:flex;align-items:center;gap:8px">
+    <button id="bvPageBack" type="button" aria-label="Back" title="Back"
+      style="display:none;width:34px;height:34px;border:1px solid #dce4ef;border-radius:9px;background:#fff;color:#17324f;font-size:21px;font-weight:900;line-height:30px;cursor:pointer;flex:0 0 34px">←</button>
+    <button class="menu" id="menuBtn">☰</button>
+    <div>
+      <h1 id="topTitle">Dashboard</h1>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:9px">
+    <button class="btn btn-light" id="previewBtn" style="font-size:11px;padding:7px 9px;min-width:auto">🌐 View Site</button>
+    <button class="btn btn-light" id="themeBtn" title="Toggle theme">🌙</button>
+
+    <div class="bv-admin-profile" id="bvAdminProfile" title="Admin Profile">
+      <div class="bv-profile-avatar">M</div>
+      <div class="bv-profile-text">
+        <b>Hello Manish</b>
+        <small id="adminEmailLabel">Admin</small>
+      </div>
+      <span class="bv-profile-chevron">⌄</span>
+    </div>
+
+    <button class="bv-notification-btn" id="bvNotificationBtn" title="Notifications">
+      🔔<i class="bv-notification-dot"></i>
+    </button>
+  </div>
+</header>
+
+ <main>
+
+ <!-- DASHBOARD -->
+ <section id="page-dashboard">
+  <div class="page-head">
+    
+    <div>
+      <h2>Hello Manish! 👋</h2>
+      <p>Bharat Viral Admin Panel में आपका स्वागत है</p>
+    </div>
+
+    <button class="btn btn-red" id="dashboardAdd">＋ Add News</button>
+  </div>
+
+  <div class="notice">Supabase LIVE: यहाँ से Draft/Publish किया गया article database में save होगा और published article के बाद sitemap refresh request भी भेजी जाएगी।</div>
+
+  <div class="bv-top-stats">
+    <div class="bv-stat-card">
+      <div class="bv-stat-icon blue">👥</div>
+      <div><span>Total Visitors</span><strong id="bvTotalVisitors">0</strong><small>All visitors</small></div>
+    </div>
+    <div class="bv-stat-card">
+      <div class="bv-stat-icon green">👁️</div>
+      <div><span>Total Views</span><strong id="bvTotalViews">0</strong><small>Article views</small></div>
+    </div>
+    <div class="bv-stat-card">
+      <div class="bv-stat-icon purple">📰</div>
+      <div><span>Total Posts</span><strong id="bvTotalPosts">0</strong><small>All articles</small></div>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div>
+      <div class="panel bv-recent-panel" style="margin-bottom:17px">
+        <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Recently Posts</span>
+          <button class="btn btn-light" id="recentViewAll" style="padding:7px 10px;font-size:11px">View All</button>
+        </div>
+        <div class="bv-recent-wrap">
+          <table class="bv-recent-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="bvRecentPostsBody">
+              <tr><td colspan="4" class="bv-empty-row">Loading latest posts...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel" style="margin-bottom:17px">
+        <div class="panel-head">क्विक एक्शन</div>
+        <div class="quick-grid">
+          <div class="quick-action" id="qaPost"><span>🖊️</span>नया पोस्ट लिखें</div>
+          <div class="quick-action" id="qaPage"><span style="background:#e8f7ee;color:#16a34a">📄</span>नया पेज जोड़ें</div>
+          <div class="quick-action" id="qaCategory"><span style="background:#fff1df;color:#ea8a00">📂</span>कैटेगरी जोड़ें</div>
+          <div class="quick-action" id="qaMedia"><span style="background:#f0e9ff;color:#7c3aed">🖼️</span>मीडिया अपलोड करें</div>
+          <div class="quick-action" id="qaSeo"><span style="background:#e5f8f7;color:#0891a2">🔍</span>SEO चेक करें</div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:17px">
+        <div class="panel-head">📱 Install Admin App</div>
+        <div class="panel-body" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <b style="font-size:13px">Bharat Viral Admin</b>
+            <div style="font-size:11px;color:#718096;margin-top:4px">Admin Panel को app की तरह install करें। Login के बाद ही admin access मिलेगा।</div>
+          </div>
+          <button class="btn btn-red" id="bvInstallAdminApp" type="button">📱 Install Admin App</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:17px">
+        <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center">
+          <span>ट्रैफिक अवलोकन <small style="font-weight:600;color:#16a34a;margin-left:5px">● LIVE</small></span>
+          <div style="display:flex;gap:5px">
+            <button class="bv-dashboard-range active" data-bv-dashboard-days="7">7D</button>
+            <button class="bv-dashboard-range" data-bv-dashboard-days="30">30D</button>
+            <button class="bv-dashboard-range" data-bv-dashboard-days="90">90D</button>
+          </div>
+        </div>
+        <div class="analytics">
+          <div class="bv-dashboard-chart">
+            <svg id="bvDashboardTrafficChart" viewBox="0 0 600 170" preserveAspectRatio="none" aria-label="Real traffic chart">
+              <line x1="0" y1="20" x2="600" y2="20" class="bv-dashboard-grid"/>
+              <line x1="0" y1="75" x2="600" y2="75" class="bv-dashboard-grid"/>
+              <line x1="0" y1="125" x2="600" y2="125" class="bv-dashboard-grid"/>
+              <line x1="0" y1="169" x2="600" y2="169" class="bv-dashboard-grid"/>
+              <polygon id="bvDashboardArea" class="bv-dashboard-area" points="0,169 600,169"/>
+              <polyline id="bvDashboardLine" class="bv-dashboard-line" points="0,169 600,169"/>
+            </svg>
+          </div>
+          <div id="bvDashboardChartLabels" class="chart-labels"><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span></div>
+          <div class="analytics-stats">
+            <div class="analytics-stat"><small>विजिटर्स</small><b id="bvDashboardVisitors">0</b></div>
+            <div class="analytics-stat"><small>पेज व्यूज</small><b id="bvDashboardViews">0</b></div>
+            <div class="analytics-stat"><small>Top Article</small><b id="bvDashboardTopViews">0</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">सिस्टम स्थिति</div>
+        <div class="system-grid">
+          <div class="system-item"><small>वेबसाइट स्टेटस</small><div id="bvWebsiteStatus" class="bv-real-status checking"><i class="bv-status-dot"></i>Checking…</div></div>
+          <div class="system-item"><small>डेटाबेस</small><div id="bvDatabaseStatus" class="bv-real-status checking"><i class="bv-status-dot"></i>Checking…</div></div>
+          <div class="system-item"><small>Admin Session</small><div id="bvServerStatus" class="bv-real-status checking"><i class="bv-status-dot"></i>Checking…</div></div>
+          <div class="system-item"><small>Last Backup</small><div id="bvBackupStatus" style="font-size:11px;font-weight:800;margin-top:5px;color:#d97706">Not configured</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+ <!-- ADD NEWS -->
+ <section id="page-article" class="hidden">
+  <div class="page-head">
+   <div><h2>Add News</h2><p>नई खबर तैयार करके section और tags चुनें।</p></div>
+  </div>
+
+  <div class="panel form-panel">
+   <div class="form-grid">
+
+    <div class="field full">
+     <label>Article Title *</label>
+     <input id="title" type="text" placeholder="खबर का शीर्षक लिखें">
+    </div>
+
+    <div class="field full">
+     <label>SEO URL / Slug</label>
+     <input id="slug" type="text" placeholder="sarkari-naukri-2026-sbi-clerk-railway-je-bhel-apprentice">
+     <small>English letters, numbers और hyphen (-) रखें। खाली छोड़ने पर title से automatic slug बनेगा।</small>
+    </div>
+
+    <div class="field full">
+     <label>Short Description</label>
+     <textarea id="excerpt" placeholder="खबर का छोटा परिचय"></textarea>
+    </div>
+
+    <div class="field full">
+     <label>Article Content *</label>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:7px">
+      <button type="button" class="btn btn-light" id="insertLinkBtn" style="padding:7px 10px;font-size:12px">🔗 Link</button>
+      <span style="font-size:11px;color:#777;align-self:center">[इस लिंक पर tap करें](https://example.com)</span>
+     </div>
+     <textarea id="content" style="min-height:240px" placeholder="पूरी खबर यहाँ लिखें...&#10;&#10;उदाहरण: पूरी जानकारी के लिए [इस लिंक पर tap करें](https://example.com)"></textarea>
+     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;padding:10px;border:1px solid #e5e7eb;border-radius:10px;background:#fafafa">
+      <strong style="font-size:12px;flex-basis:100%">🖼️ Insert Image / PDF</strong>
+      <input id="inlineImageFile" type="file" accept="image/*" style="padding:9px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+      <input id="inlinePdfFile" type="file" accept="application/pdf,.pdf" style="padding:9px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+      <input id="inlineImageUrl" type="url" placeholder="या image URL: https://..." style="flex:1;min-width:220px;padding:10px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+      <input id="inlineImageAlt" type="text" placeholder="Image का छोटा description" style="flex:1;min-width:220px;padding:10px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+      <input id="inlinePdfTitle" type="text" placeholder="PDF का नाम / Title" style="flex:1;min-width:220px;padding:10px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+      <button type="button" id="insertInlineImage" class="btn btn-light">📷 Insert Image</button>
+      <button type="button" id="insertInlinePdf" class="btn btn-light">📄 Insert PDF</button>
+      <small id="inlineImageStatus" style="flex-basis:100%">Article Content में cursor जहाँ होगा, image वहीं insert होगी। एक से ज्यादा images भी लगा सकते हो।</small>
+     </div>
+     <small>Article के बीच में Markdown format में link डाल सकते हैं।</small>
+    </div>
+
+    <div class="field">
+     <label>Article Photo</label>
+     <input id="imageFile" type="file" accept="image/*" style="padding:9px">
+     <div id="imagePreviewBox" style="display:none;margin-top:10px;border:1px solid #e5e7eb;border-radius:10px;padding:8px;background:#fafafa">
+      <img id="imagePreview" alt="Selected photo preview" style="width:100%;max-height:230px;object-fit:cover;border-radius:8px;display:block">
+      <button type="button" id="removeImage" class="btn btn-light" style="margin-top:8px">Remove Photo</button>
+     </div>
+     <small>Photo चुनते ही preview दिखाई देगा। बाद में इसे Supabase Storage पर upload करेंगे।</small>
+    </div>
+
+    <div class="field">
+     <label>Image URL (Optional)</label>
+     <input id="image" type="url" placeholder="https://...">
+     <small>अगर direct image link है तो यहाँ डाल सकते हो।</small>
+    </div>
+
+    <div class="field">
+     <label>Author</label>
+     <input id="author" type="text" placeholder="Author name">
+    </div>
+
+    <div class="field">
+     <label>Source Name</label>
+     <input id="source" type="text" placeholder="Source / publication">
+    </div>
+
+    <div class="field">
+     <label>Source URL</label>
+     <input id="sourceUrl" type="url" placeholder="https://...">
+    </div>
+
+    <div class="field full">
+     <label>Sections</label>
+     <div class="checks"><div class="bv-category-loading">Categories load हो रही हैं...</div></div>
+    </div>
+
+    <div class="field full">
+     <label>Tags</label>
+     <input id="tagInput" type="text" placeholder="Tag लिखकर Enter दबाएँ">
+     <div id="tagList" class="tags"></div>
+    </div>
+
+    <div class="field">
+     <label>Article Type</label>
+     <select id="type">
+      <option value="news">News</option>
+      <option value="fact_check">Fact Check</option>
+      <option value="explained">Explained</option>
+     </select>
+    </div>
+
+    <div class="field">
+     <label>Status</label>
+     <select id="status">
+      <option value="draft">Draft</option>
+      <option value="published">Published</option>
+     </select>
+    </div>
+
+    <div class="field full">
+     <label>SEO Title</label>
+     <input id="seoTitle" type="text" placeholder="Google search result के लिए title">
+    </div>
+
+    <div class="field full">
+     <label>SEO Description</label>
+     <textarea id="seoDescription" placeholder="Search result के लिए short description"></textarea>
+    </div>
+
+   </div>
+
+   <div class="form-footer">
+    <button type="button" class="btn btn-light" id="saveDraft">Save Draft</button>
+    <button type="button" class="btn btn-red" id="publishBtn">Publish Article</button>
+   </div>
+  </div>
+ </section>
+
+ <!-- ARTICLES -->
+ <section id="page-articles" class="hidden">
+  <div class="page-head"><div><h2>All Articles</h2><p>सभी news और उनके status.</p></div><button class="btn btn-red" id="articlesAdd">＋ Add News</button></div>
+  <div class="panel"><table><thead><tr><th>Article</th><th>Type</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead><tbody><tr><td colspan="4"><div class="empty">अभी कोई article नहीं है।</div></td></tr></tbody></table></div>
+ </section>
+
+ <!-- CATEGORIES -->
+ <section id="page-categories" class="hidden">
+  <div class="page-head">
+    <div>
+      <h2>Categories</h2>
+      <p>यहाँ से category जोड़ें या delete करें। Delete करने पर वह homepage से भी हट जाएगी।</p>
+    </div>
+    <button class="btn btn-red" id="addCategoryBtn">＋ Add Category</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">Website Categories</div>
+    <div class="panel-body">
+      <div id="categoryManagerList" class="bv-category-manager-list">
+        <div class="empty">Categories load हो रही हैं...</div>
+      </div>
+    </div>
+  </div>
+ </section>
+
+ <!-- TAGS -->
+ <section id="page-tags" class="hidden">
+  <div class="page-head">
+   <div><h2>🏷️ Tags</h2><p>Auto-assigned और manually managed tags.</p></div>
+   <button class="btn btn-light" id="bvTagsRefresh">🔄 Refresh</button>
+  </div>
+
+  <div class="panel" style="margin-bottom:17px">
+   <div class="panel-head">＋ नया Tag</div>
+   <div class="panel-body">
+    <form id="bvTagForm" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end">
+     <div class="field">
+      <label>Tag Name</label>
+      <input id="bvTagName" type="text" maxlength="80" placeholder="जैसे Rajasthan School" required>
+     </div>
+     <div class="field">
+      <label>Slug</label>
+      <input id="bvTagSlug" type="text" maxlength="100" placeholder="rajasthan-school">
+     </div>
+     <button class="btn btn-red" type="submit">＋ Add Tag</button>
+    </form>
+    <div id="bvTagMsg" style="margin-top:10px;font-size:12px"></div>
+   </div>
+  </div>
+
+  <div class="panel">
+   <div class="panel-head">📋 Tag List</div>
+   <div class="panel-body" style="overflow-x:auto">
+    <table style="width:100%;min-width:620px">
+     <thead><tr><th>TAG</th><th>SLUG</th><th>ACTIONS</th></tr></thead>
+     <tbody id="bvTagsBody"><tr><td colspan="3"><div class="empty">Tags load हो रहे हैं...</div></td></tr></tbody>
+    </table>
+   </div>
+  </div>
+ </section>
+
+ <!-- BREAKING NEWS -->
+ <section id="page-breaking-news" class="hidden">
+  <div class="page-head">
+   <div><h2>📌 Breaking News</h2><p>Homepage की blue Breaking News strip को यहाँ से manage करें।</p></div>
+   <button class="btn btn-light" id="bvBreakingRefresh">🔄 Refresh</button>
+  </div>
+
+  <div class="panel" style="margin-bottom:17px">
+   <div class="panel-head">＋ नई Breaking News</div>
+   <div class="panel-body">
+    <form id="bvBreakingForm" style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end">
+     <div class="field">
+      <label>Breaking News Text</label>
+      <input id="bvBreakingTitle" type="text" maxlength="180" placeholder="जैसे: राजस्थान में कल स्कूलों के लिए नया नियम लागू" required>
+     </div>
+     <button class="btn btn-red" type="submit">＋ Add</button>
+    </form>
+    <div id="bvBreakingMsg" style="margin-top:10px;font-size:12px"></div>
+   </div>
+  </div>
+
+  <div class="panel">
+   <div class="panel-head">📋 Breaking News List</div>
+   <div class="panel-body" style="overflow-x:auto">
+    <table style="width:100%;min-width:700px">
+     <thead><tr><th>NEWS</th><th>STATUS</th><th>ORDER</th><th>ACTIONS</th></tr></thead>
+     <tbody id="bvBreakingBody"><tr><td colspan="4"><div class="empty">Breaking News load हो रही है...</div></td></tr></tbody>
+    </table>
+   </div>
+  </div>
+ </section>
+
+ <!-- SEO -->
+ <section id="page-seo" class="hidden">
+  <div class="page-head">
+    <div><h2>SEO Tools</h2><p>Bharat Viral articles का live SEO audit और SEO editing.</p></div>
+    <button class="btn btn-red" id="seoRefreshBtn">🔄 Refresh SEO</button>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="label">PUBLISHED</div><div class="number" id="seoPublished">0</div></div>
+    <div class="card"><div class="label">SEO TITLE READY</div><div class="number" id="seoTitleReady">0</div></div>
+    <div class="card"><div class="label">DESCRIPTION READY</div><div class="number" id="seoDescReady">0</div></div>
+    <div class="card"><div class="label">NEEDS SEO</div><div class="number" id="seoNeedsWork">0</div></div>
+  </div>
+  <div class="two">
+    <div class="panel"><div class="panel-head">🔎 SEO Rules</div><div class="panel-body" style="line-height:1.8;font-size:13px">
+      <div>✅ Published article = index, follow</div>
+      <div>🚫 Draft article = noindex, follow</div>
+      <div>🎯 SEO Title: recommended 30–60 characters</div>
+      <div>📝 SEO Description: recommended 120–160 characters</div>
+      <div>🔗 Canonical: published article का SEO slug URL; पुराने links भी supported हैं</div>
+      <div>🗺️ Published articles sitemap में automatically जाते हैं।</div>
+    </div></div>
+    <div class="panel"><div class="panel-head">📊 SEO Status</div><div class="panel-body" id="seoHealthBox">SEO data load हो रहा है...</div></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-head">📰 Article SEO Audit</div>
+    <div class="panel-body" style="padding:0;overflow:auto">
+      <table style="min-width:820px">
+        <thead><tr><th>Article</th><th>Status</th><th>SEO Title</th><th>Description</th><th>Canonical</th><th>Action</th></tr></thead>
+        <tbody id="seoAuditBody"><tr><td colspan="6"><div class="empty">SEO data load हो रहा है...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+ </section>
+<section id="page-sitemap" class="hidden">
+  <div class="page-head">
+    <div><h2>Sitemap</h2><p>Published articles और active categories का live sitemap.</p></div>
+  </div>
+  <div class="panel"><div class="panel-body">
+    <h3>🗺️ Sitemap Management</h3>
+    <p style="color:#718096;line-height:1.7">नया published article और active category sitemap में automatically शामिल होते हैं, बशर्ते Netlify sitemap function deploy हो।</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-red" id="refreshSitemapBtn">🔄 Check Sitemap</button>
+      <a class="btn" href="/sitemap.xml" target="_blank" style="font-size:12px;padding:7px 10px;text-decoration:none">🗺️ Open sitemap.xml</a>
+    </div>
+    <div id="sitemapStatus" style="margin-top:12px;padding:10px;border-radius:9px;background:#f7fafc;color:#475569;font-size:12px">Sitemap status check करें।</div>
+  </div></div>
+</section>
+
+<section id="page-analytics" class="hidden">
+  <div class="page-head">
+    <div><h2>Analytics</h2><p>Bharat Viral real website traffic overview.</p></div>
+  </div>
+
+  <div class="bv-analytics-toolbar">
+    <b style="font-size:12px;color:#17324f">Traffic Overview</b>
+    <div class="bv-analytics-range">
+      <button class="bv-range-btn active" data-bv-days="7">7 Days</button>
+      <button class="bv-range-btn" data-bv-days="30">30 Days</button>
+      <button class="bv-range-btn" data-bv-days="90">90 Days</button>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:15px">
+    <div class="bv-real-chart">
+      <svg id="bvRealTrafficChart" viewBox="0 0 700 210" preserveAspectRatio="none" aria-label="Traffic chart">
+        <line x1="0" y1="20" x2="700" y2="20" class="bv-chart-grid"/>
+        <line x1="0" y1="80" x2="700" y2="80" class="bv-chart-grid"/>
+        <line x1="0" y1="140" x2="700" y2="140" class="bv-chart-grid"/>
+        <line x1="0" y1="200" x2="700" y2="200" class="bv-chart-grid"/>
+        <polygon id="bvRealArea" class="bv-chart-area" points="0,200 700,200"/>
+        <polyline id="bvRealLine" class="bv-chart-line" points="0,200 700,200"/>
+      </svg>
+      <div id="bvRealChartLabels" class="bv-chart-labels"><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span></div>
+    </div>
+    <div class="bv-real-analytics-stats">
+      <div class="bv-real-analytics-stat"><small>Unique Visitors</small><b id="bvAnalyticsVisitors">0</b></div>
+      <div class="bv-real-analytics-stat"><small>Page Views</small><b id="bvAnalyticsViews">0</b></div>
+      <div class="bv-real-analytics-stat"><small>Top Article Views</small><b id="bvAnalyticsTopViews">0</b></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">Top Articles</div>
+    <div class="panel-body" id="bvTopArticles">
+      <div class="empty">Analytics data अभी load नहीं हुआ।</div>
+    </div>
+  </div>
+</section>
+
+<section id="page-users" class="hidden">
+  <div class="page-head"><div><h2>Users</h2><p>Admin/user management.</p></div></div>
+  <div class="panel"><div class="panel-body"><div class="empty">👥 User management panel ready.</div></div></div>
+</section>
+<section id="page-roles" class="hidden">
+  <div class="page-head"><div><h2>Roles</h2><p>Admin roles and permissions.</p></div></div>
+  <div class="panel"><div class="panel-body"><div class="empty">🛡️ Roles & permissions panel ready.</div></div></div>
+</section>
+<section id="page-activity" class="hidden">
+  <div class="page-head"><div><h2>Admin Activity</h2><p>Recent administrator activity.</p></div></div>
+  <div class="panel"><div class="panel-body"><div class="empty">🕘 Activity log panel ready.</div></div></div>
+</section>
+<section id="page-settings" class="hidden">
+  <div class="page-head">
+    <div><h2>⚙️ General Settings</h2><p>Website की सामान्य और publishing settings manage करें।</p></div>
+    <button class="btn btn-red" id="bvSettingsSave">💾 Save All Settings</button>
+  </div>
+
+  <div class="notice">Settings को पहले browser में सुरक्षित रखा जाता है। अगर Supabase में <b>site_settings</b> table उपलब्ध है तो वही settings database में भी save होंगी।</div>
+
+  <div class="two">
+    <div class="panel">
+      <div class="panel-head">🌐 Website Identity</div>
+      <div class="panel-body">
+        <div class="form-grid">
+          <div class="field full"><label>Website Name</label><input id="setSiteName" value="Bharat Viral"></div>
+          <div class="field"><label>Tagline</label><input id="setTagline" placeholder="Viral News, Authentic Information"></div>
+          <div class="field"><label>Admin Email / Contact Email</label><input id="setContactEmail" type="email" placeholder="your@email.com"></div>
+          <div class="field full"><label>Website Description</label><textarea id="setSiteDescription" placeholder="Website की short description"></textarea></div>
+          <div class="field"><label>Logo URL</label><input id="setLogoUrl" type="url" placeholder="https://..."></div>
+          <div class="field"><label>Favicon URL</label><input id="setFaviconUrl" type="url" placeholder="https://.../favicon.png"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">📰 Publishing Defaults</div>
+      <div class="panel-body">
+        <div class="form-grid">
+          <div class="field"><label>Default Author</label><input id="setDefaultAuthor" placeholder="Bharat Viral"></div>
+          <div class="field"><label>Default Article Status</label>
+            <select id="setDefaultStatus"><option value="draft">Draft</option><option value="published">Published</option></select>
+          </div>
+          <div class="field"><label>Default Language</label>
+            <select id="setLanguage"><option value="hi">Hindi</option><option value="en">English</option></select>
+          </div>
+          <div class="field"><label>Timezone</label>
+            <select id="setTimezone"><option value="Asia/Kolkata">Asia/Kolkata (IST)</option><option value="UTC">UTC</option></select>
+          </div>
+          <div class="field"><label>Articles Per Page</label><input id="setArticlesPerPage" type="number" min="1" max="100" value="12"></div>
+          <div class="field"><label>Trending Count</label><input id="setTrendingCount" type="number" min="1" max="10" value="4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-head">🔥 Homepage / Trending</div>
+    <div class="panel-body">
+      <div class="form-grid">
+        <div class="field"><label>Trending Enabled</label><select id="setTrendingEnabled"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+        <div class="field"><label>Breaking News Enabled</label><select id="setBreakingEnabled"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+        <div class="field"><label>Manual Notice Box Enabled</label><select id="setNoticeEnabled"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+        <div class="field"><label>Show View All</label><select id="setViewAll"><option value="true">Yes</option><option value="false">No</option></select></div>
+        <div class="field"><label>Maintenance Mode</label><select id="setMaintenance"><option value="false">OFF</option><option value="true">ON</option></select></div>
+        <div class="field"><label>Allow Search Indexing</label><select id="setIndexing"><option value="true">index, follow</option><option value="false">noindex, nofollow</option></select></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-head">🔐 Admin / Security Preferences</div>
+    <div class="panel-body">
+      <div class="form-grid">
+        <div class="field"><label>Session Reminder (minutes)</label><input id="setSessionMinutes" type="number" min="5" max="1440" value="60"></div>
+        <div class="field"><label>Auto Refresh Dashboard</label><select id="setDashboardRefresh"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+        <div class="field"><label>Confirm Before Delete</label><select id="setConfirmDelete"><option value="true">Yes</option><option value="false">No</option></select></div>
+        <div class="field"><label>Show Admin Notifications</label><select id="setAdminNotifications"><option value="true">Yes</option><option value="false">No</option></select></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="page-website" class="hidden">
+  <div class="page-head">
+    <div><h2>🌐 Website Settings</h2><p>Design, SEO, social links, scripts और website behaviour manage करें।</p></div>
+    <button class="btn btn-red" id="bvWebsiteSave">💾 Save Website Settings</button>
+  </div>
+
+  <div class="two">
+    <div class="panel">
+      <div class="panel-head">🎨 Design & Branding</div>
+      <div class="panel-body">
+        <div class="form-grid">
+          <div class="field"><label>Primary Color</label><input id="webPrimaryColor" type="color" value="#123a63"></div>
+          <div class="field"><label>Accent Color</label><input id="webAccentColor" type="color" value="#e30613"></div>
+          <div class="field"><label>Header Logo URL</label><input id="webLogoUrl" type="url"></div>
+          <div class="field"><label>Favicon URL</label><input id="webFaviconUrl" type="url"></div>
+          <div class="field full"><label>Footer Text</label><textarea id="webFooterText" placeholder="Copyright / footer information"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">🔎 Default SEO</div>
+      <div class="panel-body">
+        <div class="form-grid">
+          <div class="field full"><label>Default SEO Title</label><input id="webSeoTitle" placeholder="Bharat Viral — Latest News"></div>
+          <div class="field full"><label>Default SEO Description</label><textarea id="webSeoDescription"></textarea></div>
+          <div class="field"><label>Default Focus Keyword</label><input id="webFocusKeyword"></div>
+          <div class="field"><label>Canonical Base URL</label><input id="webCanonical" type="url" value="https://bharat-viral.netlify.app"></div>
+          <div class="field"><label>Robots</label><select id="webRobots"><option value="index, follow">index, follow</option><option value="noindex, follow">noindex, follow</option><option value="noindex, nofollow">noindex, nofollow</option></select></div>
+          <div class="field"><label>Sitemap Enabled</label><select id="webSitemap"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-head">📱 Social / Contact</div>
+    <div class="panel-body">
+      <div class="form-grid">
+        <div class="field"><label>Telegram Channel URL</label><input id="webTelegram" type="url"></div>
+        <div class="field"><label>Facebook URL</label><input id="webFacebook" type="url"></div>
+        <div class="field"><label>Instagram URL</label><input id="webInstagram" type="url"></div>
+        <div class="field"><label>YouTube URL</label><input id="webYoutube" type="url"></div>
+        <div class="field"><label>X / Twitter URL</label><input id="webTwitter" type="url"></div>
+        <div class="field"><label>Contact Email</label><input id="webContactEmail" type="email"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <div class="panel-head">📈 Tracking / Search Console</div>
+    <div class="panel-body">
+      <div class="form-grid">
+        <div class="field"><label>Google Analytics Measurement ID</label><input id="webGaId" placeholder="G-XXXXXXXXXX"></div>
+        <div class="field"><label>Google Search Console Verification</label><input id="webGscVerification"></div>
+        <div class="field full"><label>Head Custom Code</label><textarea id="webHeadCode" style="min-height:130px" placeholder="Optional verified script/meta code"></textarea></div>
+        <div class="field full"><label>Footer Custom Code</label><textarea id="webFooterCode" style="min-height:130px" placeholder="Optional verified script/code"></textarea></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="page-ads" class="hidden">
+  <div class="page-head">
+    <div><h2>📢 Ad Management</h2><p>Advertisement को globally enable/disable और default placement manage करें।</p></div>
+    <button class="btn btn-red" id="bvAdsSave">💾 Save Ad Settings</button>
+  </div>
+  <div class="panel">
+    <div class="panel-head">💰 Global Advertisement Settings</div>
+    <div class="panel-body">
+      <div class="form-grid">
+        <div class="field"><label>Ads Enabled</label><select id="adsEnabled"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+        <div class="field"><label>Auto Ads Enabled</label><select id="adsAuto"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+        <div class="field"><label>Show Ads on Homepage</label><select id="adsHomepage"><option value="true">Yes</option><option value="false">No</option></select></div>
+        <div class="field"><label>Show Ads on Articles</label><select id="adsArticles"><option value="true">Yes</option><option value="false">No</option></select></div>
+        <div class="field"><label>Show Ads in Sidebar</label><select id="adsSidebar"><option value="true">Yes</option><option value="false">No</option></select></div>
+        <div class="field"><label>Default Placement</label>
+          <select id="adsPlacement"><option value="homepage_top">Homepage Top</option><option value="homepage_between">Homepage Between</option><option value="article_top">Article Top</option><option value="article_middle">Article Middle</option><option value="article_bottom">Article Bottom</option><option value="sidebar">Sidebar</option>
+          </select>
+        </div>
+        <div class="field"><label>Maximum Ads Per Article</label><input id="adsMaxArticle" type="number" min="0" max="20" value="3"></div>
+        <div class="field"><label>Ad Label</label><input id="adsLabel" value="Advertisement"></div>
+      </div>
+    </div>
+  </div>
+  <div class="notice" style="margin-top:16px">अलग-अलग ad code और slots के लिए <b>Advertisement Slots</b> section इस्तेमाल करें।</div>
+</section>
+
+<section id="page-auto-news" class="hidden">
+  <div class="page-head">
+    <div><h2>🤖 Auto News Control</h2><p>Official-source monitoring, classification और processing logs.</p></div>
+    <button class="btn btn-light" id="bvAutoRefresh">↻ Refresh</button>
+  </div>
+  <div class="notice" id="bvAutoStatus">Auto News logs load हो रहे हैं...</div>
+  <div class="panel"><div class="table-wrap" style="overflow:auto">
+    <table style="width:100%;min-width:900px">
+      <thead><tr><th>Source</th><th>Notice Type</th><th>Status</th><th>Article</th><th>Telegram</th><th>Processed</th><th>Official URL</th></tr></thead>
+      <tbody id="bvAutoNewsBody"><tr><td colspan="7"><div class="empty">Loading...</div></td></tr></tbody>
+    </table>
+  </div></div>
+</section>
+
+<section id="page-notices" class="hidden">
+  <div class="page-head">
+    <div><h2>📢 Manual Notice</h2><p>Homepage के rectangular Notice Box को manage करें।</p></div>
+    <button class="btn btn-red" id="bvNoticeNew">＋ New Notice</button>
+  </div>
+  <div class="panel form-panel" style="margin-bottom:16px">
+    <div class="form-grid">
+      <div class="field full"><label>Notice Title *</label><input id="bvNoticeTitle" type="text"></div>
+      <div class="field full"><label>Notice Text *</label><textarea id="bvNoticeContent" style="min-height:160px"></textarea></div>
+      <div class="field"><label>Image URL</label><input id="bvNoticeImage" type="url"></div>
+      <div class="field"><label>Link URL</label><input id="bvNoticeLink" type="url"></div>
+      <div class="field"><label>Status</label><select id="bvNoticeStatus"><option value="published">Published</option><option value="hidden">Hidden</option><option value="draft">Draft</option></select></div>
+      <div class="field"><label>Display Order</label><input id="bvNoticeOrder" type="number" value="0"></div>
+      <div class="field" style="display:flex;align-items:end;gap:8px"><button class="btn btn-red" id="bvNoticeSave">Save Notice</button><button class="btn btn-light" id="bvNoticeCancel">Clear</button></div>
+    </div>
+    <input id="bvNoticeId" type="hidden">
+  </div>
+  <div class="panel"><div style="overflow:auto">
+    <table style="width:100%;min-width:800px">
+      <thead><tr><th>Title</th><th>Status</th><th>Image</th><th>Link</th><th>Order</th><th>Actions</th></tr></thead>
+      <tbody id="bvNoticeBody"><tr><td colspan="6"><div class="empty">Loading...</div></td></tr></tbody>
+    </table>
+  </div></div>
+</section>
+
+<section id="page-ad-slots" class="hidden">
+  <div class="page-head">
+    <div><h2>💰 Advertisement Slots</h2><p>हर अलग ad location का code और enable/disable manage करें।</p></div>
+    <button class="btn btn-red" id="bvAdNew">＋ New Slot</button>
+  </div>
+  <div class="panel form-panel" style="margin-bottom:16px">
+    <div class="form-grid">
+      <div class="field"><label>Slot Name *</label><input id="bvAdName"></div>
+      <div class="field"><label>Placement</label><select id="bvAdPlacement">
+        <option value="homepage_top">Homepage Top</option><option value="homepage_between">Homepage Between</option><option value="article_top">Article Top</option><option value="article_middle">Article Middle</option><option value="article_bottom">Article Bottom</option><option value="sidebar">Sidebar</option>
+      </select></div>
+      <div class="field full"><label>Ad Code</label><textarea id="bvAdCode" style="min-height:140px"></textarea></div>
+      <div class="field"><label>Enabled</label><select id="bvAdEnabled"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
+      <div class="field"><label>Display Order</label><input id="bvAdOrder" type="number" value="0"></div>
+      <div class="field" style="display:flex;align-items:end;gap:8px"><button class="btn btn-red" id="bvAdSave">Save Slot</button><button class="btn btn-light" id="bvAdCancel">Clear</button></div>
+    </div>
+    <input id="bvAdId" type="hidden">
+  </div>
+  <div class="panel"><div style="overflow:auto">
+    <table style="width:100%;min-width:800px">
+      <thead><tr><th>Slot</th><th>Placement</th><th>Enabled</th><th>Order</th><th>Updated</th><th>Actions</th></tr></thead>
+      <tbody id="bvAdBody"><tr><td colspan="6"><div class="empty">Loading...</div></td></tr></tbody>
+    </table>
+  </div></div>
+</section>
+
+</main>
+</div>
+</div>
+<script>
+(function(){
+  const SUPABASE_URL = "https://ocarsylhsyxjqpzidndb.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+
+  const app = document.querySelector(".app");
+  const authScreen = document.getElementById("authScreen");
+  const authLoading = document.getElementById("authLoading");
+  const loginForm = document.getElementById("loginForm");
+  const loginBtn = document.getElementById("loginBtn");
+  const authError = document.getElementById("authError");
+  const adminEmailLabel = document.getElementById("adminEmailLabel");
+  const profileEmail = document.getElementById("bvProfileEmail");
+
+  function showError(message){
+    authError.textContent = message;
+    authError.style.display = "block";
+  }
+
+  function clearError(){
+    authError.textContent = "";
+    authError.style.display = "none";
+  }
+
+  function finishLoading(){
+    if(authLoading) authLoading.style.display = "none";
+  }
+
+  function showPanel(user){
+    finishLoading();
+    authScreen.style.display = "none";
+    app.style.display = "";
+    if(user && user.email){
+      if(adminEmailLabel) adminEmailLabel.textContent = user.email;
+      if(profileEmail) profileEmail.textContent = user.email;
+    }
+  }
+
+  function showLogin(message){
+    finishLoading();
+    app.style.display = "none";
+    authScreen.style.display = "flex";
+    if(message) showError(message);
+  }
+
+  // Make showLogin available to the other admin scripts on this page.
+  window.showLogin = showLogin;
+
+  async function initAuth(){
+    // Never leave the user stuck on "Checking admin login…".
+    const fallbackTimer = setTimeout(function(){
+      if(authLoading && authLoading.style.display !== "none"){
+        showLogin("Login check में समय लग रहा है। कृपया अपना admin email और password डालकर Login करें।");
+      }
+    }, 8000);
+
+    try{
+      if(!window.supabase || !window.supabase.createClient){
+        clearTimeout(fallbackTimer);
+        showLogin("Supabase library load नहीं हुई। Internet connection check करें और page reload करें।");
+        return;
+      }
+
+      window.supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+      );
+
+      // Register listener before checking the current session.
+      window.supabaseClient.auth.onAuthStateChange(function(event, session){
+        if(session && session.user){
+          showPanel(session.user);
+        }else if(event === "SIGNED_OUT"){
+          showLogin();
+        }
+      });
+
+      const result = await Promise.race([
+        window.supabaseClient.auth.getSession(),
+        new Promise((_, reject)=>setTimeout(()=>reject(new Error("AUTH_TIMEOUT")),7000))
+      ]);
+
+      clearTimeout(fallbackTimer);
+
+      if(result && result.error){
+        showLogin("Supabase connection error: " + (result.error.message || "Unable to check login."));
+        return;
+      }
+
+      const session = result?.data?.session;
+      if(session && session.user){
+        showPanel(session.user);
+      }else{
+        showLogin();
+      }
+    }catch(err){
+      clearTimeout(fallbackTimer);
+      console.error("Admin auth initialization failed:", err);
+
+      if(err && err.message === "AUTH_TIMEOUT"){
+        showLogin("Login check timed out. कृपया अपना admin email और password डालकर Login करें।");
+      }else{
+        showLogin("Admin login initialize नहीं हो पाया। कृपया page reload करके फिर कोशिश करें।");
+      }
+    }
+  }
+
+  loginForm.addEventListener("submit", async function(e){
+    e.preventDefault();
+    clearError();
+
+    if(!window.supabaseClient){
+      showError("Supabase अभी तैयार नहीं है। कुछ सेकंड बाद फिर कोशिश करें।");
+      return;
+    }
+
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Logging in…";
+
+    try{
+      const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if(error){
+        showError(error.message || "Login failed. Email या password check करें।");
+        return;
+      }
+
+      showPanel(data.user);
+    }catch(err){
+      showError(err?.message || "Login failed. कृपया दोबारा कोशिश करें।");
+    }finally{
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Login to Admin Panel";
+    }
+  });
+
+  // Existing logout button was removed from the sidebar. Keep a global
+  // logout function for the profile dropdown.
+  window.logoutAdmin = async function(){
+    try{
+      if(window.supabaseClient){
+        const {error} = await window.supabaseClient.auth.signOut();
+        if(error) throw error;
+      }
+      showLogin();
+      const pass=document.getElementById("loginPassword");
+      if(pass) pass.value="";
+    }catch(err){
+      alert(err?.message || "Logout नहीं हो पाया।");
+    }
+  };
+
+  window.addEventListener("load", initAuth, {once:true});
+})();
+</script>
+
+<script id="bv-profile-working-js">
+(function(){
+  const profile = document.getElementById("bvAdminProfile");
+  const menu = document.getElementById("bvProfileMenu");
+  const notification = document.getElementById("bvNotificationBtn");
+
+  function closeProfile(){
+    menu?.classList.remove("show");
+  }
+
+  profile?.addEventListener("click", function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    menu?.classList.toggle("show");
+  });
+
+  document.addEventListener("click", function(e){
+    if(menu && !menu.contains(e.target) && !profile?.contains(e.target)){
+      closeProfile();
+    }
+  });
+
+  notification?.addEventListener("click", function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    closeProfile();
+    alert("अभी कोई नई notification नहीं है।");
+  });
+
+  document.getElementById("bvProfileLogout")?.addEventListener("click", function(e){
+    e.preventDefault();
+    closeProfile();
+    if(typeof window.logoutAdmin === "function") window.logoutAdmin();
+  });
+})();
+</script>
+
+<script>
+(function(){
+ const titles={
+  dashboard:"Dashboard",
+  article:"Add News",
+  articles:"All Articles",
+  categories:"Categories",
+  tags:"Tags",
+  "breaking-news":"Breaking News",
+  seo:"SEO",
+  sitemap:"Sitemap",
+  analytics:"Analytics",
+  users:"Users",
+  roles:"Roles",
+  activity:"Admin Activity",
+  settings:"General Settings",
+  website:"Website Settings",
+  ads:"Ad Management"
+ };
+
+ const buttons=document.querySelectorAll(".nav-btn");
+ const pages=document.querySelectorAll("main section");
+
+
+ async function loadSeoTools(){
+  const body=document.getElementById("seoAuditBody");
+  const health=document.getElementById("seoHealthBox");
+  if(!body) return;
+
+  body.innerHTML='<tr><td colspan="6"><div class="empty">SEO data load हो रहा है...</div></td></tr>';
+
+  const result=await window.supabaseClient
+    .from("articles")
+    .select("id,title,slug,status,seo_title,seo_description,published_at,updated_at,created_at")
+    .order("created_at",{ascending:false});
+
+  if(result.error){
+    body.innerHTML='<tr><td colspan="6"><div class="empty">SEO data load नहीं हुआ: '+escapeHtml(result.error.message)+'</div></td></tr>';
+    if(health) health.innerHTML='<span style="color:#b51219">❌ Supabase से SEO data नहीं मिला।</span>';
+    return;
+  }
+
+  const rows=Array.isArray(result.data)?result.data:[];
+  const published=rows.filter(a=>String(a.status||"").toLowerCase()==="published");
+  const titleReady=rows.filter(a=>String(a.seo_title||"").trim());
+  const descReady=rows.filter(a=>String(a.seo_description||"").trim());
+  const needs=rows.filter(a=>!String(a.seo_title||"").trim() || !String(a.seo_description||"").trim());
+
+  document.getElementById("seoPublished").textContent=published.length;
+  document.getElementById("seoTitleReady").textContent=titleReady.length;
+  document.getElementById("seoDescReady").textContent=descReady.length;
+  document.getElementById("seoNeedsWork").textContent=needs.length;
+
+  if(health) health.innerHTML=needs.length
+    ? '<div style="color:#92400e">⚠️ '+needs.length+' article को SEO title/description की जरूरत है।</div>'
+    : '<div style="color:#166534">✅ सभी articles में SEO title और description मौजूद हैं।</div>';
+
+  const origin=window.location.origin;
+  const clip=(v,n)=>String(v||"").length>n?String(v).slice(0,n)+"…":String(v||"");
+
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="6"><div class="empty">अभी कोई article नहीं है।</div></td></tr>';
+    return;
+  }
+
+  body.innerHTML=rows.map(a=>{
+    const canonical=a.slug ? origin+"/"+encodeURIComponent(a.slug) : origin+"/article.html?id="+encodeURIComponent(a.id||"");
+    const st=String(a.status||"draft").toLowerCase();
+    const robots=st==="published"?"index, follow":"noindex, follow";
+    const title=String(a.seo_title||"").trim();
+    const desc=String(a.seo_description||"").trim();
+    return '<tr>'+
+      '<td><b>'+escapeHtml(clip(a.title||"Untitled",55))+'</b><br><small style="color:#718096">'+robots+'</small></td>'+
+      '<td><span class="tag">'+escapeHtml(a.status||"draft")+'</span></td>'+
+      '<td style="color:'+(title?'#166534':'#b51219')+'">'+escapeHtml(clip(title||"Missing",55))+'</td>'+
+      '<td style="color:'+(desc?'#166534':'#b51219')+'">'+escapeHtml(clip(desc||"Missing",75))+'</td>'+
+      '<td><a href="'+escapeHtml(canonical)+'" target="_blank" style="font-size:11px">'+escapeHtml(clip(canonical,55))+'</a></td>'+
+      '<td><button type="button" class="seo-edit-btn" data-id="'+escapeHtml(a.id)+'" style="padding:6px 10px;border:1px solid #bbb;border-radius:6px;background:#fff;cursor:pointer">✏️ Edit SEO</button></td>'+
+    '</tr>';
+  }).join("");
+
+  body.querySelectorAll(".seo-edit-btn").forEach(btn=>{
+    btn.addEventListener("click",function(){
+      openEditArticle(this.dataset.id);
+    });
+  });
+ }
+
+
+/* =========================================================
+   Bharat Viral - Dynamic Tags + Breaking News
+   These functions were missing from the previous feature build.
+   They use the existing Supabase client and existing page IDs.
+   ========================================================= */
+(function(){
+  const sb = () => window.supabaseClient;
+
+  function bvMsg(id, text, ok=false){
+    const el=document.getElementById(id);
+    if(el) el.innerHTML = '<span style="color:'+(ok?'#166534':'#b51219')+'">'+escapeHtml(text)+'</span>';
+  }
+
+  function bvSlug(v){
+    return String(v||'').trim().toLowerCase()
+      .replace(/[^a-z0-9\u0900-\u097f]+/g,'-')
+      .replace(/^-+|-+$/g,'');
+  }
+
+  function bvNeedAuth(){
+    if(!sb()) throw new Error("Supabase client तैयार नहीं है।");
+    return sb().auth.getSession().then(r=>{
+      if(r.error) throw r.error;
+      if(!r.data?.session) throw new Error("Admin login session नहीं मिली।");
+      return r.data.session;
+    });
+  }
+
+  window.bvLoadTags = async function(){
+    const body=document.getElementById("bvTagsBody");
+    if(!body) return;
+    body.innerHTML='<tr><td colspan="3"><div class="empty">Tags load हो रहे हैं...</div></td></tr>';
+    try{
+      await bvNeedAuth();
+      const {data,error}=await sb().from("tags").select("id,name,slug,created_at").order("name",{ascending:true});
+      if(error) throw error;
+      if(!data?.length){
+        body.innerHTML='<tr><td colspan="3"><div class="empty">अभी कोई Tag नहीं है।</div></td></tr>';
+        return;
+      }
+      body.innerHTML=data.map(t=>`
+        <tr>
+          <td><strong>${escapeHtml(t.name||"")}</strong></td>
+          <td>${escapeHtml(t.slug||"")}</td>
+          <td>
+            <button class="btn btn-light bv-tag-edit" data-id="${escapeHtml(t.id)}" data-name="${escapeHtml(t.name||"")}" data-slug="${escapeHtml(t.slug||"")}">✏️ Edit</button>
+            <button class="btn btn-red bv-tag-delete" data-id="${escapeHtml(t.id)}" data-name="${escapeHtml(t.name||"")}">🗑️ Delete</button>
+          </td>
+        </tr>`).join("");
+
+      body.querySelectorAll(".bv-tag-edit").forEach(b=>b.onclick=async()=>{
+        const name=prompt("Tag Name:",b.dataset.name);
+        if(name===null) return;
+        const slug=prompt("Slug:",b.dataset.slug||bvSlug(name));
+        if(slug===null) return;
+        try{
+          await bvNeedAuth();
+          const {error}=await sb().from("tags").update({name:name.trim(),slug:slug.trim()||bvSlug(name)}).eq("id",b.dataset.id);
+          if(error) throw error;
+          await window.bvLoadTags();
+        }catch(e){ alert("❌ Tag update नहीं हुआ:\\n"+(e.message||e)); }
+      });
+
+      body.querySelectorAll(".bv-tag-delete").forEach(b=>b.onclick=async()=>{
+        if(!confirm('"'+b.dataset.name+'" Tag delete करें?\\n\\nArticles delete नहीं होंगे।')) return;
+        try{
+          await bvNeedAuth();
+          // Remove article associations first. This is safe even if there are none.
+          const {error:assocError}=await sb().from("article_tags").delete().eq("tag_id",b.dataset.id);
+          if(assocError) throw assocError;
+          const {error}=await sb().from("tags").delete().eq("id",b.dataset.id);
+          if(error) throw error;
+          await window.bvLoadTags();
+        }catch(e){ alert("❌ Tag delete नहीं हुआ:\\n"+(e.message||e)); }
+      });
+    }catch(e){
+      body.innerHTML='<tr><td colspan="3"><div class="empty">Tags load नहीं हुए: '+escapeHtml(e.message||e)+'</div></td></tr>';
+    }
+  };
+
+  window.bvSyncArticleTags = async function(articleId, tagNames){
+    if(!articleId || !sb()) return;
+    await bvNeedAuth();
+    const names=[...new Set((tagNames||[]).map(x=>String(x).trim()).filter(Boolean))];
+    // Remove old associations.
+    const del=await sb().from("article_tags").delete().eq("article_id",articleId);
+    if(del.error) throw del.error;
+    if(!names.length) return;
+
+    // Get existing tags.
+    const got=await sb().from("tags").select("id,name,slug").in("name",names);
+    if(got.error) throw got.error;
+    const map=new Map((got.data||[]).map(t=>[String(t.name).toLowerCase(),t]));
+    const missing=names.filter(n=>!map.has(n.toLowerCase()));
+
+    // Auto-create missing manual/automatic tags.
+    if(missing.length){
+      const ins=await sb().from("tags").insert(missing.map(name=>({name,slug:bvSlug(name)}))).select("id,name,slug");
+      if(ins.error) throw ins.error;
+      (ins.data||[]).forEach(t=>map.set(String(t.name).toLowerCase(),t));
+    }
+
+    const rows=names.map(n=>map.get(n.toLowerCase())).filter(Boolean)
+      .map(t=>({article_id:articleId,tag_id:t.id}));
+    if(rows.length){
+      const ins=await sb().from("article_tags").insert(rows);
+      if(ins.error) throw ins.error;
+    }
+  };
+
+  window.bvLoadBreakingNews = async function(){
+    const body=document.getElementById("bvBreakingBody");
+    if(!body) return;
+    body.innerHTML='<tr><td colspan="4"><div class="empty">Breaking News load हो रही है...</div></td></tr>';
+    try{
+      await bvNeedAuth();
+      const {data,error}=await sb().from("breaking_news").select("*").order("display_order",{ascending:true}).order("created_at",{ascending:false});
+      if(error) throw error;
+      if(!data?.length){
+        body.innerHTML='<tr><td colspan="4"><div class="empty">अभी कोई Breaking News नहीं है।</div></td></tr>';
+        return;
+      }
+      body.innerHTML=data.map(n=>`
+        <tr>
+          <td><strong>${escapeHtml(n.title||n.text||n.news||"")}</strong></td>
+          <td>
+            <button class="btn btn-light bv-break-toggle" data-id="${escapeHtml(n.id)}" data-active="${n.is_active!==false}">
+              ${n.is_active!==false?'🟢 ON':'⚪ OFF'}
+            </button>
+          </td>
+          <td><input class="bv-break-order" data-id="${escapeHtml(n.id)}" type="number" value="${Number(n.display_order||0)}" style="width:80px;padding:8px"></td>
+          <td>
+            <button class="btn btn-light bv-break-edit" data-id="${escapeHtml(n.id)}" data-title="${escapeHtml(n.title||n.text||n.news||"")}">✏️ Edit</button>
+            <button class="btn btn-red bv-break-delete" data-id="${escapeHtml(n.id)}">🗑️ Delete</button>
+          </td>
+        </tr>`).join("");
+
+      body.querySelectorAll(".bv-break-toggle").forEach(b=>b.onclick=async()=>{
+        try{
+          await bvNeedAuth();
+          const active=b.dataset.active!=="true";
+          const {error}=await sb().from("breaking_news").update({is_active:active}).eq("id",b.dataset.id);
+          if(error) throw error;
+          await window.bvLoadBreakingNews();
+        }catch(e){ alert("❌ Status update नहीं हुआ:\\n"+(e.message||e)); }
+      });
+
+      body.querySelectorAll(".bv-break-order").forEach(inp=>inp.addEventListener("change",async()=>{
+        try{
+          await bvNeedAuth();
+          const {error}=await sb().from("breaking_news").update({display_order:Number(inp.value||0)}).eq("id",inp.dataset.id);
+          if(error) throw error;
+          await window.bvLoadBreakingNews();
+        }catch(e){ alert("❌ Order update नहीं हुआ:\\n"+(e.message||e)); }
+      }));
+
+      body.querySelectorAll(".bv-break-edit").forEach(b=>b.onclick=async()=>{
+        const title=prompt("Breaking News:",b.dataset.title);
+        if(title===null || !title.trim()) return;
+        try{
+          await bvNeedAuth();
+          const {error}=await sb().from("breaking_news").update({title:title.trim()}).eq("id",b.dataset.id);
+          if(error) throw error;
+          await window.bvLoadBreakingNews();
+        }catch(e){ alert("❌ Breaking News update नहीं हुई:\\n"+(e.message||e)); }
+      });
+
+      body.querySelectorAll(".bv-break-delete").forEach(b=>b.onclick=async()=>{
+        if(!confirm("यह Breaking News delete करें?")) return;
+        try{
+          await bvNeedAuth();
+          const {error}=await sb().from("breaking_news").delete().eq("id",b.dataset.id);
+          if(error) throw error;
+          await window.bvLoadBreakingNews();
+        }catch(e){ alert("❌ Breaking News delete नहीं हुई:\\n"+(e.message||e)); }
+      });
+    }catch(e){
+      body.innerHTML='<tr><td colspan="4"><div class="empty">Breaking News load नहीं हुई: '+escapeHtml(e.message||e)+'</div></td></tr>';
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded",()=>{
+    document.getElementById("bvTagsRefresh")?.addEventListener("click",()=>window.bvLoadTags());
+    document.getElementById("bvBreakingRefresh")?.addEventListener("click",()=>window.bvLoadBreakingNews());
+
+    document.getElementById("bvTagForm")?.addEventListener("submit",async e=>{
+      e.preventDefault();
+      const name=document.getElementById("bvTagName").value.trim();
+      const slug=document.getElementById("bvTagSlug").value.trim()||bvSlug(name);
+      if(!name) return;
+      try{
+        await bvNeedAuth();
+        const {error}=await sb().from("tags").insert({name,slug});
+        if(error) throw error;
+        e.target.reset();
+        bvMsg("bvTagMsg","Tag add हो गया।",true);
+        await window.bvLoadTags();
+      }catch(err){ bvMsg("bvTagMsg","Tag add नहीं हुआ: "+(err.message||err)); }
+    });
+
+    document.getElementById("bvBreakingForm")?.addEventListener("submit",async e=>{
+      e.preventDefault();
+      const title=document.getElementById("bvBreakingTitle").value.trim();
+      if(!title) return;
+      try{
+        await bvNeedAuth();
+        const {data:latest,error:qerr}=await sb().from("breaking_news").select("display_order").order("display_order",{ascending:false}).limit(1);
+        if(qerr) throw qerr;
+        const next=(Number(latest?.[0]?.display_order)||0)+1;
+        const {error}=await sb().from("breaking_news").insert({title,is_active:true,display_order:next});
+        if(error) throw error;
+        e.target.reset();
+        bvMsg("bvBreakingMsg","Breaking News add हो गई।",true);
+        await window.bvLoadBreakingNews();
+      }catch(err){ bvMsg("bvBreakingMsg","Breaking News add नहीं हुई: "+(err.message||err)); }
+    });
+  });
+})();
+
+ window.openPage = function openPage(page){
+  pages.forEach(p=>p.classList.add("hidden"));
+  const target=document.getElementById("page-"+page);
+  if(target)target.classList.remove("hidden");
+
+  buttons.forEach(b=>b.classList.remove("active"));
+  const active=document.querySelector('.nav-btn[data-page="'+page+'"]');
+  if(active)active.classList.add("active");
+
+  document.getElementById("topTitle").textContent=titles[page]||"Dashboard";
+  const pageBack=document.getElementById("bvPageBack"); if(pageBack) pageBack.style.display=(window.innerWidth<=720 && page!=="dashboard")?"grid":"none";
+  if(page==="seo") loadSeoTools();
+  if(page==="tags") setTimeout(window.bvLoadTags,120);
+  if(page==="breaking-news") setTimeout(window.bvLoadBreakingNews,120);
+
+  // Refresh articles whenever All Articles is opened.
+  if(page==="articles"){
+    const tbody = document.querySelector("#page-articles tbody");
+    if(tbody) tbody.innerHTML='<tr><td colspan="5"><div class="empty">Articles load हो रहे हैं...</div></td></tr>';
+    if(typeof loadArticlesFromDB==="function"){
+      setTimeout(function(){
+        Promise.resolve(loadArticlesFromDB()).catch(function(err){
+          console.error("All Articles refresh error:", err);
+          if(tbody) tbody.innerHTML='<tr><td colspan="5"><div class="empty">Articles load नहीं हुए।</div></td></tr>';
+        });
+      },50);
+    }
+  }
+
+  if(page==="sitemap") setTimeout(checkSitemap,120);
+
+  if(window.innerWidth<=720){
+   document.getElementById("sidebar").classList.remove("open");
+   document.getElementById("menuOverlay")?.classList.remove("show");
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+ }
+
+ buttons.forEach(btn=>{
+  btn.addEventListener("click",function(){
+   openPage(this.dataset.page);
+  });
+ });
+
+ document.getElementById("dashboardAdd").addEventListener("click",()=>openPage("article"));
+ document.getElementById("articlesAdd").addEventListener("click",()=>openPage("article"));
+
+ document.getElementById("previewBtn").addEventListener("click",()=>{
+  window.open(window.location.origin + "/", "_blank");
+ });
+
+
+ // Working quick actions and navigation helpers.
+ document.getElementById("qaPost")?.addEventListener("click",()=>openPage("article"));
+ document.getElementById("qaCategory")?.addEventListener("click",()=>{openPage("categories");setTimeout(()=>window.bvLoadCategories?.(),120);});
+ document.getElementById("qaSeo")?.addEventListener("click",()=>openPage("seo"));
+
+ document.getElementById("qaPage")?.addEventListener("click",function(){
+   openPage("website");
+   alert("Website Settings में जाकर page configuration करें।");
+ });
+
+ document.getElementById("qaMedia")?.addEventListener("click",function(){
+   openPage("article");
+   setTimeout(()=>document.getElementById("imageFile")?.click(),150);
+ });
+
+ document.getElementById("bvSidebarBack")?.addEventListener("click",function(){
+   openPage("dashboard");
+ });
+
+ document.getElementById("refreshSitemapBtn")?.addEventListener("click",async function(){
+   const btn=this, old=btn.textContent;
+   btn.disabled=true;
+   btn.textContent="Refreshing…";
+   try{
+     const url=window.location.origin+"/.netlify/functions/sitemap?refresh="+Date.now();
+     const r=await fetch(url,{method:"GET",cache:"no-store",credentials:"omit"});
+     if(!r.ok) throw new Error("HTTP "+r.status);
+     alert("✅ Sitemap refresh request सफल रहा।");
+   }catch(e){
+     alert("❌ Sitemap refresh नहीं हो पाया। Netlify sitemap function check करें।");
+   }finally{
+     btn.disabled=false;
+     btn.textContent=old;
+   }
+ });
+
+ let tags=[];
+ let selectedImageData="";
+
+ const imageFile=document.getElementById("imageFile");
+ const imagePreviewBox=document.getElementById("imagePreviewBox");
+ const imagePreview=document.getElementById("imagePreview");
+ const removeImage=document.getElementById("removeImage");
+ const inlineImageFile=document.getElementById("inlineImageFile");
+ const inlinePdfFile=document.getElementById("inlinePdfFile");
+ const inlineImageUrl=document.getElementById("inlineImageUrl");
+ const inlineImageAlt=document.getElementById("inlineImageAlt");
+ const inlinePdfTitle=document.getElementById("inlinePdfTitle");
+ const inlineImageStatus=document.getElementById("inlineImageStatus");
+
+ imageFile.addEventListener("change",function(){
+  const file=this.files && this.files[0];
+  if(!file)return;
+  if(!file.type.startsWith("image/")){
+   alert("कृपया केवल image file चुनें।");
+   this.value="";
+   return;
+  }
+  if(file.size > 5*1024*1024){
+   alert("Photo 5 MB से छोटी रखें।");
+   this.value="";
+   return;
+  }
+  const reader=new FileReader();
+  reader.onload=function(e){
+   selectedImageData=e.target.result;
+   imagePreview.src=selectedImageData;
+   imagePreviewBox.style.display="block";
+  };
+  reader.readAsDataURL(file);
+ });
+
+ removeImage.addEventListener("click",function(){
+  selectedImageData="";
+  imageFile.value="";
+  imagePreview.src="";
+  imagePreviewBox.style.display="none";
+ });
+
+ function insertAtCursor(text){
+  const textarea=document.getElementById("content");
+  const start=textarea.selectionStart ?? textarea.value.length;
+  const end=textarea.selectionEnd ?? start;
+  textarea.value=textarea.value.slice(0,start)+text+textarea.value.slice(end);
+  const pos=start+text.length;
+  textarea.focus();
+  textarea.setSelectionRange(pos,pos);
+ }
+
+ async function uploadInlineImage(file){
+  const session=await window.supabaseClient.auth.getUser();
+  if(!session.data.user) throw new Error("Admin login session नहीं मिली।");
+  if(!file.type.startsWith("image/")) throw new Error("कृपया केवल image file चुनें।");
+  if(file.size>5*1024*1024) throw new Error("Inline photo 5 MB से छोटी रखें।");
+  const safeName=file.name.toLowerCase().replace(/[^a-z0-9._-]/g,"-");
+  const path=session.data.user.id+"/inline-"+Date.now()+"-"+safeName;
+  const upload=await window.supabaseClient.storage.from("article-images").upload(path,file,{upsert:false,contentType:file.type});
+  if(upload.error) throw upload.error;
+  return window.supabaseClient.storage.from("article-images").getPublicUrl(path).data.publicUrl;
+ }
+
+ document.getElementById("insertInlineImage").addEventListener("click",async function(){
+  const btn=this;
+  const file=inlineImageFile.files && inlineImageFile.files[0];
+  const directUrl=inlineImageUrl.value.trim();
+  const alt=(inlineImageAlt.value.trim()||"Article image").replace(/[\[\]|]/g,"");
+  if(!file && !directUrl){alert("पहले image file चुनें या image URL डालें।");return;}
+  const old=btn.textContent;
+  btn.disabled=true;btn.textContent="Uploading…";
+  inlineImageStatus.textContent="Image तैयार हो रही है…";
+  try{
+   const url=file?await uploadInlineImage(file):directUrl;
+   insertAtCursor("\n[[IMAGE|"+encodeURIComponent(url)+"|"+encodeURIComponent(alt)+"]]\n");
+   inlineImageFile.value="";
+   inlineImageUrl.value="";
+   inlineImageAlt.value="";
+   inlineImageStatus.textContent="✅ Image Article Content में insert हो गई।";
+  }catch(error){
+   console.error(error);
+   inlineImageStatus.textContent="❌ Image insert नहीं हुई।";
+   alert("❌ Image upload/insert failed:\n"+(error.message||"Unknown error"));
+  }finally{
+   btn.disabled=false;btn.textContent=old;
+  }
+ });
+
+
+ async function uploadInlinePdf(file){
+  const session=await window.supabaseClient.auth.getUser();
+  if(session.error || !session.data.user) throw new Error("Admin login session नहीं मिली।");
+  if(file.type!=="application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) throw new Error("कृपया केवल PDF file चुनें।");
+  if(file.size>20*1024*1024) throw new Error("PDF 20 MB से छोटी रखें।");
+  const safeName=file.name.toLowerCase().replace(/[^a-z0-9._-]/g,"-");
+  const path=session.data.user.id+"/inline-pdf-"+Date.now()+"-"+safeName;
+  const upload=await window.supabaseClient.storage.from("article-images").upload(path,file,{upsert:false,contentType:"application/pdf"});
+  if(upload.error) throw upload.error;
+  return window.supabaseClient.storage.from("article-images").getPublicUrl(path).data.publicUrl;
+ }
+
+ document.getElementById("insertInlinePdf").addEventListener("click",async function(){
+  const btn=this;
+  const file=inlinePdfFile.files && inlinePdfFile.files[0];
+  const title=(inlinePdfTitle.value.trim() || (file ? file.name.replace(/\.pdf$/i,"") : "PDF Document")).replace(/[\[\]|]/g,"");
+  if(!file){alert("पहले PDF file चुनें।");return;}
+  const old=btn.textContent;
+  btn.disabled=true;btn.textContent="Uploading…";
+  inlineImageStatus.textContent="PDF तैयार हो रही है…";
+  try{
+   const url=await uploadInlinePdf(file);
+   insertAtCursor("\n[[PDF|"+encodeURIComponent(url)+"|"+encodeURIComponent(title)+"]]\n");
+   inlinePdfFile.value=""; inlinePdfTitle.value="";
+   inlineImageStatus.textContent="✅ PDF Article Content में insert हो गई।";
+  }catch(error){
+   console.error(error);
+   inlineImageStatus.textContent="❌ PDF insert नहीं हुई।";
+   alert("❌ PDF upload/insert failed:\n"+(error.message||"Unknown error"));
+  }finally{btn.disabled=false;btn.textContent=old;}
+ });
+
+ document.getElementById("tagInput").addEventListener("keydown",function(e){
+  if(e.key==="Enter"){
+   e.preventDefault();
+   const value=this.value.trim();
+   if(value && !tags.includes(value)){
+    tags.push(value);
+    renderTags();
+   }
+   this.value="";
+  }
+ });
+
+ function renderTags(){
+  document.getElementById("tagList").innerHTML=tags.map((tag,index)=>
+   '<span class="tag">'+escapeHtml(tag)+' <button type="button" data-index="'+index+'" style="border:0;background:none;color:inherit;font-weight:900">×</button></span>'
+  ).join("");
+
+  document.querySelectorAll("#tagList button").forEach(btn=>{
+   btn.addEventListener("click",()=>{
+    tags.splice(Number(btn.dataset.index),1);
+    renderTags();
+   });
+  });
+ }
+
+ function escapeHtml(text){
+  return String(text ?? "").replace(/[&<>"']/g,function(m){
+   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m];
+  });
+ }
+
+ function validate(){
+  const title=document.getElementById("title").value.trim();
+  const content=document.getElementById("content").value.trim();
+  if(!title){alert("पहले Article Title भरें।");document.getElementById("title").focus();return false}
+  if(!content){alert("पहले Article Content भरें।");document.getElementById("content").focus();return false}
+  return true;
+ }
+
+ function bvSlugify(value){
+  return String(value||"").toLowerCase().trim()
+    .normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
+}
+
+function getArticleSlug(){
+  const manual=document.getElementById("slug")?.value.trim()||"";
+  return manual ? bvSlugify(manual) : bvSlugify(document.getElementById("title")?.value||"");
+}
+
+document.getElementById("title")?.addEventListener("blur",function(){
+  const slug=document.getElementById("slug");
+  if(slug && !slug.value.trim()) slug.value=bvSlugify(this.value);
+});
+
+function collect(status){
+  return {
+   title:document.getElementById("title").value.trim(),
+   slug:getArticleSlug(),
+   excerpt:document.getElementById("excerpt").value.trim(),
+   content:document.getElementById("content").value.trim(),
+   image_url:document.getElementById("image").value.trim(),
+   image_preview_data:selectedImageData,
+   author_name:document.getElementById("author").value.trim(),
+   source_name:document.getElementById("source").value.trim(),
+   source_url:document.getElementById("sourceUrl").value.trim(),
+   article_type:document.getElementById("type").value,
+   status:status,
+   seo_title:document.getElementById("seoTitle").value.trim(),
+   seo_description:document.getElementById("seoDescription").value.trim(),
+   categories:[...document.querySelectorAll('.check input:checked')].map(x=>x.value),
+   tags:[...tags],
+   saved_at:new Date().toISOString()
+  };
+ }
+
+  async function uploadArticleImage() {
+    const file = imageFile.files && imageFile.files[0];
+    if (!file) return document.getElementById("image").value.trim() || null;
+
+    const session = await window.supabaseClient.auth.getUser();
+    if (!session.data.user) throw new Error("Admin login session नहीं मिली।");
+
+    const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
+    const path = session.data.user.id + "/" + Date.now() + "-" + safeName;
+
+    const upload = await window.supabaseClient.storage
+      .from("article-images")
+      .upload(path, file, {
+        upsert: false,
+        contentType: file.type
+      });
+
+    if (upload.error) throw upload.error;
+
+    return window.supabaseClient.storage
+      .from("article-images")
+      .getPublicUrl(path).data.publicUrl;
+  }
+
+  async function saveArticleToSupabase(status) {
+    if (!validate()) return;
+
+    const button = status === "published"
+      ? document.getElementById("publishBtn")
+      : document.getElementById("saveDraft");
+
+    const oldText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Saving…";
+
+    try {
+      const userResult = await window.supabaseClient.auth.getUser();
+      if (userResult.error || !userResult.data.user) {
+        window.showLogin();
+        throw new Error("आपका admin session समाप्त हो गया है। दोबारा login करें।");
+      }
+
+      const article = collect(status);
+      delete article.image_preview_data;
+      delete article.saved_at;
+
+      article.image_url = await uploadArticleImage();
+      article.author_id = userResult.data.user.id;
+      article.created_by = userResult.data.user.id;
+      article.published_at = status === "published"
+        ? new Date().toISOString()
+        : null;
+
+      const result = await window.supabaseClient
+        .from("articles")
+        .insert(article)
+        .select()
+        .single();
+
+      if (result.error) throw result.error;
+
+      // Dynamic Tags: manually selected tags + automatic suggestions.
+      try {
+        await window.bvAutoAssignArticleTags?.(result.data, article.tags || []);
+      } catch (tagError) {
+        console.warn("Dynamic tag sync skipped:", tagError);
+      }
+
+      // Publish होते ही sitemap को refresh/request करें।
+      // नया published article अगली sitemap response में अपने-आप शामिल होगा।
+      // Google indexing की कोई instant guarantee नहीं होती।
+      if (status === "published") {
+        try {
+          const sitemapUrl = window.location.origin + "/.netlify/functions/sitemap";
+          await fetch(sitemapUrl + "?refresh=" + Date.now(), {
+            method: "GET",
+            cache: "no-store",
+            credentials: "omit"
+          });
+        } catch (sitemapError) {
+          console.warn("Sitemap refresh request failed:", sitemapError);
+        }
+      }
+
+      alert(
+        status === "published"
+          ? "✅ Article Publish हो गया!\n\nअब यह Homepage पर दिखाई देगा।"
+          : "✅ Draft Supabase में save हो गया।"
+      );
+
+      clearArticleForm();
+} catch (error) {
+      console.error(error);
+      alert("❌ Save failed:\n" + (error.message || "Unknown error"));
+    } finally {
+      button.disabled = false;
+      button.textContent = oldText;
+    }
+  }
+
+  function clearArticleForm() {
+    ["title","slug","excerpt","content","image","author","source","sourceUrl","seoTitle","seoDescription"]
+      .forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+      });
+
+    document.getElementById("imageFile").value = "";
+    document.getElementById("inlineImageFile").value = "";
+    document.getElementById("inlineImageUrl").value = "";
+    document.getElementById("inlineImageAlt").value = "";
+    document.getElementById("inlineImageStatus").textContent = "Article Content में cursor जहाँ होगा, image वहीं insert होगी। एक से ज्यादा images भी लगा सकते हो।";
+    selectedImageData = "";
+    tags = [];
+    renderTags();
+
+    document.querySelectorAll(".check input").forEach(function(x) {
+      x.checked = false;
+    });
+
+    imagePreview.src = "";
+    imagePreviewBox.style.display = "none";
+    document.getElementById("status").value = "draft";
+    document.getElementById("type").value = "news";
+  }
+
+
+  async function loadArticlesFromDB() {
+    const tbody = document.querySelector("#page-articles tbody");
+    const result = await window.supabaseClient
+      .from("articles")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (result.error) {
+      if(tbody){
+        tbody.innerHTML =
+          '<tr><td colspan="5"><div class="empty">Articles load नहीं हुए: ' +
+          escapeHtml(result.error.message) + '</div></td></tr>';
+      }
+      window.articles = [];
+      return;
+    }
+
+    window.articles = result.data || [];
+
+    if (!tbody) {
+      if(typeof bvRenderDashboard === "function") bvRenderDashboard();
+      return;
+    }
+
+    if (!window.articles.length) {
+      tbody.innerHTML =
+        '<tr><td colspan="5"><div class="empty">अभी कोई article नहीं है।</div></td></tr>';
+      if(typeof bvRenderDashboard === "function") bvRenderDashboard();
+      return;
+    }
+
+    tbody.innerHTML = window.articles.map(function(a) {
+      return '<tr>' +
+        '<td><b>' + escapeHtml(a.title || "") + '</b>' +
+        '<br><small style="color:#888">' +
+        escapeHtml((a.excerpt || "").slice(0, 90)) +
+        '</small></td>' +
+        '<td>' + escapeHtml(a.article_type || "") + '</td>' +
+        '<td><span class="tag">' + escapeHtml(a.status || "") + '</span></td>' +
+        '<td>' + Number(a.views || 0) + '</td>' +
+        '<td style="white-space:nowrap;">' +
+          '<button type="button" class="db-edit-btn" data-id="' + escapeHtml(a.id) +
+          '" style="padding:6px 10px;border:1px solid #bbb;border-radius:6px;background:#fff;cursor:pointer;margin-right:5px;">✏️ Edit</button>' +
+          '<button type="button" class="db-delete-btn" data-id="' + escapeHtml(a.id) +
+          '" style="padding:6px 10px;border:0;border-radius:6px;background:#b51219;color:#fff;cursor:pointer;">🗑️ Delete</button>' +
+        '</td>' +
+      '</tr>';
+    }).join("");
+
+    tbody.querySelectorAll(".db-edit-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        openEditArticle(this.dataset.id);
+      });
+    });
+
+    tbody.querySelectorAll(".db-delete-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        deleteArticle(this.dataset.id);
+      });
+    });
+
+    if(typeof bvRenderDashboard === "function") bvRenderDashboard();
+  }
+
+  async function openEditArticle(id) {
+    const result = await window.supabaseClient
+      .from("articles")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (result.error) {
+      alert("Article load नहीं हुआ:\n" + result.error.message);
+      return;
+    }
+
+    const a = result.data;
+
+    document.querySelectorAll("#editArticleModal .edit-category-check").forEach(function(cb){
+      cb.checked = false;
+    });
+
+    document.getElementById("editArticleId").value = a.id;
+    document.getElementById("editTitle").value = a.title || "";
+    document.getElementById("editExcerpt").value = a.excerpt || "";
+    document.getElementById("editContent").value = a.content || "";
+    document.getElementById("editType").value = a.article_type || "news";
+    document.getElementById("editStatus").value = a.status || "draft";
+
+    const savedCategories = Array.isArray(a.categories) ? a.categories : [];
+    savedCategories.forEach(function(category){
+      document.querySelectorAll("#editArticleModal .edit-category-check").forEach(function(cb){
+        if(cb.value === category) cb.checked = true;
+      });
+    });
+
+    document.getElementById("editSeoTitle").value = a.seo_title || "";
+    document.getElementById("editSeoDescription").value = a.seo_description || "";
+    document.getElementById("editAuthor").value = a.author_name || "";
+    document.getElementById("editSource").value = a.source_name || "";
+    document.getElementById("editSourceUrl").value = a.source_url || "";
+    document.getElementById("editImageUrl").value = a.image_url || "";
+    document.getElementById("editImageFile").value = "";
+
+    document.getElementById("editArticleModal").style.display = "block";
+  }
+
+  function closeEditArticle() {
+    document.getElementById("editArticleModal").style.display = "none";
+  }
+
+  async function uploadEditedImage() {
+    const file = document.getElementById("editImageFile").files[0];
+    if (!file) return null;
+
+    const userResult = await window.supabaseClient.auth.getUser();
+    if (userResult.error || !userResult.data.user) {
+      throw new Error("Admin login session नहीं मिली।");
+    }
+
+    const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
+    const path = userResult.data.user.id + "/" + Date.now() + "-" + safeName;
+
+    const upload = await window.supabaseClient.storage
+      .from("article-images")
+      .upload(path, file, {
+        upsert: false,
+        contentType: file.type
+      });
+
+    if (upload.error) throw upload.error;
+
+    return window.supabaseClient.storage
+      .from("article-images")
+      .getPublicUrl(path).data.publicUrl;
+  }
+
+  async function updateArticle() {
+    const id = document.getElementById("editArticleId").value;
+    if (!id) return;
+
+    const button = document.getElementById("updateArticleBtn");
+    const oldText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Updating…";
+
+    try {
+      const userResult = await window.supabaseClient.auth.getUser();
+      if (userResult.error || !userResult.data.user) {
+        window.showLogin();
+        throw new Error("Admin login session समाप्त हो गया है।");
+      }
+
+      const newImage = await uploadEditedImage();
+
+      const payload = {
+        title: document.getElementById("editTitle").value.trim(),
+        excerpt: document.getElementById("editExcerpt").value.trim(),
+        content: document.getElementById("editContent").value.trim(),
+        article_type: document.getElementById("editType").value,
+        status: document.getElementById("editStatus").value,
+        categories: [...document.querySelectorAll("#editArticleModal .edit-category-check:checked")].map(function(cb){ return cb.value; }),
+        seo_title: document.getElementById("editSeoTitle").value.trim(),
+        seo_description: document.getElementById("editSeoDescription").value.trim(),
+        author_name: document.getElementById("editAuthor").value.trim(),
+        source_name: document.getElementById("editSource").value.trim(),
+        source_url: document.getElementById("editSourceUrl").value.trim(),
+        image_url: newImage || document.getElementById("editImageUrl").value.trim() || null,
+        published_at: document.getElementById("editStatus").value === "published"
+          ? new Date().toISOString()
+          : null
+      };
+
+      if (!payload.title || !payload.content) {
+        throw new Error("Title और Content जरूरी हैं।");
+      }
+
+      const result = await window.supabaseClient
+        .from("articles")
+        .update(payload)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (result.error) throw result.error;
+
+      // Rebuild tags after editing title/content/category.
+      try {
+        await window.bvAutoAssignArticleTags?.(result.data, []);
+      } catch (tagError) {
+        console.warn("Dynamic tag update skipped:", tagError);
+      }
+
+      closeEditArticle();
+      await loadArticlesFromDB();
+      await loadDashboardFromDB();
+
+      alert("✅ Article successfully updated.");
+
+    } catch (error) {
+      console.error(error);
+      alert("❌ Update failed:\n" + (error.message || "Unknown error"));
+    } finally {
+      button.disabled = false;
+      button.textContent = oldText;
+    }
+  }
+
+  async function deleteArticle(id) {
+    const ok = confirm(
+      "क्या आप इस article को permanently delete करना चाहते हैं?\n\n" +
+      "यह action वापस नहीं किया जा सकता।"
+    );
+
+    if (!ok) return;
+
+    try {
+      const userResult = await window.supabaseClient.auth.getUser();
+      if (userResult.error || !userResult.data.user) {
+        window.showLogin();
+        throw new Error("Admin login session समाप्त हो गया है।");
+      }
+
+      const result = await window.supabaseClient
+        .from("articles")
+        .delete()
+        .eq("id", id);
+
+      if (result.error) throw result.error;
+
+      await loadArticlesFromDB();
+      await loadDashboardFromDB();
+
+      alert("🗑️ Article delete हो गया।");
+
+    } catch (error) {
+      console.error(error);
+      alert("❌ Delete failed:\n" + (error.message || "Unknown error"));
+    }
+  }
+
+  // Mobile menu: close it when the user taps anywhere outside the sidebar.
+  const sideMenu = document.getElementById("sidebar");
+  const menuBtnEl = document.getElementById("menuBtn");
+  const menuOverlay = document.getElementById("menuOverlay");
+
+  function closeSideMenu(){
+    sideMenu?.classList.remove("open");
+    menuOverlay?.classList.remove("show");
+    if(menuOverlay) menuOverlay.setAttribute("aria-hidden","true");
+  }
+
+  function toggleSideMenu(){
+    if(!sideMenu) return;
+    const willOpen = !sideMenu.classList.contains("open");
+    sideMenu.classList.toggle("open", willOpen);
+    menuOverlay?.classList.toggle("show", willOpen);
+    if(menuOverlay) menuOverlay.setAttribute("aria-hidden", String(!willOpen));
+  }
+
+  menuBtnEl?.addEventListener("click", function(e){
+    e.stopPropagation();
+    toggleSideMenu();
+  });
+
+  menuOverlay?.addEventListener("click", closeSideMenu);
+
+  document.addEventListener("touchstart", function(e){
+    if(window.innerWidth <= 720 && sideMenu?.classList.contains("open")){
+      if(!sideMenu.contains(e.target) && !menuBtnEl?.contains(e.target)){
+        closeSideMenu();
+      }
+    }
+  }, {passive:true});
+
+  // Edit modal HTML is declared after this script, so attach these
+  // listeners only when those elements actually exist.
+  const closeEditModalBtn = document.getElementById("closeEditModal");
+  const cancelEditBtn = document.getElementById("cancelEdit");
+  const updateArticleBtn = document.getElementById("updateArticleBtn");
+  const editArticleModal = document.getElementById("editArticleModal");
+
+  if (closeEditModalBtn) {
+    closeEditModalBtn.addEventListener("click", closeEditArticle);
+  }
+
+  if (cancelEditBtn) {
+    cancelEditBtn.addEventListener("click", closeEditArticle);
+  }
+
+  if (updateArticleBtn) {
+    updateArticleBtn.addEventListener("click", updateArticle);
+  }
+
+  if (editArticleModal) {
+    editArticleModal.addEventListener("click", function(e) {
+      if (e.target === this) closeEditArticle();
+    });
+  }
+
+  // The modal is placed after this script in the HTML.
+  // Attach the same listeners after the document has finished parsing.
+  document.addEventListener("DOMContentLoaded", function() {
+    const closeBtn = document.getElementById("closeEditModal");
+    const cancelBtn = document.getElementById("cancelEdit");
+    const updateBtn = document.getElementById("updateArticleBtn");
+    const modal = document.getElementById("editArticleModal");
+
+    if (closeBtn && !closeBtn.dataset.listenerAttached) {
+      closeBtn.dataset.listenerAttached = "1";
+      closeBtn.addEventListener("click", closeEditArticle);
+    }
+
+    if (cancelBtn && !cancelBtn.dataset.listenerAttached) {
+      cancelBtn.dataset.listenerAttached = "1";
+      cancelBtn.addEventListener("click", closeEditArticle);
+    }
+
+    if (updateBtn && !updateBtn.dataset.listenerAttached) {
+      updateBtn.dataset.listenerAttached = "1";
+      updateBtn.addEventListener("click", updateArticle);
+    }
+
+    if (modal && !modal.dataset.listenerAttached) {
+      modal.dataset.listenerAttached = "1";
+      modal.addEventListener("click", function(e) {
+        if (e.target === this) closeEditArticle();
+      });
+    }
+  });
+
+  async function loadDashboardFromDB() {
+    try {
+      const result = await window.supabaseClient
+        .from("articles")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (result.error) {
+        console.error("Dashboard articles:", result.error);
+        const body=document.getElementById("bvRecentPostsBody");
+        if(body) body.innerHTML='<tr><td colspan="4" class="bv-empty-row">Articles load नहीं हुए: '+escapeHtml(result.error.message)+'</td></tr>';
+        return;
+      }
+
+      window.articles = result.data || [];
+      const articles = window.articles;
+      const totalViews = articles.reduce((sum,a)=>sum + Number(a.views || 0),0);
+
+      const postsEl=document.getElementById("bvTotalPosts");
+      const viewsEl=document.getElementById("bvTotalViews");
+      if(postsEl) postsEl.textContent=Number(articles.length).toLocaleString("en-IN");
+      if(viewsEl) viewsEl.textContent=totalViews.toLocaleString("en-IN");
+
+      if(typeof bvLoadDashboardAnalytics === "function"){
+        bvLoadDashboardAnalytics(7);
+      }
+
+      if(typeof bvRenderDashboard === "function") bvRenderDashboard();
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
+  function insertMarkdownLink(textareaId){
+    const textarea=document.getElementById(textareaId);
+    if(!textarea) return;
+    const start=textarea.selectionStart ?? textarea.value.length;
+    const end=textarea.selectionEnd ?? start;
+    const selected=textarea.value.slice(start,end);
+    const label=selected || "इस लिंक पर tap करें";
+    const url=prompt("Website URL डालें:", "https://");
+    if(!url) return;
+    textarea.focus();
+    textarea.setRangeText("["+label+"]("+url.trim()+")",start,end,"end");
+  }
+
+  document.getElementById("insertLinkBtn")?.addEventListener("click",function(){
+    insertMarkdownLink("content");
+  });
+  document.getElementById("editInsertLinkBtn")?.addEventListener("click",function(){
+    insertMarkdownLink("editContent");
+  });
+
+  document.getElementById("saveDraft").addEventListener("click", function() {
+    saveArticleToSupabase("draft");
+  });
+
+  document.getElementById("publishBtn").addEventListener("click", function() {
+    saveArticleToSupabase("published");
+  });
+
+
+  document.getElementById("qaPost")?.addEventListener("click",()=>openPage("article"));
+  document.getElementById("recentViewAll")?.addEventListener("click",()=>openPage("articles"));
+
+
+  // Bharat Viral dashboard: total visitors, total views, total posts and latest 4 posts.
+  function bvFormatNumber(value){
+    return Number(value || 0).toLocaleString("en-IN");
+  }
+
+  function bvGetArticleStatus(article){
+    const raw = String(article?.status ?? article?.publication_status ?? "").toLowerCase();
+    if(raw === "published" || article?.published === true || article?.is_published === true) return "published";
+    if(raw === "draft" || raw === "unpublished") return "draft";
+    // The existing panel uses published_at to identify published content.
+    if(article?.published_at) return "published";
+    return "draft";
+  }
+
+  function bvGetArticleTitle(article){
+    return article?.title || article?.headline || article?.name || "Untitled Article";
+  }
+
+  function bvGetArticleCategory(article){
+    let v = article?.category || article?.category_name || article?.article_type || article?.categories;
+    if(Array.isArray(v)) v=v.map(x=>typeof x==="object"?(x?.name||x?.slug||""):x).filter(Boolean).join(", ");
+    else if(v && typeof v === "object") v=v.name || v.slug || v.title || "";
+    return String(v || article?.category_id || "—");
+  }
+
+  function bvGetArticleId(article){
+    return article?.id || article?.article_id || "";
+  }
+
+  function bvGetArticleDate(article){
+    return article?.created_at || article?.updated_at || article?.published_at || "";
+  }
+
+  function bvRenderDashboard(){
+    const list = Array.isArray(window.articles) ? window.articles : [];
+    const getDate=(a)=>a?.created_at||a?.createdAt||a?.updated_at||a?.updatedAt||a?.published_at||a?.publishedAt||a?.date||"";
+    const getTitle=(a)=>a?.title||a?.headline||a?.name||a?.article_title||"Untitled Article";
+    const getCategory=(a)=>{
+      let v=a?.category||a?.category_name||a?.categoryName||a?.article_type||a?.type||a?.categories||a?.category_id;
+      if(Array.isArray(v)) v=v.map(x=>typeof x==='object'?(x?.name||x?.slug||x?.title||''):x).filter(Boolean).join(', ');
+      if(v&&typeof v==='object') v=v.name||v.slug||v.title||v.id||'';
+      return String(v||'—');
+    };
+    const getStatus=(a)=>{
+      const raw=String(a?.status??a?.publication_status??a?.publicationStatus??'').toLowerCase();
+      if(raw==='published'||a?.published===true||a?.is_published===true||a?.isPublished===true||a?.published_at||a?.publishedAt) return 'published';
+      return 'draft';
+    };
+    const getId=(a)=>a?.id||a?.article_id||a?.articleId||'';
+    const sorted=[...list].sort((a,b)=>{
+      const da=Date.parse(getDate(a))||0, db=Date.parse(getDate(b))||0;
+      return db-da;
+    });
+
+    const totalViews=list.reduce((sum,a)=>{
+      const v=Number(a?.views??a?.view_count??a?.viewCount??a?.total_views??a?.totalViews??0);
+      return sum+(Number.isFinite(v)?v:0);
+    },0);
+    const postsEl=document.getElementById('bvTotalPosts');
+    const viewsEl=document.getElementById('bvTotalViews');
+    if(postsEl) postsEl.textContent=bvFormatNumber(list.length);
+    if(viewsEl) viewsEl.textContent=bvFormatNumber(totalViews);
+
+    const body=document.getElementById('bvRecentPostsBody');
+    if(!body) return;
+    const latest=sorted.slice(0,4);
+    if(!latest.length){
+      body.innerHTML='<tr><td colspan="4" class="bv-empty-row">अभी कोई post उपलब्ध नहीं है।</td></tr>';
+      return;
+    }
+    body.innerHTML=latest.map(a=>{
+      const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      const status=getStatus(a), id=esc(getId(a));
+      return '<tr>'+
+        '<td class="bv-title-cell">'+esc(getTitle(a))+'</td>'+
+        '<td class="bv-category-cell">'+esc(getCategory(a))+'</td>'+
+        '<td><span class="bv-status '+status+'">'+status+'</span></td>'+
+        '<td><div class="bv-actions">'+
+          '<button class="bv-action-btn edit" data-bv-action="edit" data-bv-id="'+id+'">✏️ Edit</button>'+
+          '<button class="bv-action-btn delete" data-bv-action="delete" data-bv-id="'+id+'">🗑️ Delete</button>'+
+        '</div></td>'+
+      '</tr>';
+    }).join('');
+  }
+
+  // Directly refresh the Latest Posts panel from Supabase. This is intentionally
+  // independent of the All Articles table so the dashboard cannot stay empty
+  // when the article list is loaded after the first dashboard render.
+  async function bvRefreshLatestPosts(){
+    const body=document.getElementById('bvRecentPostsBody');
+    if(!body || !window.supabaseClient) return;
+    try{
+      const result=await window.supabaseClient.from('articles').select('*').order('created_at',{ascending:false}).limit(4);
+      if(result.error) throw result.error;
+      const rows=Array.isArray(result.data)?result.data:[];
+      if(rows.length){
+        window.articles=Array.isArray(window.articles)?window.articles:[];
+        const byId=new Map(window.articles.map(a=>[String(a.id),a]));
+        rows.forEach(a=>byId.set(String(a.id),a));
+        window.articles=[...byId.values()];
+      }
+      bvRenderDashboard();
+    }catch(err){
+      console.error('Latest posts:',err);
+      if(!Array.isArray(window.articles)||!window.articles.length){
+        body.innerHTML='<tr><td colspan="4" class="bv-empty-row">Latest posts load नहीं हुए: '+String(err.message||err)+'</td></tr>';
+      }
+    }
+  }
+
+  document.addEventListener("click", async function(e){
+    const btn=e.target.closest("[data-bv-action]");
+    if(!btn) return;
+    const id=btn.getAttribute("data-bv-id");
+    const action=btn.getAttribute("data-bv-action");
+    if(action==="edit" && id) openEditArticle(id);
+    if(action==="delete" && id) deleteArticle(id);
+  });
+
+
+  loadArticlesFromDB();
+  loadDashboardFromDB();
+  setTimeout(bvRefreshLatestPosts, 300);
+  setTimeout(bvRenderDashboard, 500);
+
+  setInterval(function(){
+    try{
+      if(typeof articles !== "undefined" && window.articles !== articles) window.articles = articles;
+      bvRenderDashboard();
+    }catch(e){}
+  }, 1200);
+  setInterval(bvRefreshLatestPosts, 15000);
+
+})();
+</script>
+
+<div id="editArticleModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;overflow:auto;padding:20px;">
+  <div style="max-width:900px;margin:30px auto;background:#fff;border-radius:14px;padding:22px;position:relative;">
+    <button id="closeEditModal" type="button" style="position:absolute;right:15px;top:12px;border:0;background:none;font-size:28px;cursor:pointer;">×</button>
+    <h2 style="margin:0 0 6px;">Edit Article</h2>
+    <p style="margin:0 0 18px;color:#777;font-size:13px;">Article में बदलाव करके Update करें।</p>
+
+    <input type="hidden" id="editArticleId">
+
+    <label>Title</label>
+    <input id="editTitle" type="text" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+
+    <label>Excerpt</label>
+    <textarea id="editExcerpt" rows="3" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;"></textarea>
+
+    <label>Content</label>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0">
+      <button id="editInsertLinkBtn" type="button" style="padding:7px 10px;border:1px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;">🔗 Link</button>
+      <span style="font-size:11px;color:#777;align-self:center">[इस लिंक पर tap करें](https://example.com)</span>
+    </div>
+    <textarea id="editContent" rows="12" style="width:100%;padding:10px;margin:0 0 12px;box-sizing:border-box;"></textarea>
+
+    <label>Category / Type</label>
+    <select id="editType" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+      <option value="news">News</option>
+      <option value="trending">Trending</option>
+      <option value="entertainment">Entertainment</option>
+      <option value="cricket">Cricket</option>
+      <option value="sports">Sports</option>
+      <option value="technology">Technology</option>
+      <option value="education">Education</option>
+      <option value="social-media">Social Media</option>
+      <option value="fact-check">Fact Check</option>
+      <option value="explained">Explained</option>
+      <option value="india">India</option>
+      <option value="rajasthan">Rajasthan</option>
+    </select>
+
+    <label>Status</label>
+    <select id="editStatus" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+      <option value="draft">Draft</option>
+      <option value="published">Published</option>
+    </select>
+    <label>Categories</label>
+    <div class="edit-categories-dynamic" style="display:flex;flex-wrap:wrap;gap:7px;margin:6px 0 12px;"><div class="bv-category-loading">Categories load हो रही हैं...</div></div>
+
+    <label>SEO Title</label>
+    <input id="editSeoTitle" type="text" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+
+    <label>SEO Description</label>
+    <textarea id="editSeoDescription" rows="3" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;"></textarea>
+    <label>Author</label>
+    <input id="editAuthor" type="text" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+
+    <label>Source Name</label>
+    <input id="editSource" type="text" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+
+    <label>Source URL</label>
+    <input id="editSourceUrl" type="url" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+
+    <label>Image URL (optional)</label>
+    <input id="editImageUrl" type="url" style="width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box;">
+
+    <label>Replace Image (optional)</label>
+    <input id="editImageFile" type="file" accept="image/*" style="width:100%;padding:10px;margin:6px 0 15px;box-sizing:border-box;">
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button id="cancelEdit" type="button" style="padding:10px 18px;border:1px solid #ccc;border-radius:8px;background:#fff;cursor:pointer;">Cancel</button>
+      <button id="updateArticleBtn" type="button" style="padding:10px 18px;border:0;border-radius:8px;background:#111;color:#fff;cursor:pointer;">Update Article</button>
+    </div>
+  </div>
+</div>
+<script id="bv-real-analytics-js">
+(function(){
+  const BV_URL="https://ocarsylhsyxjqpzidndb.supabase.co";
+  const BV_KEY="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+
+  function fmt(n){return Number(n||0).toLocaleString("en-IN");}
+
+  async function loadRealAnalytics(days){
+    const views=document.getElementById("bvAnalyticsViews");
+    const visitors=document.getElementById("bvAnalyticsVisitors");
+    const topViews=document.getElementById("bvAnalyticsTopViews");
+    const topBox=document.getElementById("bvTopArticles");
+
+    try{
+      if(!window.supabaseClient || !window.supabaseClient.auth){
+        throw new Error("Admin Supabase client not ready");
+      }
+
+      const {data:sessionData}=await window.supabaseClient.auth.getSession();
+      const session=sessionData?.session;
+      if(!session) throw new Error("Admin login required");
+
+      const {data,error}=await window.supabaseClient.rpc("get_analytics_summary",{p_days:days});
+      if(error) throw error;
+
+      const result=data || {};
+      if(views) views.textContent=fmt(result.page_views);
+      if(visitors) visitors.textContent=fmt(result.visitors);
+
+      const top=Array.isArray(result.top_articles)?result.top_articles:[];
+      if(topViews) topViews.textContent=fmt(top[0]?.views || 0);
+
+      if(topBox){
+        topBox.innerHTML=top.length ? top.map((a,i)=>`
+          <div class="bv-top-article">
+            <strong>${i+1}. ${String(a.title||"Untitled").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</strong>
+            <span>${fmt(a.views)} views</span>
+          </div>`).join("") :
+          '<div class="empty">इस period में अभी कोई article view नहीं मिला।</div>';
+      }
+
+      renderTrafficChart(Array.isArray(result.days)?result.days:[]);
+    }catch(e){
+      console.error("Real analytics error:",e);
+      if(topBox) topBox.innerHTML='<div class="empty">Analytics load नहीं हुआ। पहले Supabase SQL चलाएँ, फिर page reload करें।</div>';
+    }
+  }
+
+  function renderTrafficChart(days){
+    const line=document.getElementById("bvRealLine");
+    const area=document.getElementById("bvRealArea");
+    const labels=document.getElementById("bvRealChartLabels");
+    if(!line || !area) return;
+
+    const values=days.map(d=>Number(d.page_views||0));
+    const max=Math.max(1,...values);
+    const width=700, top=20, bottom=200, h=bottom-top;
+    const points=values.length ? values.map((v,i)=>{
+      const x=values.length===1 ? width/2 : i*(width/(values.length-1));
+      const y=bottom-(v/max)*h;
+      return [x,y];
+    }) : [[0,bottom],[width,bottom]];
+
+    const pts=points.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+    line.setAttribute("points",pts);
+    area.setAttribute("points","0,200 "+pts+" 700,200");
+
+    if(labels){
+      const pick=[0,Math.max(0,Math.floor((days.length-1)/4)),Math.max(0,Math.floor((days.length-1)/2)),Math.max(0,Math.floor((days.length-1)*3/4)),Math.max(0,days.length-1)];
+      labels.innerHTML=[...new Set(pick)].map(i=>{
+        const d=days[i]?.day || "—";
+        return "<span>"+d.slice(5)+"</span>";
+      }).join("");
+    }
+  }
+
+  document.addEventListener("click",function(e){
+    const b=e.target.closest("[data-bv-days]");
+    if(!b) return;
+    document.querySelectorAll("[data-bv-days]").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    loadRealAnalytics(Number(b.dataset.bvDays));
+  });
+
+  // When Analytics is opened, load fresh data.
+  document.addEventListener("click",function(e){
+    const b=e.target.closest('.nav-btn[data-page="analytics"]');
+    if(b) setTimeout(()=>loadRealAnalytics(7),100);
+  });
+
+  window.bvLoadRealAnalytics=loadRealAnalytics;
+})();
+</script>
+<script id="bv-real-dashboard-analytics-system">
+(function(){
+  function fmt(n){return Number(n||0).toLocaleString("en-IN");}
+
+  async function bvGetAnalytics(days){
+    if(!window.supabaseClient) throw new Error("Supabase client not ready");
+    const {data:sessionData}=await window.supabaseClient.auth.getSession();
+    if(!sessionData?.session) throw new Error("Admin login required");
+    const {data,error}=await window.supabaseClient.rpc("get_analytics_summary",{p_days:Number(days||7)});
+    if(error) throw error;
+    return data || {};
+  }
+
+  function drawDashboardChart(days){
+    const line=document.getElementById("bvDashboardLine");
+    const area=document.getElementById("bvDashboardArea");
+    const labels=document.getElementById("bvDashboardChartLabels");
+    if(!line || !area) return;
+
+    const vals=(days||[]).map(d=>Number(d.page_views||0));
+    const max=Math.max(1,...vals);
+    const W=600,H=169;
+    const points=vals.length ? vals.map((v,i)=>{
+      const x=vals.length===1 ? W/2 : i*(W/(vals.length-1));
+      const y=H-(v/max)*(H-10);
+      return [x,y];
+    }) : [[0,H],[W,H]];
+
+    const pts=points.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+    line.setAttribute("points",pts);
+    area.setAttribute("points","0,169 "+pts+" 600,169");
+
+    if(labels){
+      const count=vals.length;
+      if(!count){labels.innerHTML="<span>—</span><span>—</span><span>—</span><span>—</span><span>—</span>";return;}
+      const idx=[0,Math.floor((count-1)/4),Math.floor((count-1)/2),Math.floor((count-1)*3/4),count-1];
+      labels.innerHTML=[...new Set(idx)].map(i=>"<span>"+String(days[i]?.day||"").slice(5)+"</span>").join("");
+    }
+  }
+
+  async function bvLoadDashboardAnalytics(days){
+    try{
+      const result=await bvGetAnalytics(days||7);
+      const v=document.getElementById("bvDashboardVisitors");
+      const pv=document.getElementById("bvDashboardViews");
+      const tv=document.getElementById("bvDashboardTopViews");
+      const topVisitor=document.getElementById("bvTotalVisitors");
+      const topView=document.getElementById("bvTotalViews");
+      if(v) v.textContent=fmt(result.visitors);
+      if(pv) pv.textContent=fmt(result.page_views);
+      if(topVisitor) topVisitor.textContent=fmt(result.visitors);
+      if(topView) topView.textContent=fmt(result.page_views);
+      const top=Array.isArray(result.top_articles)?result.top_articles:[];
+      if(tv) tv.textContent=fmt(top[0]?.views||0);
+      drawDashboardChart(Array.isArray(result.days)?result.days:[]);
+      return result;
+    }catch(e){
+      console.warn("Real dashboard analytics:",e);
+      return null;
+    }
+  }
+  window.bvLoadDashboardAnalytics=bvLoadDashboardAnalytics;
+
+  document.addEventListener("click",function(e){
+    const b=e.target.closest("[data-bv-dashboard-days]");
+    if(!b) return;
+    document.querySelectorAll("[data-bv-dashboard-days]").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    bvLoadDashboardAnalytics(Number(b.dataset.bvDashboardDays));
+  });
+
+  async function setStatus(id,state,text){
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.className="bv-real-status "+state;
+    el.innerHTML='<i class="bv-status-dot"></i>'+text;
+  }
+
+  async function checkSystemStatus(){
+    // Website: test the current site origin.
+    try{
+      const r=await fetch(window.location.origin+"/?health="+Date.now(),{
+        method:"GET",cache:"no-store",credentials:"omit"
+      });
+      await setStatus("bvWebsiteStatus",r.ok?"online":"offline",r.ok?"Online":"Offline");
+    }catch(e){
+      await setStatus("bvWebsiteStatus","offline","Offline");
+    }
+
+    // Database: real authenticated query.
+    try{
+      const {error}=await window.supabaseClient.from("articles").select("id",{count:"exact",head:true});
+      await setStatus("bvDatabaseStatus",error?"offline":"online",error?"Error":"Connected");
+    }catch(e){
+      await setStatus("bvDatabaseStatus","offline","Error");
+    }
+
+    // Admin authentication status.
+    try{
+      const {data,error}=await window.supabaseClient.auth.getSession();
+      const ok=!error && !!data?.session?.user;
+      await setStatus("bvServerStatus",ok?"online":"offline",ok?"Active":"Not authenticated");
+    }catch(e){
+      await setStatus("bvServerStatus","offline","Unavailable");
+    }
+
+    // Backup is only real if an actual backup source is configured.
+    const backup=document.getElementById("bvBackupStatus");
+    if(backup){
+      backup.innerHTML='<span style="color:#d97706;font-weight:800">Not configured</span>';
+    }
+  }
+  window.bvCheckSystemStatus=checkSystemStatus;
+
+  document.addEventListener("click",function(e){
+    const b=e.target.closest('[data-page="dashboard"]');
+    if(b) setTimeout(checkSystemStatus,150);
+  });
+
+  setTimeout(function(){
+    bvLoadDashboardAnalytics(7);
+    checkSystemStatus();
+  },700);
+})();
+</script>
+<script id="bv-dynamic-category-admin-js">
+(function(){
+  const CATS_URL = "https://ocarsylhsyxjqpzidndb.supabase.co";
+
+  function slugify(s){
+    return String(s||"").toLowerCase().trim()
+      .replace(/[^a-z0-9\u0900-\u097F]+/g,"-")
+      .replace(/^-+|-+$/g,"");
+  }
+
+  function catEscape(s){
+    return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+  }
+
+  async function getCats(){
+    const {data,error}=await window.supabaseClient
+      .from("categories")
+      .select("*")
+      .eq("is_active",true)
+      .order("sort_order",{ascending:true})
+      .order("created_at",{ascending:true});
+    if(error) throw error;
+    return data||[];
+  }
+
+  function renderManager(cats){
+    const box=document.getElementById("categoryManagerList");
+    if(!box)return;
+    if(!cats.length){
+      box.innerHTML='<div class="empty"><div class="empty-icon">📂</div>अभी कोई category नहीं है।</div>';
+      return;
+    }
+    box.innerHTML=cats.map(c=>`
+      <div class="bv-category-manager-item">
+        <div class="bv-category-manager-left">
+          <div class="bv-category-manager-icon">${catEscape(c.icon||"📰")}</div>
+          <div>
+            <div class="bv-category-manager-name">${catEscape(c.name)}</div>
+            <div class="bv-category-manager-slug">${catEscape(c.slug)}</div>
+          </div>
+        </div>
+        <button type="button" class="bv-category-delete" data-delete-category="${catEscape(c.id)}" data-category-name="${catEscape(c.name)}">🗑 Delete</button>
+      </div>
+    `).join("");
+
+    box.querySelectorAll("[data-delete-category]").forEach(btn=>{
+      btn.addEventListener("click",()=>deleteCategory(btn.dataset.deleteCategory,btn.dataset.categoryName));
+    });
+  }
+
+  function renderCategoryChecks(cats){
+    const targets=[
+      document.querySelector("#page-article .field.full .checks"),
+      document.querySelector("#editArticleModal .edit-category-check")?.parentElement?.parentElement
+    ];
+
+    const addBox=document.querySelector("#page-article .field.full .checks");
+    if(addBox){
+      addBox.innerHTML=cats.map(c=>`
+        <label class="check"><input type="checkbox" value="${catEscape(c.slug)}">${catEscape(c.name)}</label>
+      `).join("");
+    }
+
+    const editBox=document.querySelector("#editArticleModal .edit-categories-dynamic");
+    if(editBox){
+      editBox.innerHTML=cats.map(c=>`
+        <label class="check"><input class="edit-category-check" type="checkbox" value="${catEscape(c.slug)}">${catEscape(c.name)}</label>
+      `).join("");
+    }
+  }
+
+  async function loadCategories(){
+    try{
+      const cats=await getCats();
+      renderManager(cats);
+      renderCategoryChecks(cats);
+      window.bvCategories=cats;
+      return cats;
+    }catch(e){
+      console.error("Categories:",e);
+      const box=document.getElementById("categoryManagerList");
+      if(box) box.innerHTML='<div class="empty">Categories load नहीं हुईं। पहले Supabase में Dynamic Category SQL चलाएँ।</div>';
+      return [];
+    }
+  }
+
+  async function addCategory(){
+    const name=prompt("नई category का नाम लिखें:");
+    if(!name || !name.trim()) return;
+    const icon=prompt("Category icon/emoji लिखें:", "📰") || "📰";
+    const slug=slugify(name);
+    if(!slug){alert("Category name valid नहीं है।");return;}
+
+    try{
+      const cats=window.bvCategories||[];
+      const nextOrder=cats.length ? Math.max(...cats.map(c=>Number(c.sort_order||0)))+10 : 10;
+      const {error}=await window.supabaseClient.from("categories").insert({
+        name:name.trim(),slug,icon:icon.trim()||"📰",sort_order:nextOrder,is_active:true
+      });
+      if(error) throw error;
+      alert("✅ Category add हो गई। Homepage पर भी अपने-आप दिखाई देगी।");
+      await loadCategories();
+    }catch(e){
+      alert("❌ Category add नहीं हुई: "+(e.message||e));
+    }
+  }
+
+  async function deleteCategory(id,name){
+    if(!confirm('"' + name + '" category delete करें?\n\nयह homepage से हट जाएगी।')) return;
+
+    try{
+      // IMPORTANT:
+      // Articles table में `category` column जरूरी नहीं है.
+      // इसलिए category delete करते समय articles को update नहीं करेंगे.
+      // Homepage categories table से पढ़ता है; category delete होते ही
+      // वह category homepage से अपने-आप हट जाएगी.
+      const {error}=await window.supabaseClient
+        .from("categories")
+        .delete()
+        .eq("id",id);
+
+      if(error) throw error;
+
+      alert("✅ Category delete हो गई। Homepage से भी हट गई है।");
+      await loadCategories();
+
+      if(typeof loadArticlesFromDB==="function") await loadArticlesFromDB();
+      if(typeof loadDashboardFromDB==="function") await loadDashboardFromDB();
+
+    }catch(e){
+      console.error("Category delete error:",e);
+      alert("❌ Category delete नहीं हुई: "+(e.message||e));
+    }
+  }
+
+  window.bvLoadCategories=loadCategories;
+
+  document.addEventListener("click",function(e){
+    if(e.target.closest("#addCategoryBtn")) addCategory();
+    const nav=e.target.closest('.nav-btn[data-page="categories"]');
+    if(nav) setTimeout(loadCategories,120);
+  });
+
+  setTimeout(loadCategories,900);
+})();
+
+  async function checkSitemap(){
+    const box=document.getElementById("sitemapStatus");
+    const btn=document.getElementById("refreshSitemapBtn");
+    if(!box)return;
+    const old=btn?.textContent;
+    if(btn){btn.disabled=true;btn.textContent="Checking…";}
+    try{
+      const r=await fetch("/sitemap.xml?ts="+Date.now(),{cache:"no-store"});
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      const xml=await r.text();
+      const count=(xml.match(/<url>/g)||[]).length;
+      box.textContent="✅ Sitemap live है — "+count+" URLs मिले।";
+      box.style.background="#ecfdf3";box.style.color="#166534";
+    }catch(e){
+      box.textContent="❌ Sitemap नहीं मिला: "+(e.message||e);
+      box.style.background="#fff1f2";box.style.color="#b91c1c";
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent=old||"🔄 Check Sitemap";}
+    }
+  }
+
+  function bindFinalControls(){
+    document.getElementById("viewSiteBtn")?.addEventListener("click",()=>window.open("/", "_blank"));
+    document.getElementById("refreshSitemapBtn")?.addEventListener("click",checkSitemap);
+    document.getElementById("globalBackBtn")?.addEventListener("click",()=>{
+      if(history.length>1) history.back();
+      else if(typeof openPage==="function") openPage("dashboard");
+    });
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",bindFinalControls);
+  else bindFinalControls();
+</script>
+
+
+
+<script id="">
+(function(){
+  function ready(fn){
+    if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",fn,{once:true});
+    else fn();
+  }
+
+  ready(function(){
+    // One delegated navigation handler: works even if an earlier individual
+    // listener failed during page initialization.
+    document.addEventListener("click", function(e){
+      const nav=e.target.closest(".nav-btn[data-page]");
+      if(nav && typeof window.openPage==="function"){
+        e.preventDefault();
+        e.stopPropagation();
+        window.openPage(nav.dataset.page);
+        return;
+      }
+
+      const quick=e.target.closest("[data-page-target]");
+      if(quick && typeof window.openPage==="function"){
+        e.preventDefault();
+        window.openPage(quick.dataset.pageTarget);
+        return;
+      }
+
+      if(e.target.closest("#dashboardAdd,#articlesAdd")){
+        e.preventDefault();
+        if(typeof window.openPage==="function") window.openPage("article");
+        return;
+      }
+
+      if(e.target.closest("#recentViewAll")){
+        e.preventDefault();
+        if(typeof window.openPage==="function") window.openPage("articles");
+        return;
+      }
+
+      if(e.target.closest("#previewBtn,#viewSiteBtn")){
+        e.preventDefault();
+        window.open(window.location.origin+"/","_blank");
+        return;
+      }
+
+      if(e.target.closest("#bvSidebarBack,#globalBackBtn")){
+        e.preventDefault();
+        if(typeof window.openPage==="function") window.openPage("dashboard");
+        return;
+      }
+
+      if(e.target.closest("#qaPost")){
+        e.preventDefault();
+        if(typeof window.openPage==="function") window.openPage("article");
+        return;
+      }
+
+      if(e.target.closest("#qaCategory")){
+        e.preventDefault();
+        if(typeof window.openPage==="function") window.openPage("categories");
+        setTimeout(()=>window.bvLoadCategories?.(),150);
+        return;
+      }
+
+      if(e.target.closest("#qaSeo")){
+        e.preventDefault();
+        if(typeof window.openPage==="function") window.openPage("seo");
+        return;
+      }
+
+      if(e.target.closest("#qaMedia")){
+        e.preventDefault();
+        if(typeof window.openPage==="function") window.openPage("article");
+        setTimeout(()=>document.getElementById("imageFile")?.click(),180);
+        return;
+      }
+
+      if(e.target.closest("#refreshSitemapBtn")){
+        e.preventDefault();
+        if(typeof window.checkSitemap==="function") window.checkSitemap();
+        return;
+      }
+
+      if(e.target.closest("#seoRefreshBtn")){
+        e.preventDefault();
+        if(typeof window.loadSeoTools==="function") window.loadSeoTools();
+        return;
+      }
+    }, true);
+
+    // Expose these functions because some earlier scripts kept them local.
+    if(typeof window.loadSeoTools!=="function" && typeof loadSeoTools==="function")
+      window.loadSeoTools=loadSeoTools;
+    if(typeof window.checkSitemap!=="function" && typeof checkSitemap==="function")
+      window.checkSitemap=checkSitemap;
+
+    // Mobile menu: delegated fallback.
+    const menu=document.getElementById("menuBtn");
+    const sidebar=document.getElementById("sidebar");
+    const overlay=document.getElementById("menuOverlay");
+
+    menu?.addEventListener("click",function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      const open=sidebar?.classList.toggle("open");
+      overlay?.classList.toggle("show",!!open);
+      overlay?.setAttribute("aria-hidden",String(!open));
+    },true);
+
+    overlay?.addEventListener("click",function(){
+      sidebar?.classList.remove("open");
+      overlay.classList.remove("show");
+      overlay.setAttribute("aria-hidden","true");
+    },true);
+
+    document.addEventListener("touchstart",function(e){
+      if(window.innerWidth>720) return;
+      if(!sidebar?.classList.contains("open")) return;
+      if(!sidebar.contains(e.target) && !menu?.contains(e.target)){
+        sidebar.classList.remove("open");
+        overlay?.classList.remove("show");
+        overlay?.setAttribute("aria-hidden","true");
+      }
+    },{passive:true});
+
+    // Load dashboard data after Supabase auth has had time to initialize.
+    setTimeout(function(){
+      try{ if(typeof window.loadDashboardFromDB==="function") window.loadDashboardFromDB(); }catch(e){}
+      try{ if(typeof window.bvLoadCategories==="function") window.bvLoadCategories(); }catch(e){}
+    },1200);
+  });
+})();
+</script>
+
+<script id="BV-ULTIMATE-CONTROLLER">
+(function(){
+  function init(){
+    const hardMenu=document.getElementById('bvHardMenuBtn');
+    const sidebar=document.getElementById('sidebar');
+    const overlay=document.getElementById('menuOverlay');
+    const floatingBack=document.getElementById('bvFloatingBack');
+    const theme=document.getElementById('themeBtn');
+
+    let historyStack=['dashboard'];
+    let goingBack=false;
+
+    function page(){
+      const visible=[...document.querySelectorAll('[id^="page-"]')].find(x=>!x.classList.contains('hidden'));
+      return visible ? visible.id.slice(5) : 'dashboard';
+    }
+
+    function menuOpen(){
+      return sidebar && sidebar.classList.contains('bv-forced-open');
+    }
+
+    function openMenu(){
+      if(!sidebar) return;
+      sidebar.classList.add('bv-forced-open','open');
+      sidebar.style.setProperty('transform','translate3d(0,0,0)','important');
+      sidebar.style.setProperty('width','290px','important');
+      sidebar.style.setProperty('max-width','84vw','important');
+      if(overlay){
+        overlay.classList.add('bv-forced-show','show');
+        overlay.style.setProperty('display','block','important');
+      }
+      hardMenu?.classList.add('bv-menu-open');
+      hardMenu?.setAttribute('aria-label','Close menu');
+      hardMenu?.setAttribute('aria-expanded','true');
+    }
+
+    function closeMenu(){
+      sidebar?.classList.remove('bv-forced-open','open');
+      if(sidebar) sidebar.style.setProperty('transform','translate3d(-110%,0,0)','important');
+      overlay?.classList.remove('bv-forced-show','show');
+      if(overlay) overlay.style.setProperty('display','none','important');
+      hardMenu?.classList.remove('bv-menu-open');
+      hardMenu?.setAttribute('aria-label','Open menu');
+      hardMenu?.setAttribute('aria-expanded','false');
+    }
+
+    function syncBack(){
+      if(!floatingBack) return;
+      const show=window.innerWidth<=720 && page()!=='dashboard';
+      floatingBack.style.display=show?'grid':'none';
+      floatingBack.style.placeItems='center';
+    }
+
+    function go(p, record=true){
+      const cur=page();
+      if(record && !goingBack && p!==cur){
+        historyStack.push(p);
+        if(historyStack.length>40) historyStack.shift();
+      }
+      if(typeof window.openPage==='function') window.openPage(p);
+      setTimeout(function(){closeMenu();syncBack();},30);
+    }
+
+    // Use capture and stopImmediatePropagation so the old duplicate handlers
+    // cannot toggle the menu/theme a second time.
+    hardMenu?.addEventListener('click',function(e){
+      e.preventDefault();e.stopImmediatePropagation();
+      menuOpen()?closeMenu():openMenu();
+    },true);
+
+    overlay?.addEventListener('click',function(e){
+      e.preventDefault();e.stopImmediatePropagation();closeMenu();
+    },true);
+
+    floatingBack?.addEventListener('click',function(e){
+      e.preventDefault();e.stopImmediatePropagation();
+      if(historyStack.length>1){
+        historyStack.pop();
+        const prev=historyStack[historyStack.length-1]||'dashboard';
+        goingBack=true;
+        if(typeof window.openPage==='function') window.openPage(prev);
+        setTimeout(function(){goingBack=false;syncBack();},50);
+      }else{
+        go('dashboard',false);
+      }
+    },true);
+
+    // Theme: compute current state once, then set it. This prevents the older
+    // duplicate theme listeners from cancelling the click.
+    theme?.addEventListener('click',function(e){
+      e.preventDefault();e.stopImmediatePropagation();
+      const on=!document.body.classList.contains('bv-dark');
+      document.body.classList.toggle('bv-dark',on);
+      theme.textContent=on?'☀️':'🌙';
+      try{localStorage.setItem('bharatViralDarkMode',on?'1':'0');}catch(_){}
+    },true);
+
+    try{
+      const saved=localStorage.getItem('bharatViralDarkMode')==='1';
+      document.body.classList.toggle('bv-dark',saved);
+      if(theme) theme.textContent=saved?'☀️':'🌙';
+    }catch(_){}
+
+    // Also record direct calls to openPage from quick actions and buttons.
+    if(typeof window.openPage==='function' && !window.openPage.__ultimateWrapped){
+      const original=window.openPage;
+      function wrapped(p){
+        const cur=page();
+        if(p && p!==cur && !goingBack){
+          historyStack.push(p);
+          if(historyStack.length>40) historyStack.shift();
+        }
+        const r=original(p);
+        setTimeout(syncBack,40);
+        return r;
+      }
+      wrapped.__ultimateWrapped=true;
+      window.openPage=wrapped;
+    }
+
+    // Clicking any navigation button closes the drawer.
+    sidebar?.addEventListener('click',function(e){
+      if(e.target.closest?.('.nav-btn')){
+        setTimeout(function(){closeMenu();syncBack();},60);
+      }
+    },true);
+
+    window.addEventListener('resize',function(){
+      if(window.innerWidth>720) closeMenu();
+      syncBack();
+    });
+
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape') closeMenu();
+    });
+
+    setInterval(syncBack,250);
+    syncBack();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',init,{once:true});
+  }else init();
+})();
+</script>
+
+<script id="bv-auto-tags-js">
+/* =========================================================
+   Bharat Viral - Automatic Article Tags
+   Uses title + content + category and syncs article_tags.
+   Existing Admin UI/features remain unchanged.
+   ========================================================= */
+(function(){
+  const client=()=>window.supabaseClient;
+
+  function bvAutoNormalize(v){
+    return String(v??"").toLowerCase()
+      .replace(/<[^>]*>/g," ")
+      .replace(/[^\p{L}\p{N}]+/gu," ")
+      .replace(/\s+/g," ").trim();
+  }
+
+  function bvAutoTagCandidates(article){
+    const title=bvAutoNormalize(article?.title);
+    const content=bvAutoNormalize(article?.content || article?.body || article?.description);
+    let category=article?.category || article?.category_name || article?.article_type || "";
+    if(Array.isArray(article?.categories)){
+      category += " " + article.categories.join(" ");
+    }
+    const hay=(title+" "+content+" "+category).trim();
+
+    const stop=new Set([
+      "और","का","के","की","को","में","से","पर","यह","एक","है","हैं","हो","था","थे",
+      "the","and","for","with","this","that","from","news","latest","भारत","बारे"
+    ]);
+
+    const words=new Set(hay.split(/\s+/).filter(w=>w.length>=3 && !stop.has(w)));
+    const categoryWords=category.split(/\s+/).filter(w=>w.length>=3 && !stop.has(w));
+
+    // Strong category signal first, then meaningful title/content words.
+    const ranked=[...new Set([...categoryWords,...title.split(/\s+/),...words])]
+      .filter(w=>w.length>=3 && !stop.has(w));
+
+    return ranked.slice(0,20);
+  }
+
+  async function bvAutoAssignArticleTags(article, manualTagNames){
+    const sb=client();
+    if(!sb || !article?.id) return;
+
+    try{
+      const {data:allTags,error}=await sb.from("tags")
+        .select("id,name,slug")
+        .limit(500);
+      if(error) throw error;
+
+      const candidates=bvAutoTagCandidates(article);
+      const manual=(manualTagNames||[]).map(x=>String(x).trim()).filter(Boolean);
+
+      const selected=allTags.filter(t=>{
+        const name=bvAutoNormalize(t.name);
+        if(!name) return false;
+
+        const manualMatch=manual.some(m=>{
+          const mn=bvAutoNormalize(m);
+          return mn===name;
+        });
+
+        const autoMatch=candidates.some(c=>{
+          return name===c || name.includes(c) || c.includes(name);
+        });
+
+        return manualMatch || autoMatch;
+      });
+
+      // Preserve manually entered tags even if they are new.
+      const existingNames=new Set(allTags.map(t=>bvAutoNormalize(t.name)));
+      const missing=manual.filter(m=>!existingNames.has(bvAutoNormalize(m)));
+
+      let finalTags=[...selected];
+
+      if(missing.length){
+        const ins=await sb.from("tags").insert(
+          missing.map(name=>({name,slug:bvSlug(name)}))
+        ).select("id,name,slug");
+        if(ins.error) throw ins.error;
+        finalTags=finalTags.concat(ins.data||[]);
+      }
+
+      // Remove old associations, then write the combined manual + automatic set.
+      const del=await sb.from("article_tags").delete().eq("article_id",article.id);
+      if(del.error) throw del.error;
+
+      const unique=new Map(finalTags.map(t=>[String(t.id),t]));
+      const rows=[...unique.values()].map(t=>({
+        article_id:article.id,
+        tag_id:t.id
+      }));
+
+      if(rows.length){
+        const ins=await sb.from("article_tags").insert(rows);
+        if(ins.error) throw ins.error;
+      }
+
+      console.log("Bharat Viral: auto/manual tags synced", [...unique.values()].map(t=>t.name));
+    }catch(err){
+      console.warn("Bharat Viral auto tags:",err.message||err);
+    }
+  }
+
+  // Public helper so existing article save/edit code can call it directly.
+  window.bvAutoAssignArticleTags=bvAutoAssignArticleTags;
+
+  // If an existing article-save event is emitted, automatically process it.
+  window.addEventListener("bvArticleSaved",function(e){
+    const article=e.detail?.article || e.detail;
+    if(article) bvAutoAssignArticleTags(article);
+  });
+})();
+ </script>
+ 
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/admin-sw.js")
+            .then(function () {
+                console.log("Bharat Viral Admin Service Worker registered");
+            })
+            .catch(function (error) {
+                console.error("Admin Service Worker registration failed:", error);
+            });
+    });
+}
+</script>
+
+
+<script id="bv-admin-v3-title-patch">
+(function(){
+  const oldOpen = window.openPage;
+  function titleFor(p){
+    return ({
+      "auto-news":"Auto News",
+      "notices":"Manual Notice",
+      "ad-slots":"Advertisement Slots"
+    })[p];
+  }
+  function patch(){
+    if(typeof oldOpen !== "function") return;
+    window.openPage=function(page){
+      oldOpen(page);
+      const t=titleFor(page);
+      if(t && document.getElementById("topTitle")) document.getElementById("topTitle").textContent=t;
+    };
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",patch);
+  else patch();
+})();
+</script>
+
+
+<script id="bv-admin-v3-complete-settings">
+(function(){
+  "use strict";
+  const $=id=>document.getElementById(id);
+  const client=()=>window.supabaseClient;
+  const SETTINGS_KEY="bharat_viral_admin_settings_v5";
+
+  const defaultSettings={
+    siteName:"Bharat Viral",tagline:"",contactEmail:"",siteDescription:"",
+    logoUrl:"",faviconUrl:"",webLogoUrl:"",webFaviconUrl:"",defaultAuthor:"Bharat Viral",defaultStatus:"draft",
+    language:"hi",timezone:"Asia/Kolkata",articlesPerPage:"12",trendingCount:"4",
+    trendingEnabled:"true",breakingEnabled:"true",noticeEnabled:"true",viewAll:"true",
+    maintenance:"false",indexing:"true",sessionMinutes:"60",dashboardRefresh:"true",
+    confirmDelete:"true",adminNotifications:"true",
+    primaryColor:"#123a63",accentColor:"#e30613",footerText:"",
+    seoTitle:"Bharat Viral",seoDescription:"",focusKeyword:"",
+    canonical:"https://bharat-viral.netlify.app",robots:"index, follow",sitemap:"true",
+    telegram:"",facebook:"",instagram:"",youtube:"",twitter:"",webContactEmail:"",
+    gaId:"",gscVerification:"",headCode:"",footerCode:"",
+    adsEnabled:"true",adsAuto:"false",adsHomepage:"true",adsArticles:"true",
+    adsSidebar:"true",adsPlacement:"article_middle",adsMaxArticle:"3",adsLabel:"Advertisement"
+  };
+
+  function toast(text,ok=true){
+    const n=document.createElement("div");
+    n.textContent=text;
+    n.style.cssText="position:fixed;right:16px;bottom:16px;z-index:99999;padding:12px 15px;border-radius:10px;color:#fff;font-weight:800;background:"+(ok?"#17324f":"#b51219");max-width:390px";
+    document.body.appendChild(n); setTimeout(()=>n.remove(),4500);
+  }
+
+  function local(){
+    try{return {...defaultSettings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")};}
+    catch{return {...defaultSettings};}
+  }
+
+  function setVal(id,v){
+    const e=$(id);
+    if(e && v!==undefined && v!==null) e.value=String(v);
+  }
+
+  function fill(s){
+    const map={
+      siteName:"setSiteName",tagline:"setTagline",contactEmail:"setContactEmail",siteDescription:"setSiteDescription",
+      logoUrl:"setLogoUrl",faviconUrl:"setFaviconUrl",webLogoUrl:"webLogoUrl",webFaviconUrl:"webFaviconUrl",defaultAuthor:"setDefaultAuthor",defaultStatus:"setDefaultStatus",
+      language:"setLanguage",timezone:"setTimezone",articlesPerPage:"setArticlesPerPage",trendingCount:"setTrendingCount",
+      trendingEnabled:"setTrendingEnabled",breakingEnabled:"setBreakingEnabled",noticeEnabled:"setNoticeEnabled",viewAll:"setViewAll",
+      maintenance:"setMaintenance",indexing:"setIndexing",sessionMinutes:"setSessionMinutes",dashboardRefresh:"setDashboardRefresh",
+      confirmDelete:"setConfirmDelete",adminNotifications:"setAdminNotifications",
+      primaryColor:"webPrimaryColor",accentColor:"webAccentColor",footerText:"webFooterText",
+      seoTitle:"webSeoTitle",seoDescription:"webSeoDescription",focusKeyword:"webFocusKeyword",canonical:"webCanonical",
+      robots:"webRobots",sitemap:"webSitemap",telegram:"webTelegram",facebook:"webFacebook",instagram:"webInstagram",
+      youtube:"webYoutube",twitter:"webTwitter",webContactEmail:"webContactEmail",gaId:"webGaId",
+      gscVerification:"webGscVerification",headCode:"webHeadCode",footerCode:"webFooterCode",
+      adsEnabled:"adsEnabled",adsAuto:"adsAuto",adsHomepage:"adsHomepage",adsArticles:"adsArticles",
+      adsSidebar:"adsSidebar",adsPlacement:"adsPlacement",adsMaxArticle:"adsMaxArticle",adsLabel:"adsLabel"
+    };
+    Object.entries(map).forEach(([k,id])=>setVal(id,s[k]));
+  }
+
+  function collect(){
+    const s=local();
+    const map={
+      siteName:"setSiteName",tagline:"setTagline",contactEmail:"setContactEmail",siteDescription:"setSiteDescription",
+      logoUrl:"setLogoUrl",faviconUrl:"setFaviconUrl",webLogoUrl:"webLogoUrl",webFaviconUrl:"webFaviconUrl",defaultAuthor:"setDefaultAuthor",defaultStatus:"setDefaultStatus",
+      language:"setLanguage",timezone:"setTimezone",articlesPerPage:"setArticlesPerPage",trendingCount:"setTrendingCount",
+      trendingEnabled:"setTrendingEnabled",breakingEnabled:"setBreakingEnabled",noticeEnabled:"setNoticeEnabled",viewAll:"setViewAll",
+      maintenance:"setMaintenance",indexing:"setIndexing",sessionMinutes:"setSessionMinutes",dashboardRefresh:"setDashboardRefresh",
+      confirmDelete:"setConfirmDelete",adminNotifications:"setAdminNotifications",
+      primaryColor:"webPrimaryColor",accentColor:"webAccentColor",footerText:"webFooterText",
+      seoTitle:"webSeoTitle",seoDescription:"webSeoDescription",focusKeyword:"webFocusKeyword",canonical:"webCanonical",
+      robots:"webRobots",sitemap:"webSitemap",telegram:"webTelegram",facebook:"webFacebook",instagram:"webInstagram",
+      youtube:"webYoutube",twitter:"webTwitter",webContactEmail:"webContactEmail",gaId:"webGaId",
+      gscVerification:"webGscVerification",headCode:"webHeadCode",footerCode:"webFooterCode",
+      adsEnabled:"adsEnabled",adsAuto:"adsAuto",adsHomepage:"adsHomepage",adsArticles:"adsArticles",
+      adsSidebar:"adsSidebar",adsPlacement:"adsPlacement",adsMaxArticle:"adsMaxArticle",adsLabel:"adsLabel"
+    };
+    Object.entries(map).forEach(([k,id])=>{
+      const e=$(id);
+      if(e) s[k]=e.value;
+    });
+    return s;
+  }
+
+  async function dbLoad(){
+    const sb=client();
+    if(!sb) return null;
+    const r=await sb.from("site_settings").select("key,value");
+    if(r.error) throw r.error;
+    const s=local();
+    (r.data||[]).forEach(row=>{if(row.key) s[row.key]=row.value??"";});
+    return s;
+  }
+
+  async function dbSave(s){
+    const sb=client();
+    if(!sb) throw new Error("Supabase client उपलब्ध नहीं है।");
+    const rows=Object.entries(s).map(([key,value])=>({
+      key,
+      value:String(value??""),
+      updated_at:new Date().toISOString()
+    }));
+    const r=await sb.from("site_settings").upsert(rows,{onConflict:"key"});
+    if(r.error) throw r.error;
+    return true;
+  }
+
+  async function loadSettings(){
+    // Always show usable values immediately.
+    let s=local();
+    fill(s);
+    try{
+      const db=await dbLoad();
+      if(db){
+        s=db;
+        localStorage.setItem(SETTINGS_KEY,JSON.stringify(s));
+        fill(s);
+      }
+    }catch(e){
+      console.error("Settings load:",e);
+      toast("Settings load नहीं हुई: "+(e.message||e),false);
+    }
+  }
+
+  async function saveSettings(){
+    const s=collect();
+    localStorage.setItem(SETTINGS_KEY,JSON.stringify(s));
+    const buttons=[$("bvSettingsSave"),$("bvWebsiteSave"),$("bvAdsSave")].filter(Boolean);
+    buttons.forEach(b=>{b.disabled=true; b.dataset.oldText=b.textContent; b.textContent="Saving…";});
+    try{
+      await dbSave(s);
+      toast("सभी settings Supabase में save हो गईं।",true);
+    }catch(e){
+      console.error("Settings save:",e);
+      toast("Settings save नहीं हुई: "+(e.message||e),false);
+    }finally{
+      buttons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.oldText||"Save";});
+    }
+  }
+
+  // Expose a single save function for existing panel wiring.
+  window.bvSaveSettingsV5=saveSettings;
+  window.bvLoadSettingsV5=loadSettings;
+  window.saveSettings=saveSettings;
+
+  function installSaveButtons(){
+    fill(local());
+
+    // Use capture at document level so old panel bindings cannot double-run
+    // or call a stale saveSettings() function.
+    if(!document.documentElement.dataset.bvV6SaveGuard){
+      document.documentElement.dataset.bvV6SaveGuard="1";
+      document.addEventListener("click",function(e){
+        const btn=e.target.closest && e.target.closest("#bvSettingsSave,#bvWebsiteSave,#bvAdsSave");
+        if(!btn) return;
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        if(btn.dataset.bvSaving==="1") return;
+        btn.dataset.bvSaving="1";
+
+        saveSettings().finally(()=>{
+          btn.dataset.bvSaving="0";
+        });
+      },true);
+    }
+
+    loadSettings();
+  }
+
+  // This script is already near the end of the document, so initialize
+  // immediately and also on DOMContentLoaded when applicable.
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",installSaveButtons,{once:true});
+  }else{
+    installSaveButtons();
+  }
+})();
+</script>
+
+
+<script id="bv-settings-v5-navigation-hook">
+(function(){
+  const run=()=>window.bvLoadSettingsV5 && window.bvLoadSettingsV5();
+  document.addEventListener("click",e=>{
+    const el=e.target.closest && e.target.closest('[data-page="settings"],[data-page="website"],[data-page="ads"],#navSettings,#navWebsite,#navAds');
+    if(el) setTimeout(run,50);
+  },true);
+})();
+</script>
+
+
+<script id="bv-all-settings-live-admin">
+(function(){
+"use strict";
+const ids = [
+ "setSiteName","setTagline","setContactEmail","setSiteDescription","setLogoUrl","setFaviconUrl",
+ "setDefaultAuthor","setDefaultStatus","setLanguage","setTimezone","setArticlesPerPage","setTrendingCount",
+ "setTrendingEnabled","setBreakingEnabled","setNoticeEnabled","setViewAll","setMaintenance","setIndexing",
+ "setSessionMinutes","setDashboardRefresh","setConfirmDelete","setAdminNotifications",
+ "webPrimaryColor","webAccentColor","webLogoUrl","webFaviconUrl","webFooterText","webSeoTitle","webSeoDescription",
+ "webFocusKeyword","webCanonical","webRobots","webSitemap","webTelegram","webFacebook","webInstagram","webYoutube",
+ "webTwitter","webContactEmail","webGaId","webGscVerification","webHeadCode","webFooterCode",
+ "adsEnabled","adsAuto","adsHomepage","adsArticles","adsSidebar","adsPlacement","adsMaxArticle","adsLabel"
+];
+const keyById = {
+ "setSiteName":"siteName","setTagline":"tagline","setContactEmail":"contactEmail","setSiteDescription":"siteDescription",
+ "setLogoUrl":"logoUrl","setFaviconUrl":"faviconUrl","setDefaultAuthor":"defaultAuthor","setDefaultStatus":"defaultStatus",
+ "setLanguage":"language","setTimezone":"timezone","setArticlesPerPage":"articlesPerPage","setTrendingCount":"trendingCount",
+ "setTrendingEnabled":"trendingEnabled","setBreakingEnabled":"breakingEnabled","setNoticeEnabled":"noticeEnabled",
+ "setViewAll":"viewAll","setMaintenance":"maintenance","setIndexing":"indexing","setSessionMinutes":"sessionMinutes",
+ "setDashboardRefresh":"dashboardRefresh","setConfirmDelete":"confirmDelete","setAdminNotifications":"adminNotifications",
+ "webPrimaryColor":"primaryColor","webAccentColor":"accentColor","webLogoUrl":"webLogoUrl","webFaviconUrl":"webFaviconUrl",
+ "webFooterText":"footerText","webSeoTitle":"seoTitle","webSeoDescription":"seoDescription","webFocusKeyword":"focusKeyword",
+ "webCanonical":"canonical","webRobots":"robots","webSitemap":"sitemap","webTelegram":"telegram","webFacebook":"facebook",
+ "webInstagram":"instagram","webYoutube":"youtube","webTwitter":"twitter","webContactEmail":"webContactEmail",
+ "webGaId":"gaId","webGscVerification":"gscVerification","webHeadCode":"headCode","webFooterCode":"footerCode",
+ "adsEnabled":"adsEnabled","adsAuto":"adsAuto","adsHomepage":"adsHomepage","adsArticles":"adsArticles",
+ "adsSidebar":"adsSidebar","adsPlacement":"adsPlacement","adsMaxArticle":"adsMaxArticle","adsLabel":"adsLabel"
+};
+
+function client(){return window.supabaseClient||null;}
+function readFields(){
+ const s={};
+ ids.forEach(id=>{const e=document.getElementById(id);if(e)s[keyById[id]]=e.value;});
+ return s;
+}
+function setFields(s){
+ ids.forEach(id=>{
+   const e=document.getElementById(id),k=keyById[id];
+   if(e && s[k]!==undefined && s[k]!==null) e.value=String(s[k]);
+ });
+}
+async function load(){
+ const sb=client(); if(!sb)return;
+ const r=await sb.from("site_settings").select("key,value");
+ if(r.error){console.warn("site_settings load:",r.error.message);return;}
+ const s={};(r.data||[]).forEach(x=>s[x.key]=x.value??"");
+ setFields(s);
+ window.bvSiteSettings=s;
+}
+async function save(){
+ const sb=client(); if(!sb){alert("Supabase connected नहीं है.");return;}
+ const s=readFields();
+ const rows=Object.entries(s).map(([key,value])=>({
+   key,value:String(value??""),updated_at:new Date().toISOString()
+ }));
+ const r=await sb.from("site_settings").upsert(rows,{onConflict:"key"});
+ if(r.error){console.error(r.error);alert("Settings save error: "+r.error.message);return;}
+ window.bvSiteSettings=s;
+ alert("✅ Settings saved. Website पर next refresh में apply होंगी.");
+}
+function bind(){
+ [["bvSettingsSave",save],["bvWebsiteSave",save],["bvAdsSave",save]].forEach(([id,fn])=>{
+   const b=document.getElementById(id);
+   if(!b||b.dataset.liveSettingsBound==="1")return;
+   b.dataset.liveSettingsBound="1"; b.type="button";
+   b.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();fn();},true);
+ });
+}
+function init(){
+ bind(); setTimeout(load,700);
+ setInterval(()=>{bind();},1000);
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
+})();
+</script>
+
+</body>
+</html>

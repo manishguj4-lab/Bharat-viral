@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Bharat Viral - Category</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#fff;color:#171717;font-family:Arial,sans-serif}.top{background:#df0712;color:#fff;padding:9px 15px;font-size:12px;font-weight:700}.head{background:#fff;border-bottom:1px solid #ddd}.headin{max-width:1100px;margin:auto;min-height:105px;display:flex;align-items:center;justify-content:space-between;padding:15px}.brand h1{margin:0;color:#df0712;font-size:28px}.brand p{margin:5px 0 0;font-size:12px}.home{border:0;background:#df0712;color:#fff;border-radius:7px;padding:11px 17px;font-weight:700;cursor:pointer}.wrap{max-width:1100px;margin:20px auto;padding:0 15px}.title{background:#fff;border-left:5px solid #df0712;border-radius:8px;padding:17px 18px;margin-bottom:15px}.title h2{margin:0 0 5px}.title p{margin:0;color:#666;font-size:13px}.grid{display:flex;flex-direction:column;gap:16px}.card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);cursor:pointer}.img{height:190px;background:#e9eef2}.img img{width:100%;height:100%;object-fit:cover;display:block}.body{padding:15px}.cat{font-size:10px;color:#df0712;font-weight:800}.body h3{margin:8px 0;font-size:21px;line-height:1.45;color:#00AEEF;font-weight:900}.body p{color:#666;font-size:12px;line-height:1.55;min-height:38px}.read{background:#df0712;color:#fff;border:0;border-radius:5px;padding:9px 13px;font-weight:700;cursor:pointer}.empty{background:#fff;padding:35px;text-align:center;border-radius:10px;color:#777}.back{margin-bottom:15px;background:#fff;border:1px solid #ddd;border-radius:7px;padding:10px 14px;cursor:pointer;font-weight:700}@media(max-width:520px){.img{height:210px}.brand h1{font-size:22px}.body h3{font-size:19px;line-height:1.4}}
+.card:focus{outline:3px solid #87ceeb;outline-offset:2px}.body h3{cursor:pointer;color:#00AEEF;font-size:20px;font-weight:900}
+.pagination{display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:wrap;margin:26px 0 36px}.pagination a,.pagination span{min-width:38px;height:38px;padding:0 10px;border:1px solid #d7e0e8;border-radius:7px;background:#fff;color:#123a63;display:inline-flex;align-items:center;justify-content:center;font-weight:800;text-decoration:none}.pagination .active{background:#00AEEF;color:#fff;border-color:#00AEEF}.pagination .next{padding:0 14px}.pagination a:hover{border-color:#00AEEF;color:#00AEEF}.pagination .active:hover{color:#fff}.page-note{text-align:center;color:#777;font-size:12px;margin-top:4px}</style>
+</head>
+<body>
+<div class="top">🔥 BHARAT VIRAL • वायरल खबरों की सच्ची जानकारी</div>
+<header class="head"><div class="headin"><div class="brand"><h1>BHARAT VIRAL</h1><p>जो वायरल है, उसकी सच्ची जानकारी</p></div><button class="home" onclick="location.href='index.html'">🏠 HOME</button></div></header>
+<main class="wrap"><button class="back" onclick="history.back()">← वापस</button><div class="title"><h2 id="heading">News</h2><p id="sub">इस category की प्रकाशित खबरें</p></div><div id="grid" class="grid"></div><div id="pagination" class="pagination" aria-label="Pagination"></div></main>
+<script>
+const URL="https://ocarsylhsyxjqpzidndb.supabase.co";
+const KEY="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+const params=new URLSearchParams(location.search);const wanted=(params.get('category')||'news').toLowerCase();
+const names={'trending':'🔥 Trending News','news':'📰 Latest News','fact-check':'🛡️ Fact Check','explained':'💡 Explained','entertainment':'🎬 Entertainment','sports':'⚽ Sports','tech-education':'💻 Tech & Education','social':'📱 Social Media'};
+document.getElementById('heading').textContent=names[wanted]||'📰 News';
+function strip(v){const d=document.createElement('div');d.innerHTML=String(v||'');return d.textContent||''}
+function esc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function norm(v){return String(v||'').toLowerCase().trim().replace(/[\s_-]+/g,' ')}
+function homeCategory(a){
+  const t=norm(a.title);
+  if(t.includes('samay raina')||t.includes('समय रैना'))return 'entertainment';
+  if(t.includes('awarapan 2')||t.includes('आवारापन 2')||t.includes('आवारापन-2'))return 'entertainment';
+  if((t.includes('modi')||t.includes('मोदी')||t.includes('नरेंद्र मोदी')||t.includes('नरेन्द्र मोदी')) &&
+     ['ai','skill','training','coaching','exam','युवा','करोड़','crore','education','शिक्षा','course'].some(k=>t.includes(norm(k))))return 'tech-education';
+  if(t.includes('लड़की')||t.includes('लड़की')||t.includes('ladki')||t.includes('girl'))return 'social';
+  const vals=[norm(a.category),norm(a.article_type),...(Array.isArray(a.categories)?a.categories.map(norm):[])];
+  const has=words=>words.some(w=>vals.some(v=>v===norm(w)||v.includes(norm(w))));
+  if(has(['entertainment','मनोरंजन','music']))return 'entertainment';
+  if(has(['sports','sport','cricket','football','खेल']))return 'sports';
+  if(has(['social media','social','instagram','youtube']))return 'social';
+  if(has(['fact check','factcheck','fact']))return 'fact-check';
+  if(has(['explained','explain']))return 'explained';
+  if(has(['technology','tech','education','ai','exam','digital']))return 'tech-education';
+  if(has(['news','viral news','india','राष्ट्रीय','भारत']))return 'news';
+  return norm(a.category||a.article_type||'');
+}
+const labels={'entertainment':'ENTERTAINMENT','sports':'SPORTS','social':'SOCIAL MEDIA','fact-check':'FACT CHECK','explained':'EXPLAINED','tech-education':'TECH & EDUCATION','news':'NEWS'};
+function articleCard(a){const id=encodeURIComponent(a.id||'');const title=esc(a.title||'बड़ी खबर');const ex=esc(a.excerpt||a.summary||strip(a.content).slice(0,150)||'पूरी खबर पढ़ें');const mapped=homeCategory(a);const label=esc(labels[mapped]||a.category||a.article_type||'NEWS');const img=a.image_url?'<div class="img"><img src="'+esc(a.image_url)+'" alt="'+title+'"></div>':'';return '<article class="card" onclick="location.href=\'article.html?id='+id+'\'" role="link" tabindex="0" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();location.href=\'article.html?id='+id+'\'}">'+img+'<div class="body"><span class="cat">'+label+'</span><h3>'+title+'</h3><p>'+ex+'</p><button class="read" onclick="event.stopPropagation();location.href=\'article.html?id='+id+'\'">पूरी खबर पढ़ें</button></div></article>'}
+async function load(){
+  const grid=document.getElementById('grid');
+  try{
+    const r=await fetch(URL+'/rest/v1/articles?select=*&order=published_at.desc.nullslast,created_at.desc&limit=200',{headers:{apikey:KEY,Authorization:'Bearer '+KEY},cache:'no-store'});
+    if(!r.ok)throw Error(r.status);
+    const rows=await r.json();
+    const all=(Array.isArray(rows)?rows:[]).filter(a=>{
+      const status=String(a.status??'').trim().toLowerCase();
+      if(status==='')return true;
+      if(['published','publish','live','active'].includes(status))return true;
+      if(a.is_published===true||a.published===true)return true;
+      return false;
+    });
+    const safeAll=all.length||!rows.length?all:rows;
+    let items=safeAll;
+    const matches=(a,key)=>{
+      const raw=[norm(a.category),norm(a.article_type),...(Array.isArray(a.categories)?a.categories.map(norm):[])];
+      if(key==='trending')return true;
+      return homeCategory(a)===key || raw.some(v=>v===norm(key)||v.includes(norm(key)));
+    };
+    if(wanted==='trending') items=[...safeAll].sort((a,b)=>(Number(b.views)||0)-(Number(a.views)||0));
+    else items=safeAll.filter(a=>matches(a,wanted));
+
+    const pageSize=7;
+    const totalPages=Math.max(1,Math.ceil(items.length/pageSize));
+    let page=Math.max(1,parseInt(params.get('page')||'1',10)||1);
+    if(page>totalPages)page=totalPages;
+    const start=(page-1)*pageSize;
+    const visible=items.slice(start,start+pageSize);
+
+    grid.innerHTML=visible.map(articleCard).join('')||'<div class="empty">इस category में अभी कोई प्रकाशित खबर उपलब्ध नहीं है।</div>';
+    renderPagination(totalPages,page);
+  }catch(e){
+    grid.innerHTML='<div class="empty">खबरें लोड नहीं हो पाईं। कृपया थोड़ी देर बाद फिर प्रयास करें।</div>';
+    document.getElementById('pagination').innerHTML='';
+    console.error(e);
+  }
+}
+function renderPagination(total,current){
+  const box=document.getElementById('pagination');
+  if(!box)return;
+  if(total<=1){box.innerHTML='';return;}
+  const make=(p,label,cls='')=>`<a class="${cls}" href="category.html?category=${encodeURIComponent(wanted)}&page=${p}">${label}</a>`;
+  let html='';
+  if(current>1)html+=make(current-1,'‹ पिछला','next');
+  const max=5;
+  let from=Math.max(1,current-2),to=Math.min(total,from+max-1);
+  if(to-from+1<max)from=Math.max(1,to-max+1);
+  if(from>1)html+=make(1,'1');
+  if(from>2)html+='<span>…</span>';
+  for(let p=from;p<=to;p++)html+=p===current?`<span class="active">${p}</span>`:make(p,String(p));
+  if(to<total-1)html+='<span>…</span>';
+  if(to<total)html+=make(total,String(total));
+  if(current<total)html+=make(current+1,'अगला ›','next');
+  html+=`<div class="page-note" style="flex-basis:100%">पेज ${current} / ${total}</div>`;
+  box.innerHTML=html;
+}
+load();
+</script></body></html>

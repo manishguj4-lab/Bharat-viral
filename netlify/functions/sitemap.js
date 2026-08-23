@@ -14,15 +14,20 @@ function xmlEscape(value) {
 
 function isoDate(value) {
   if (!value) return new Date().toISOString();
+
   const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+
+  return Number.isNaN(d.getTime())
+    ? new Date().toISOString()
+    : d.toISOString();
 }
 
 exports.handler = async function () {
   try {
     const endpoint =
       SUPABASE_URL +
-      "/rest/v1/articles?select=id,created_at,published_at&status=eq.published&order=published_at.desc";
+      "/rest/v1/articles?select=id,slug,created_at,published_at,updated_at" +
+      "&status=eq.published&slug=not.is.null&order=published_at.desc";
 
     const response = await fetch(endpoint, {
       headers: {
@@ -32,13 +37,18 @@ exports.handler = async function () {
     });
 
     if (!response.ok) {
-      throw new Error("Supabase returned HTTP " + response.status);
+      throw new Error(
+        "Supabase returned HTTP " + response.status
+      );
     }
 
     const articles = await response.json();
 
     const urls = [
-      { loc: `${SITE}/`, lastmod: new Date().toISOString() },
+      {
+        loc: `${SITE}/`,
+        lastmod: new Date().toISOString()
+      },
       { loc: `${SITE}/trending.html` },
       { loc: `${SITE}/news.html` },
       { loc: `${SITE}/entertainment.html` },
@@ -51,35 +61,52 @@ exports.handler = async function () {
     ];
 
     for (const article of articles) {
-      if (!article.id) continue;
+      if (!article.slug) continue;
+
       urls.push({
-        loc: `${SITE}/article.html?id=${encodeURIComponent(article.id)}`,
-        lastmod: isoDate(article.published_at || article.created_at)
+        loc:
+          `${SITE}/article.html?slug=` +
+          encodeURIComponent(article.slug),
+
+        lastmod: isoDate(
+          article.updated_at ||
+          article.published_at ||
+          article.created_at
+        )
       });
     }
 
     const body = [
       '<?xml version="1.0" encoding="UTF-8"?>',
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+
       ...urls.map(
         (u) =>
           "  <url>" +
           `<loc>${xmlEscape(u.loc)}</loc>` +
-          (u.lastmod ? `<lastmod>${xmlEscape(u.lastmod)}</lastmod>` : "") +
+          (u.lastmod
+            ? `<lastmod>${xmlEscape(u.lastmod)}</lastmod>`
+            : "") +
           "</url>"
       ),
+
       "</urlset>"
     ].join("\n");
 
     return {
       statusCode: 200,
+
       headers: {
         "Content-Type": "application/xml; charset=UTF-8",
-        "Cache-Control": "public, max-age=300, s-maxage=300"
+        "Cache-Control":
+          "public, max-age=300, s-maxage=300"
       },
+
       body
     };
+
   } catch (error) {
+
     console.error("Sitemap error:", error);
 
     const fallback = [
@@ -98,16 +125,24 @@ exports.handler = async function () {
     const body = [
       '<?xml version="1.0" encoding="UTF-8"?>',
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-      ...fallback.map((url) => `  <url><loc>${xmlEscape(url)}</loc></url>`),
+
+      ...fallback.map(
+        (url) =>
+          `  <url><loc>${xmlEscape(url)}</loc></url>`
+      ),
+
       "</urlset>"
     ].join("\n");
 
     return {
       statusCode: 200,
+
       headers: {
         "Content-Type": "application/xml; charset=UTF-8",
-        "Cache-Control": "public, max-age=60"
+        "Cache-Control":
+          "public, max-age=60"
       },
+
       body
     };
   }

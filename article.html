@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google-adsense-account" content="ca-pub-9100918528334463">
 <title>Article | Bharat Viral</title>
+<link id="canonical" rel="canonical" href="https://bharat-viral.netlify.app/article.html">
 <meta name="description" id="metaDescription" content="भारत और दुनिया की ताजा वायरल, ट्रेंडिंग और महत्वपूर्ण खबरें Bharat Viral पर पढ़ें।">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-<link id="canonical" rel="canonical" id="canonicalUrl" href="https://bharat-viral.netlify.app/article.html">
+<link rel="canonical" id="canonicalUrl" href="https://bharat-viral.netlify.app/article.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Bharat Viral">
 <meta property="og:title" id="ogTitle" content="Bharat Viral">
@@ -32,13 +33,28 @@
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9100918528334463" crossorigin="anonymous"></script>
 
-<script>
-(function () {
-  const canonical = document.getElementById('canonical');
-  if (!canonical) return;
-  const url = new URL(window.location.href);
-  canonical.href = url.origin + url.pathname + url.search;
-})();
+<script id="article-schema" type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "",
+  "description": "",
+  "image": [],
+  "datePublished": "",
+  "dateModified": "",
+  "author": {
+    "@type": "Organization",
+    "name": "Bharat Viral"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Bharat Viral"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": ""
+  }
+}
 </script>
 
 </head>
@@ -496,6 +512,47 @@ async function refresh(){
 }
 function start(){refresh();setInterval(refresh,15000);}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
+})();
+</script>
+
+
+<script>
+(function () {
+  function updateArticleSEO() {
+    var canonical = document.getElementById("canonical");
+    var schemaEl = document.getElementById("article-schema");
+    if (!canonical || !schemaEl) return;
+
+    var url = window.location.origin + window.location.pathname + window.location.search;
+    canonical.href = url;
+
+    try {
+      var schema = JSON.parse(schemaEl.textContent || "{}");
+      var titleEl = document.querySelector("h1");
+      var descEl = document.querySelector('meta[name="description"]');
+      var imageEl = document.querySelector("article img, main img");
+      schema.headline = titleEl ? titleEl.textContent.trim() : document.title;
+      schema.description = descEl ? descEl.getAttribute("content") || "" : "";
+      schema.image = imageEl && imageEl.src ? [imageEl.src] : [];
+      schema.mainEntityOfPage["@id"] = url;
+
+      var timeEl = document.querySelector("time[datetime]");
+      if (timeEl) {
+        var dt = timeEl.getAttribute("datetime") || "";
+        schema.datePublished = dt;
+        schema.dateModified = dt;
+      }
+
+      schemaEl.textContent = JSON.stringify(schema);
+    } catch (e) {}
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", updateArticleSEO);
+  } else {
+    updateArticleSEO();
+  }
+  window.addEventListener("load", updateArticleSEO);
 })();
 </script>
 

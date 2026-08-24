@@ -87,7 +87,7 @@ function homeCategory(a){
   if(has(['explained','explain']))return 'explained';
   if(has(['technology','tech','education','ai','exam','digital']))return 'tech-education';
   if(has(['news','viral news','india','राष्ट्रीय','भारत']))return 'news';
-  return norm(a.category||a.article_type||'');
+  return 'news';
 }
 const labels={'entertainment':'ENTERTAINMENT','sports':'SPORTS','social':'SOCIAL MEDIA','fact-check':'FACT CHECK','explained':'EXPLAINED','tech-education':'TECH & EDUCATION','news':'NEWS'};
 function articleCard(a){const id=encodeURIComponent(a.id||'');const title=esc(a.title||'बड़ी खबर');const ex=esc(a.excerpt||a.summary||strip(a.content).slice(0,150)||'पूरी खबर पढ़ें');const mapped=homeCategory(a);const label=esc(labels[mapped]||a.category||a.article_type||'NEWS');const img=a.image_url?'<div class="img"><img src="'+esc(a.image_url)+'" alt="'+title+'"></div>':'';return '<article class="card" onclick="location.href=\'article.html?id='+id+'\'" role="link" tabindex="0" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();location.href=\'article.html?id='+id+'\'}">'+img+'<div class="body"><span class="cat">'+label+'</span><h3>'+title+'</h3><p>'+ex+'</p><button class="read" onclick="event.stopPropagation();location.href=\'article.html?id='+id+'\'">पूरी खबर पढ़ें</button></div></article>'}
@@ -109,11 +109,24 @@ async function load(){
     let items=safeAll;
     const matches=(a,key)=>{
       const raw=[norm(a.category),norm(a.article_type),...(Array.isArray(a.categories)?a.categories.map(norm):[])];
-      if(key==='trending')return true;
       return homeCategory(a)===key || raw.some(v=>v===norm(key)||v.includes(norm(key)));
     };
-    if(wanted==='trending') items=[...safeAll].sort((a,b)=>(Number(b.views)||0)-(Number(a.views)||0));
-    else items=safeAll.filter(a=>matches(a,wanted));
+
+    if(wanted==='trending'){
+      // Trending: today's published articles only, ranked by views, maximum 4.
+      const now=new Date();
+      const today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+      items=safeAll
+        .filter(a=>String(a.published_at||a.created_at||'').slice(0,10)===today)
+        .sort((a,b)=>{
+          const vd=(Number(b.views)||0)-(Number(a.views)||0);
+          if(vd!==0)return vd;
+          return String(b.published_at||b.created_at||'').localeCompare(String(a.published_at||a.created_at||''));
+        })
+        .slice(0,4);
+    } else {
+      items=safeAll.filter(a=>matches(a,wanted));
+    }
 
     const pageSize=7;
     const totalPages=Math.max(1,Math.ceil(items.length/pageSize));

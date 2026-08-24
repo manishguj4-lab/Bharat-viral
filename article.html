@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google-adsense-account" content="ca-pub-9100918528334463">
@@ -9,6 +8,7 @@
 <meta name="description" id="metaDescription" content="भारत और दुनिया की ताजा वायरल, ट्रेंडिंग और महत्वपूर्ण खबरें Bharat Viral पर पढ़ें।">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <link rel="canonical" id="canonicalUrl" href="https://bharat-viral.netlify.app/article.html">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Bharat Viral">
 <meta property="og:title" id="ogTitle" content="Bharat Viral">
@@ -331,6 +331,7 @@ const source=a.source_url?'<a href="'+esc(a.source_url)+'" target="_blank" rel="
 shareUrl=location.href;shareTitle=a.title||'Bharat Viral';
 const relatedHtml=await loadRelatedNews(a);
 box.innerHTML=image+'<div class="body"><div class="cat">'+esc(category)+'</div><h1 class="title">'+esc(a.title)+'</h1><div class="meta">'+(a.author_name?'By '+esc(a.author_name)+' • ':'')+esc(time(a.published_at||a.created_at))+'</div><div class="views">👁 '+Number(a.views||0).toLocaleString('en-IN')+' views</div><div class="share"><button class="wa" onclick="shareWhatsApp()">WhatsApp</button><button class="tg" onclick="shareTelegram()">Telegram</button><button class="ig" onclick="shareInstagram()">Instagram</button><button class="copy" onclick="copyLink()">Copy Link</button></div>'+(a.excerpt?'<div class="excerpt">'+esc(a.excerpt)+'</div>':'')+'<div class="bv-manual-ad-slot" data-ad-slot="article_middle" style="display:none;width:100%;max-width:100%;margin:18px auto;text-align:center;overflow:hidden;"></div><div class="content">'+renderArticleContent(a.content)+'</div>'+(source?'<div class="source">Source: '+source+'</div>':'')+relatedHtml+'</div>';
+window.dispatchEvent(new Event('bv:article-rendered'));
 addView(a.id);
 }
 async function addView(id){if(!id)return;try{await fetch(SUPABASE_URL+'/rest/v1/rpc/increment_article_view',{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({article_id:id})});}catch(e){console.warn('view count update failed',e);}}
@@ -406,7 +407,11 @@ async function renderManualAds(){
       });
   });
 }
-function start(){renderManualAds();setInterval(renderManualAds,60000);}
+function start(){
+  renderManualAds();
+  window.addEventListener("bv:article-rendered",renderManualAds);
+  setInterval(renderManualAds,60000);
+}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
 </script>

@@ -8,7 +8,7 @@
 <style>
 *{box-sizing:border-box}body{margin:0;background:#fff;color:#171717;font-family:Arial,sans-serif}.top{background:#df0712;color:#fff;padding:9px 15px;font-size:12px;font-weight:700}.head{background:#fff;border-bottom:1px solid #ddd}.headin{max-width:1100px;margin:auto;min-height:105px;display:flex;align-items:center;justify-content:space-between;padding:15px}.brand h1{margin:0;color:#df0712;font-size:28px}.brand p{margin:5px 0 0;font-size:12px}.home{border:0;background:#df0712;color:#fff;border-radius:7px;padding:11px 17px;font-weight:700;cursor:pointer}.wrap{max-width:1100px;margin:20px auto;padding:0 15px}.title{background:#fff;border-left:5px solid #df0712;border-radius:8px;padding:17px 18px;margin-bottom:15px}.title h2{margin:0 0 5px}.title p{margin:0;color:#666;font-size:13px}.grid{display:flex;flex-direction:column;gap:16px}.card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);cursor:pointer}.img{height:190px;background:#e9eef2}.img img{width:100%;height:100%;object-fit:cover;display:block}.body{padding:15px}.cat{font-size:10px;color:#df0712;font-weight:800}.body h3{margin:8px 0;font-size:21px;line-height:1.45;color:#00AEEF;font-weight:900}.body p{color:#666;font-size:12px;line-height:1.55;min-height:38px}.read{background:#df0712;color:#fff;border:0;border-radius:5px;padding:9px 13px;font-weight:700;cursor:pointer}.empty{background:#fff;padding:35px;text-align:center;border-radius:10px;color:#777}.back{margin-bottom:15px;background:#fff;border:1px solid #ddd;border-radius:7px;padding:10px 14px;cursor:pointer;font-weight:700}@media(max-width:520px){.img{height:210px}.brand h1{font-size:22px}.body h3{font-size:19px;line-height:1.4}}
 .card:focus{outline:3px solid #87ceeb;outline-offset:2px}.body h3{cursor:pointer;color:#00AEEF;font-size:20px;font-weight:900}
-.pagination{display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:wrap;margin:26px 0 36px}.pagination a,.pagination span{min-width:38px;height:38px;padding:0 10px;border:1px solid #d7e0e8;border-radius:7px;background:#fff;color:#123a63;display:inline-flex;align-items:center;justify-content:center;font-weight:800;text-decoration:none}.pagination .active{background:#00AEEF;color:#fff;border-color:#00AEEF}.pagination .next{padding:0 14px}.pagination a:hover{border-color:#00AEEF;color:#00AEEF}.pagination .active:hover{color:#fff}.page-note{text-align:center;color:#777;font-size:12px;margin-top:4px}</style>
+.pagination{display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:wrap;margin:26px 0 36px}.pagination a,.pagination span{min-width:38px;height:38px;padding:0 10px;border:1px solid #d7e0e8;border-radius:7px;background:#fff;color:#123a63;display:inline-flex;align-items:center;justify-content:center;font-weight:800;text-decoration:none}.pagination .active{background:#00AEEF;color:#fff;border-color:#00AEEF}.pagination .next{padding:0 14px}.pagination a:hover{border-color:#00AEEF;color:#00AEEF}.pagination .active:hover{color:#fff}.page-note{text-align:center;color:#777;font-size:12px;margin-top:4px}.rashifal-content{font-size:15px;line-height:1.7;color:#555}.rashifal-content h3,.rashifal-content h4{margin:14px 0 6px;color:#222;font-size:18px}.rashifal-content p{margin:8px 0;min-height:0}.rashifal-content ul,.rashifal-content ol{margin:8px 0;padding-left:24px}.rashifal-content li{margin:4px 0}</style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9100918528334463" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -60,7 +60,7 @@ async function loadRashifal(){
     const rows=await r.json();
     const order=['मेष','वृषभ','मिथुन','कर्क','सिंह','कन्या','तुला','वृश्चिक','धनु','मकर','कुंभ','मीन'];
     const sorted=rows.sort((a,b)=>order.indexOf(a.rashi)-order.indexOf(b.rashi));
-    grid.innerHTML=sorted.map(a=>`<article class="card"><div class="body"><span class="cat">राशिफल</span><h3>${esc(a.title||a.rashi)}</h3><p style="font-size:15px;line-height:1.7;min-height:0">${esc(a.content)}</p>${a.source_name?`<p style="font-size:11px;color:#777;min-height:0">स्रोत: ${esc(a.source_name)}</p>`:''}</div></article>`).join('')||'<div class="empty">इस तारीख का राशिफल उपलब्ध नहीं है।</div>';
+    grid.innerHTML=sorted.map(a=>`<article class="card"><div class="body"><span class="cat">राशिफल</span><h3>${esc(a.title||a.rashi)}</h3><div class="rashifal-content">${safeRichText(a.content)}</div>${a.source_name?`<p style="font-size:11px;color:#777;min-height:0">स्रोत: ${esc(a.source_name)}</p>`:''}</div></article>`).join('')||'<div class="empty">इस तारीख का राशिफल उपलब्ध नहीं है।</div>';
   }catch(e){
     grid.innerHTML='<div class="empty">राशिफल लोड नहीं हो पाया। कृपया थोड़ी देर बाद फिर प्रयास करें।</div>';
   }
@@ -70,6 +70,25 @@ const names={'trending':'🔥 Trending News','news':'📰 Latest News','fact-che
 document.getElementById('heading').textContent=names[wanted]||'📰 News';
 function strip(v){const d=document.createElement('div');d.innerHTML=String(v||'');return d.textContent||''}
 function esc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function safeRichText(v){
+  const tpl=document.createElement('template');
+  tpl.innerHTML=String(v||'');
+  const allowed=new Set(['H3','H4','H5','P','BR','STRONG','B','EM','I','UL','OL','LI','BLOCKQUOTE']);
+  const walk=node=>{
+    [...node.children].forEach(el=>{
+      if(!allowed.has(el.tagName)){
+        const frag=document.createDocumentFragment();
+        while(el.firstChild)frag.appendChild(el.firstChild);
+        el.replaceWith(frag);
+        return;
+      }
+      [...el.attributes].forEach(attr=>el.removeAttribute(attr.name));
+      walk(el);
+    });
+  };
+  walk(tpl.content);
+  return tpl.innerHTML;
+}
 function norm(v){return String(v||'').toLowerCase().trim().replace(/[\s_-]+/g,' ')}
 function homeCategory(a){
   const t=norm(a.title);

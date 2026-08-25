@@ -21,11 +21,6 @@
 <select id="rDay" style="padding:9px;border:1px solid #ccc;border-radius:6px"></select>
 <select id="rMonth" style="padding:9px;border:1px solid #ccc;border-radius:6px"></select>
 <select id="rYear" style="padding:9px;border:1px solid #ccc;border-radius:6px"></select>
-<select id="rashiSelect" style="padding:9px;border:1px solid #ccc;border-radius:6px">
-<option value="all">सभी राशियाँ</option>
-<option>मेष</option><option>वृषभ</option><option>मिथुन</option><option>कर्क</option><option>सिंह</option><option>कन्या</option>
-<option>तुला</option><option>वृश्चिक</option><option>धनु</option><option>मकर</option><option>कुंभ</option><option>मीन</option>
-</select>
 <button id="rGo" class="read" type="button">देखें</button>
 </div></div>
 <div id="grid" class="grid"></div><div id="pagination" class="pagination" aria-label="Pagination"></div></main>
@@ -35,8 +30,8 @@ const KEY="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
 const params=new URLSearchParams(location.search);
 const canonicalUrl=document.getElementById('canonical');
 const allowedCategories=['trending','news','fact-check','explained','entertainment','sports','tech-education','social','rashifal'];
-const requestedCategory=(params.get('category')||'news').toLowerCase();
-const safeCategory=allowedCategories.includes(requestedCategory)?requestedCategory:'news';
+const requestedCategory=(params.get('category')||'news').toLowerCase().trim();
+const safeCategory=requestedCategory||'news';
 if(canonicalUrl){
   canonicalUrl.href='https://bharat-viral.netlify.app/category.html?category='+encodeURIComponent(safeCategory);
 }
@@ -64,10 +59,8 @@ async function loadRashifal(){
     if(!r.ok)throw Error(r.status);
     const rows=await r.json();
     const order=['मेष','वृषभ','मिथुन','कर्क','सिंह','कन्या','तुला','वृश्चिक','धनु','मकर','कुंभ','मीन'];
-    const selectedRashi=document.getElementById('rashiSelect').value;
-    const filtered=selectedRashi==='all'?rows:rows.filter(a=>a.rashi===selectedRashi);
-    const sorted=filtered.sort((a,b)=>order.indexOf(a.rashi)-order.indexOf(b.rashi));
-    grid.innerHTML=sorted.map(a=>`<article class="card"><div class="body"><span class="cat">राशिफल</span><h3>${esc(a.title||a.rashi)}</h3><p style="font-size:15px;line-height:1.7;min-height:0">${renderRashifal(a.content)}</p>${a.source_name?`<p style="font-size:11px;color:#777;min-height:0">स्रोत: ${esc(a.source_name)}</p>`:''}</div></article>`).join('')||'<div class="empty">इस तारीख का राशिफल उपलब्ध नहीं है।</div>';
+    const sorted=rows.sort((a,b)=>order.indexOf(a.rashi)-order.indexOf(b.rashi));
+    grid.innerHTML=sorted.map(a=>`<article class="card"><div class="body"><span class="cat">राशिफल</span><h3>${esc(a.title||a.rashi)}</h3><p style="font-size:15px;line-height:1.7;min-height:0">${esc(a.content)}</p>${a.source_name?`<p style="font-size:11px;color:#777;min-height:0">स्रोत: ${esc(a.source_name)}</p>`:''}</div></article>`).join('')||'<div class="empty">इस तारीख का राशिफल उपलब्ध नहीं है।</div>';
   }catch(e){
     grid.innerHTML='<div class="empty">राशिफल लोड नहीं हो पाया। कृपया थोड़ी देर बाद फिर प्रयास करें।</div>';
   }
@@ -76,13 +69,7 @@ async function loadRashifal(){
 const names={'trending':'🔥 Trending News','news':'📰 Latest News','fact-check':'🛡️ Fact Check','explained':'💡 Explained','entertainment':'🎬 Entertainment','sports':'⚽ Sports','tech-education':'💻 Tech & Education','social':'📱 Social Media','rashifal':'🌙 Rashifal'};
 document.getElementById('heading').textContent=names[wanted]||'📰 News';
 function strip(v){const d=document.createElement('div');d.innerHTML=String(v||'');return d.textContent||''}
-function esc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}\nfunction renderRashifal(v){
-  const html=String(v||'');
-  if(/<\/?(h[1-6]|p|strong|b|br|ul|ol|li)[^>]*>/i.test(html)) return html;
-  const box=document.createElement('textarea');
-  box.innerHTML=html;
-  return esc(box.value).replace(/\\n/g,'<br>');
-}
+function esc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function norm(v){return String(v||'').toLowerCase().trim().replace(/[\s_-]+/g,' ')}
 function homeCategory(a){
   const t=norm(a.title);
@@ -121,8 +108,10 @@ async function load(){
     const safeAll=all.length||!rows.length?all:rows;
     let items=safeAll;
     const matches=(a,key)=>{
-      const raw=[norm(a.category),norm(a.article_type),...(Array.isArray(a.categories)?a.categories.map(norm):[])];
-      return homeCategory(a)===key || raw.some(v=>v===norm(key)||v.includes(norm(key)));
+      const wantedNorm=norm(key);
+      const raw=[norm(a.category),norm(a.article_type),...(Array.isArray(a.categories)?a.categories.map(norm):[])].filter(Boolean);
+      return homeCategory(a)===key ||
+             raw.some(v=>v===wantedNorm||v.includes(wantedNorm)||wantedNorm.includes(v));
     };
 
     if(wanted==='trending'){

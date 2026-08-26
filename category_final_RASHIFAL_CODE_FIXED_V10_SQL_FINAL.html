@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="google-adsense-account" content="ca-pub-9100918528334463">
+<title id="pageTitle">Bharat Viral - Category</title>
+<meta id="metaDescription" name="description" content="Bharat Viral की प्रकाशित खबरें देखें।">
+<link id="canonical" rel="canonical" href="https://bharat-viral.netlify.app/category.html?category=news">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#fff;color:#171717;font-family:Arial,sans-serif}.top{background:#df0712;color:#fff;padding:9px 15px;font-size:12px;font-weight:700}.head{background:#fff;border-bottom:1px solid #ddd}.headin{max-width:1100px;margin:auto;min-height:105px;display:flex;align-items:center;justify-content:space-between;padding:15px}.brand h1{margin:0;color:#df0712;font-size:28px}.brand p{margin:5px 0 0;font-size:12px}.home{border:0;background:#df0712;color:#fff;border-radius:7px;padding:11px 17px;font-weight:700;cursor:pointer}.wrap{max-width:1100px;margin:20px auto;padding:0 15px}.title{background:#fff;border-left:5px solid #df0712;border-radius:8px;padding:17px 18px;margin-bottom:15px}.title h2{margin:0 0 5px}.title p{margin:0;color:#666;font-size:13px}.grid{display:flex;flex-direction:column;gap:16px}.card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);cursor:pointer}.img{height:190px;background:#e9eef2}.img img{width:100%;height:100%;object-fit:cover;display:block}.loading{background:#f5f7f9;padding:30px;text-align:center;border-radius:10px;color:#666}.card-link{display:block;color:inherit;text-decoration:none}.card-link:focus{outline:0}.body{padding:15px}.cat{font-size:10px;color:#df0712;font-weight:800}.body h3{margin:8px 0;font-size:21px;line-height:1.45;color:#00AEEF;font-weight:900}.body p{color:#666;font-size:12px;line-height:1.55;min-height:38px}.read{background:#df0712;color:#fff;border:0;border-radius:5px;padding:9px 13px;font-weight:700;cursor:pointer}.empty{background:#fff;padding:35px;text-align:center;border-radius:10px;color:#777}.back{margin-bottom:15px;background:#fff;border:1px solid #ddd;border-radius:7px;padding:10px 14px;cursor:pointer;font-weight:700}@media(max-width:520px){.img{height:210px}.brand h1{font-size:22px}.body h3{font-size:19px;line-height:1.4}}
+.card:focus{outline:3px solid #87ceeb;outline-offset:2px}.body h3{cursor:pointer;color:#00AEEF;font-size:20px;font-weight:900}
+.pagination{display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:wrap;margin:26px 0 36px}.pagination a,.pagination span{min-width:38px;height:38px;padding:0 10px;border:1px solid #d7e0e8;border-radius:7px;background:#fff;color:#123a63;display:inline-flex;align-items:center;justify-content:center;font-weight:800;text-decoration:none}.pagination .active{background:#00AEEF;color:#fff;border-color:#00AEEF}.pagination .next{padding:0 14px}.pagination a:hover{border-color:#00AEEF;color:#00AEEF}.pagination .active:hover{color:#fff}.page-note{text-align:center;color:#777;font-size:12px;margin-top:4px}.rashifal-content{font-size:15px;line-height:1.7;color:#555}.rashifal-content h3,.rashifal-content h4{margin:14px 0 6px;color:#222;font-size:18px}.rashifal-content p{margin:8px 0;min-height:0}.rashifal-content ul,.rashifal-content ol{margin:8px 0;padding-left:24px}.rashifal-content li{margin:4px 0}.rashifal-content code,.rashifal-content pre{font-family:inherit;font-size:inherit;background:transparent;border:0;padding:0;white-space:normal}.img-error{background:#e9eef2;min-height:190px}.img-error::after{content:"Image unavailable";display:flex;align-items:center;justify-content:center;height:100%;min-height:190px;color:#777;font-size:13px}</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9100918528334463" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="top">🔥 BHARAT VIRAL • वायरल खबरों की सच्ची जानकारी</div>
+<header class="head"><div class="headin"><div class="brand"><h1>BHARAT VIRAL</h1><p>जो वायरल है, उसकी सच्ची जानकारी</p></div><button class="home" onclick="location.href='index.html'">🏠 HOME</button></div></header>
+<main class="wrap"><button class="back" onclick="history.back()">← वापस</button><div class="title"><h2 id="heading">News</h2><p id="sub">इस category की प्रकाशित खबरें</p></div>
+<div id="rashifalPicker" style="display:none;background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:15px">
+<label style="font-weight:700;font-size:13px">राशिफल की तारीख चुनें</label>
+<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+<select id="rDay" style="padding:9px;border:1px solid #ccc;border-radius:6px"></select>
+<select id="rMonth" style="padding:9px;border:1px solid #ccc;border-radius:6px"></select>
+<select id="rYear" style="padding:9px;border:1px solid #ccc;border-radius:6px"></select>
+<button id="rGo" class="read" type="button">देखें</button>
+</div></div>
+<div id="grid" class="grid"></div><div id="pagination" class="pagination" aria-label="Pagination"></div></main>
+<script>
+'use strict';
+
+const SUPABASE_URL="https://ocarsylhsyxjqpzidndb.supabase.co";
+const SUPABASE_KEY="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+const params=new URLSearchParams(location.search);
+const PAGE_SIZE=7;
+let page=Math.max(1,parseInt(params.get('page')||'1',10)||1);
+let catalog=[];
+let wanted=(params.get('category')||'news').toLowerCase().trim();
+
+const heading=document.getElementById('heading');
+const sub=document.getElementById('sub');
+const grid=document.getElementById('grid');
+const pagination=document.getElementById('pagination');
+const picker=document.getElementById('rashifalPicker');
+const canonical=document.getElementById('canonical');
+const meta=document.getElementById('metaDescription');
+
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function loading(t){grid.innerHTML='<div class="loading" role="status">'+esc(t)+'</div>';pagination.innerHTML='';}
+function failed(t){grid.innerHTML='<div class="empty" role="alert">'+esc(t)+'</div>';pagination.innerHTML='';}
+
+async function fetchJson(url,options={}){
+ const r=await fetch(url,{...options,headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,...(options.headers||{})}});
+ if(!r.ok)throw new Error('HTTP '+r.status);
+ return r.json();
+}
+
+/* Category names, icons and descriptions now come from Supabase. */
+async function loadCatalog(){
+ const rows=await fetchJson(SUPABASE_URL+'/rest/v1/rpc/get_active_categories',{cache:'default'});
+ catalog=Array.isArray(rows)?rows:[];
+ if(!catalog.some(c=>c.slug===wanted)) wanted='news';
+
+ const c=catalog.find(x=>x.slug===wanted)||catalog[0];
+ if(!c)throw new Error('No active categories configured');
+
+ heading.textContent=(c.icon||'📰')+' '+c.name;
+ sub.textContent=c.description||'';
+ document.title=c.name+' | Bharat Viral';
+ if(meta)meta.content=c.description||c.name;
+ if(canonical)canonical.href='https://bharat-viral.netlify.app/category.html?category='+encodeURIComponent(wanted);
+
+ return c;
+}
+
+function imageMarkup(a){
+ const url=a.image_url||'';
+ const title=esc(a.title||'बड़ी खबर');
+ if(!url)return '';
+ return '<div class="img"><img src="'+esc(url)+'" alt="'+title+
+ '" loading="lazy" decoding="async" referrerpolicy="no-referrer" '+
+ 'onerror="this.onerror=null;this.closest(\'.img\').classList.add(\'img-error\');this.remove();"></div>';
+}
+
+function card(a){
+ const c=catalog.find(x=>x.slug===a.category_slug);
+ const label=esc(c?((c.icon||'')+' '+c.name):a.category_slug||'NEWS');
+ const title=esc(a.title||'बड़ी खबर');
+ return '<article class="card"><a class="card-link" href="article.html?id='+encodeURIComponent(a.id)+
+ '" aria-label="'+title+'">'+imageMarkup(a)+
+ '<div class="body"><span class="cat">'+label+'</span><h3>'+title+
+ '</h3><p>'+esc(a.excerpt||'पूरी खबर पढ़ें')+
+ '</p><span class="read">पूरी खबर पढ़ें</span></div></a></article>';
+}
+
+async function loadArticles(){
+ loading('खबरें लोड हो रही हैं…');
+ const rows=await fetchJson(SUPABASE_URL+'/rest/v1/rpc/get_category_articles',{
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({p_category:wanted,p_limit:PAGE_SIZE,p_offset:(page-1)*PAGE_SIZE}),
+  cache:'no-store'
+ });
+ const list=Array.isArray(rows)?rows:[];
+ const total=list.length?Number(list[0].total_count)||list.length:0;
+ grid.innerHTML=list.map(card).join('')||
+   '<div class="empty">इस category में अभी कोई प्रकाशित खबर उपलब्ध नहीं है।</div>';
+ renderPagination(total);
+}
+
+function renderPagination(total){
+ if(!total||total<=PAGE_SIZE){pagination.innerHTML='';return;}
+ const pages=Math.ceil(total/PAGE_SIZE);
+ if(page>pages){location.replace('category.html?category='+encodeURIComponent(wanted)+'&page=1');return;}
+ let from=Math.max(1,page-2),to=Math.min(pages,from+4);
+ if(to-from+1<5)from=Math.max(1,to-4);
+ const make=(p,l,c='')=>'<a class="'+c+'" href="category.html?category='+encodeURIComponent(wanted)+'&page='+p+'">'+l+'</a>';
+ let h=page>1?make(page-1,'‹ पिछला','next'):'';
+ if(from>1)h+=make(1,'1');
+ if(from>2)h+='<span aria-hidden="true">…</span>';
+ for(let p=from;p<=to;p++)h+=p===page?'<span class="active" aria-current="page">'+p+'</span>':make(p,p);
+ if(to<pages-1)h+='<span aria-hidden="true">…</span>';
+ if(to<pages)h+=make(pages,pages);
+ if(page<pages)h+=make(page+1,'अगला ›','next');
+ h+='<div class="page-note" style="flex-basis:100%">पेज '+page+' / '+pages+'</div>';
+ pagination.innerHTML=h;
+}
+
+/* Rashifal is also served through a Supabase RPC. */
+let rashifalController=null;
+function populateDays(){
+ const d=document.getElementById('rDay'),m=document.getElementById('rMonth'),y=document.getElementById('rYear');
+ const old=Number(d.value)||new Date().getDate();
+ const max=new Date(Number(y.value),Number(m.value),0).getDate();
+ d.innerHTML='';
+ for(let i=1;i<=max;i++)d.insertAdjacentHTML('beforeend','<option value="'+String(i).padStart(2,'0')+'">'+i+'</option>');
+ d.value=String(Math.min(old,max)).padStart(2,'0');
+}
+function setupRashifal(){
+ picker.style.display='block';
+ const now=new Date(),d=document.getElementById('rDay'),m=document.getElementById('rMonth'),y=document.getElementById('rYear');
+ for(let i=1;i<=12;i++)m.insertAdjacentHTML('beforeend','<option value="'+String(i).padStart(2,'0')+'">'+i+'</option>');
+ for(let i=now.getFullYear();i>=now.getFullYear()-10;i--)y.insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'</option>');
+ m.value=String(now.getMonth()+1).padStart(2,'0');y.value=String(now.getFullYear());
+ populateDays();d.value=String(now.getDate()).padStart(2,'0');
+ m.addEventListener('change',populateDays);y.addEventListener('change',populateDays);
+ document.getElementById('rGo').addEventListener('click',loadRashifal);
+}
+function safeRichText(v){
+ let raw=String(v??'').trim().replace(/^```(?:html|HTML)?\s*/,'').replace(/\s*```$/,'').trim();
+ if(/&lt;\/?(?:h[3-5]|p|strong|b|em|i|ul|ol|li|br|blockquote)\b/i.test(raw)){
+  const d=document.createElement('textarea');d.innerHTML=raw;raw=d.value;
+ }
+ raw=raw.replace(/<!doctype[^>]*>/ig,'').replace(/<\/?(?:html|head|body)[^>]*>/ig,'');
+ const tpl=document.createElement('template');tpl.innerHTML=raw;
+ const allowed=new Set(['H3','H4','H5','P','BR','STRONG','B','EM','I','UL','OL','LI','BLOCKQUOTE']);
+ const walk=n=>[...n.children].forEach(el=>{
+  if(!allowed.has(el.tagName)){const f=document.createDocumentFragment();while(el.firstChild)f.appendChild(el.firstChild);el.replaceWith(f);return;}
+  [...el.attributes].forEach(a=>el.removeAttribute(a.name));walk(el);
+ });
+ walk(tpl.content);return tpl.innerHTML;
+}
+async function loadRashifal(){
+ if(rashifalController)rashifalController.abort();
+ rashifalController=new AbortController();
+ const y=Number(document.getElementById('rYear').value),m=Number(document.getElementById('rMonth').value),d=Number(document.getElementById('rDay').value);
+ const date=y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+ loading('राशिफल लोड हो रहा है…');
+ try{
+  const rows=await fetchJson(SUPABASE_URL+'/rest/v1/rpc/get_daily_rashifal',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({p_date:date}),
+   cache:'default',
+   signal:rashifalController.signal
+  });
+  grid.innerHTML=(Array.isArray(rows)?rows:[]).map(a=>
+   '<article class="card"><div class="body"><span class="cat">🌙 राशिफल</span><h3>'+
+   esc(a.title||a.rashi||'राशिफल')+'</h3><div class="rashifal-content">'+safeRichText(a.content)+'</div>'+
+   (a.source_name?'<p style="font-size:11px;color:#777;min-height:0">स्रोत: '+esc(a.source_name)+'</p>':'')+
+   '</div></article>'
+  ).join('')||'<div class="empty">इस तारीख का राशिफल उपलब्ध नहीं है।</div>';
+  pagination.innerHTML='';
+ }catch(e){if(e.name!=='AbortError'){console.error(e);failed('राशिफल लोड नहीं हो पाया। कृपया थोड़ी देर बाद फिर प्रयास करें।');}}
+}
+
+async function init(){
+ loading('लोड हो रहा है…');
+ try{
+  const c=await loadCatalog();
+  if(c.slug==='rashifal'){setupRashifal();await loadRashifal();}
+  else await loadArticles();
+ }catch(e){console.error(e);failed('डेटा लोड नहीं हो पाया। कृपया थोड़ी देर बाद फिर प्रयास करें।');}
+}
+init();
+</script></body></html>

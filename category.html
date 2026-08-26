@@ -76,10 +76,10 @@ function safeRichText(v){
   // Use pehle normal HTML me convert karke hi render karein, taaki code text
   // ke roop me page par na dikhe.
   let raw=String(v??'').trim();
-  raw=raw.replace(/^```(?:html|HTML)?\\s*/,'').replace(/\\s*```$/,'').trim();
+  raw=raw.replace(/^```(?:html|HTML)?\s*/,'').replace(/\s*```$/,'').trim();
 
   // Decode escaped HTML only when it actually looks like HTML.
-  if(/&lt;\\/?(?:h[3-5]|p|strong|b|em|i|ul|ol|li|br|blockquote)\\b/i.test(raw)){
+  if(/&lt;\/?(?:h[3-5]|p|strong|b|em|i|ul|ol|li|br|blockquote)\b/i.test(raw)){
     const decoder=document.createElement('textarea');
     decoder.innerHTML=raw;
     raw=decoder.value;
@@ -87,7 +87,7 @@ function safeRichText(v){
 
   // Remove accidental full-document wrappers if they were pasted into content.
   raw=raw.replace(/<!doctype[^>]*>/ig,'')
-         .replace(/<\\/?(?:html|head|body)[^>]*>/ig,'');
+         .replace(/<\/?(?:html|head|body)[^>]*>/ig,'');
 
   const tpl=document.createElement('template');
   tpl.innerHTML=raw;

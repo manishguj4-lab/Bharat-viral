@@ -1,6 +1,13 @@
 [functions]
   directory = "netlify/functions"
 
+[build]
+  edge_functions = "netlify/edge-functions"
+
+[[edge_functions]]
+  function = "article-seo"
+  path = "/article/*"
+
 [[redirects]]
   from = "/sitemap.xml"
   to = "/.netlify/functions/sitemap"
@@ -10,11 +17,5 @@
 [[redirects]]
   from = "/news-sitemap.xml"
   to = "/.netlify/functions/news-sitemap"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/article/:slug"
-  to = "/.netlify/edge-functions/article-seo?slug=:slug"
   status = 200
   force = true

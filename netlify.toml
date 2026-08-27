@@ -6,3 +6,15 @@
   to = "/.netlify/functions/sitemap"
   status = 200
   force = true
+
+[[redirects]]
+  from = "/news-sitemap.xml"
+  to = "/.netlify/functions/news-sitemap"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/article/:slug"
+  to = "/.netlify/edge-functions/article-seo?slug=:slug"
+  status = 200
+  force = true

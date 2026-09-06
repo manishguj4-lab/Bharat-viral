@@ -465,8 +465,8 @@ html,body{max-width:100%;overflow-x:hidden!important}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
-  const url="https://ocarsylhsyxjqpzidndb.supabase.co";
-  const key="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+  const url="__SUPABASE_URL__";
+  const key="__SUPABASE_KEY__";
   function init(){
     if(window.supabase && !window.supabaseClient){
       window.supabaseClient=window.supabase.createClient(url,key);
@@ -749,8 +749,8 @@ document.getElementById("heroNext").addEventListener("click",(e)=>{e.stopPropaga
 document.getElementById("heroPrev").addEventListener("click",(e)=>{e.stopPropagation();prevHero();restartHeroTimer();});
 
 async function loadPublishedArticles(){
-  const U="https://ocarsylhsyxjqpzidndb.supabase.co";
-  const K="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+  const U="__SUPABASE_URL__";
+  const K="__SUPABASE_KEY__";
   const H={apikey:K,Authorization:"Bearer "+K};
 
   const norm=v=>String(v??"").toLowerCase().trim().replace(/[\s_-]+/g,"-");
@@ -1113,8 +1113,8 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
 
 <script id="bv-final-breaking-js">
 (function(){
-  const U="https://ocarsylhsyxjqpzidndb.supabase.co";
-  const K="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+  const U="__SUPABASE_URL__";
+  const K="__SUPABASE_KEY__";
   const H={apikey:K,Authorization:"Bearer "+K};
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
   async function loadBreakingNews(){

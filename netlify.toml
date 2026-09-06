@@ -2,6 +2,7 @@
   directory = "netlify/functions"
 
 [build]
+  command = "bash build.sh"
   edge_functions = "netlify/edge-functions"
 
 [[edge_functions]]

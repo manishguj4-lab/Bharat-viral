@@ -22,6 +22,24 @@ function isoDate(value) {
     : d.toISOString();
 }
 
+function buildSitemapResponse(urlElements, cacheControl) {
+  const body = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...urlElements,
+    "</urlset>"
+  ].join("\n");
+
+  return {
+    statusCode: 200,
+    headers: {
+      "Content-Type": "application/xml; charset=UTF-8",
+      "Cache-Control": cacheControl
+    },
+    body
+  };
+}
+
 exports.handler = async function () {
   try {
     const endpoint =
@@ -76,34 +94,20 @@ exports.handler = async function () {
       });
     }
 
-    const body = [
-      '<?xml version="1.0" encoding="UTF-8"?>',
-      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    const urlElements = urls.map(
+      (u) =>
+        "  <url>" +
+        `<loc>${xmlEscape(u.loc)}</loc>` +
+        (u.lastmod
+          ? `<lastmod>${xmlEscape(u.lastmod)}</lastmod>`
+          : "") +
+        "</url>"
+    );
 
-      ...urls.map(
-        (u) =>
-          "  <url>" +
-          `<loc>${xmlEscape(u.loc)}</loc>` +
-          (u.lastmod
-            ? `<lastmod>${xmlEscape(u.lastmod)}</lastmod>`
-            : "") +
-          "</url>"
-      ),
-
-      "</urlset>"
-    ].join("\n");
-
-    return {
-      statusCode: 200,
-
-      headers: {
-        "Content-Type": "application/xml; charset=UTF-8",
-        "Cache-Control":
-          "public, max-age=300, s-maxage=300"
-      },
-
-      body
-    };
+    return buildSitemapResponse(
+      urlElements,
+      "public, max-age=300, s-maxage=300"
+    );
 
   } catch (error) {
 
@@ -122,28 +126,14 @@ exports.handler = async function () {
       `${SITE}/google-trends.html`
     ];
 
-    const body = [
-      '<?xml version="1.0" encoding="UTF-8"?>',
-      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    const urlElements = fallback.map(
+      (url) =>
+        `  <url><loc>${xmlEscape(url)}</loc></url>`
+    );
 
-      ...fallback.map(
-        (url) =>
-          `  <url><loc>${xmlEscape(url)}</loc></url>`
-      ),
-
-      "</urlset>"
-    ].join("\n");
-
-    return {
-      statusCode: 200,
-
-      headers: {
-        "Content-Type": "application/xml; charset=UTF-8",
-        "Cache-Control":
-          "public, max-age=60"
-      },
-
-      body
-    };
+    return buildSitemapResponse(
+      urlElements,
+      "public, max-age=60"
+    );
   }
 };

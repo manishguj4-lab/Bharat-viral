@@ -74,22 +74,56 @@ async function loadCatalog(){
 
 function imageMarkup(a){
  const url=a.image_url||'';
- const title=esc(a.title||'बड़ी खबर');
- if(!url)return '';
- return '<div class="img"><img src="'+esc(url)+'" alt="'+title+
- '" loading="lazy" decoding="async" referrerpolicy="no-referrer" '+
- 'onerror="this.onerror=null;this.closest(\'.img\').classList.add(\'img-error\');this.remove();"></div>';
+ const title=a.title||'बड़ी खबर';
+ if(!url)return null;
+ const div=document.createElement('div');
+ div.className='img';
+ const img=document.createElement('img');
+ img.src=url;
+ img.alt=title;
+ img.loading='lazy';
+ img.decoding='async';
+ img.referrerPolicy='no-referrer';
+ img.onerror=function(){
+  this.onerror=null;
+  this.closest('.img').classList.add('img-error');
+  this.remove();
+ };
+ div.appendChild(img);
+ return div;
 }
 
 function card(a){
  const c=catalog.find(x=>x.slug===a.category_slug);
- const label=esc(c?((c.icon||'')+' '+c.name):a.category_slug||'NEWS');
- const title=esc(a.title||'बड़ी खबर');
- return '<article class="card"><a class="card-link" href="article.html?id='+encodeURIComponent(a.id)+
- '" aria-label="'+title+'">'+imageMarkup(a)+
- '<div class="body"><span class="cat">'+label+'</span><h3>'+title+
- '</h3><p>'+esc(a.excerpt||'पूरी खबर पढ़ें')+
- '</p><span class="read">पूरी खबर पढ़ें</span></div></a></article>';
+ const label=c?((c.icon||'')+' '+c.name):a.category_slug||'NEWS';
+ const title=a.title||'बड़ी खबर';
+ const article=document.createElement('article');
+ article.className='card';
+ const aTag=document.createElement('a');
+ aTag.className='card-link';
+ aTag.href='article.html?id='+encodeURIComponent(a.id);
+ aTag.setAttribute('aria-label', title);
+ const imgElem=imageMarkup(a);
+ if(imgElem)aTag.appendChild(imgElem);
+ const bodyDiv=document.createElement('div');
+ bodyDiv.className='body';
+ const catSpan=document.createElement('span');
+ catSpan.className='cat';
+ catSpan.textContent=label;
+ bodyDiv.appendChild(catSpan);
+ const h3=document.createElement('h3');
+ h3.textContent=title;
+ bodyDiv.appendChild(h3);
+ const p=document.createElement('p');
+ p.textContent=a.excerpt||'पूरी खबर पढ़ें';
+ bodyDiv.appendChild(p);
+ const readSpan=document.createElement('span');
+ readSpan.className='read';
+ readSpan.textContent='पूरी खबर पढ़ें';
+ bodyDiv.appendChild(readSpan);
+ aTag.appendChild(bodyDiv);
+ article.appendChild(aTag);
+ return article;
 }
 
 async function loadArticles(){
@@ -102,8 +136,15 @@ async function loadArticles(){
  });
  const list=Array.isArray(rows)?rows:[];
  const total=list.length?Number(list[0].total_count)||list.length:0;
- grid.innerHTML=list.map(card).join('')||
-   '<div class="empty">इस category में अभी कोई प्रकाशित खबर उपलब्ध नहीं है।</div>';
+ grid.innerHTML='';
+ if(list.length===0){
+  const emptyDiv=document.createElement('div');
+  emptyDiv.className='empty';
+  emptyDiv.textContent='इस category में अभी कोई प्रकाशित खबर उपलब्ध नहीं है।';
+  grid.appendChild(emptyDiv);
+ }else{
+  list.forEach(a=>grid.appendChild(card(a)));
+ }
  renderPagination(total);
 }
 

@@ -1841,6 +1841,10 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
 </div>
 </div>
 <script>
+window.supabaseClientPromise = new Promise(resolve => {
+  window.resolveSupabaseClient = resolve;
+});
+
 (function(){
   const SUPABASE_URL = "https://ocarsylhsyxjqpzidndb.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
@@ -1927,6 +1931,10 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
           }
         }
       );
+
+      if (window.resolveSupabaseClient) {
+        window.resolveSupabaseClient(window.supabaseClient);
+      }
 
       // Register listener before checking the current session.
       window.supabaseClient.auth.onAuthStateChange(function(event, session){
@@ -5571,9 +5579,17 @@ body.bv-dark #menuOverlay{
   }
 
   async function getClient(){
-    for(let i=0;i<50;i++){
-      if(window.supabaseClient) return window.supabaseClient;
-      await new Promise(r=>setTimeout(r,100));
+    if (window.supabaseClient) return window.supabaseClient;
+    if (window.supabaseClientPromise) {
+      try {
+        const client = await Promise.race([
+          window.supabaseClientPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Supabase connection timeout")), 5000))
+        ]);
+        if (client) return client;
+      } catch (err) {
+        throw new Error("Supabase connection तैयार नहीं हुई।");
+      }
     }
     throw new Error("Supabase connection तैयार नहीं हुई।");
   }

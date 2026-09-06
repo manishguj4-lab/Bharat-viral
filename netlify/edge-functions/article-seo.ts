@@ -28,7 +28,7 @@ function toAbsoluteUrl(value: unknown): string {
   }
 }
 
-function toKeywordList(...values: unknown[]): string[] {
+export function toKeywordList(...values: unknown[]): string[] {
   const result: string[] = [];
   for (const value of values) {
     if (Array.isArray(value)) {

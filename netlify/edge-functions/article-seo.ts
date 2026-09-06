@@ -1,5 +1,5 @@
-const SUPABASE_URL = "https://ocarsylhsyxjqpzidndb.supabase.co";
-const SUPABASE_KEY = "sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+const SUPABASE_URL = Netlify.env.get("SUPABASE_URL") || "https://ocarsylhsyxjqpzidndb.supabase.co";
+const SUPABASE_KEY = Netlify.env.get("SUPABASE_KEY") || "";
 const SITE = "https://bharat-viral.netlify.app";
 
 function esc(value: unknown): string {

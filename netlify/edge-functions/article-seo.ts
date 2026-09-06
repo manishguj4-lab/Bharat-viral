@@ -1,5 +1,10 @@
-const SUPABASE_URL = "https://ocarsylhsyxjqpzidndb.supabase.co";
-const SUPABASE_KEY = "sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+declare const Netlify: any;
+declare const process: any;
+declare const Deno: any;
+
+const SUPABASE_URL = (typeof Netlify !== 'undefined' ? Netlify.env.get("SUPABASE_URL") : null) || (typeof Deno !== 'undefined' ? Deno.env.get("SUPABASE_URL") : null) || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : null) || "https://ocarsylhsyxjqpzidndb.supabase.co";
+const SUPABASE_KEY = (typeof Netlify !== 'undefined' ? Netlify.env.get("SUPABASE_KEY") : null) || (typeof Deno !== 'undefined' ? Deno.env.get("SUPABASE_KEY") : null) || (typeof process !== 'undefined' ? process.env.SUPABASE_KEY : null) || "";
+
 const SITE = "https://bharat-viral.netlify.app";
 
 function esc(value: unknown): string {
@@ -354,5 +359,4 @@ ${content}
       }
     );
   }
-          }
-  
+}

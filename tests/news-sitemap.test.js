@@ -14,7 +14,10 @@ test('news-sitemap handler', async (t) => {
     const recentDate = new Date(now - 1000 * 60 * 60 * 2).toISOString(); // 2 hours ago
 
     global.fetch = async (url, options) => {
-      assert.strictEqual(options.headers.apikey, "sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0");
+      // Verify that the necessary headers are passed, without hardcoding specific values
+      assert.ok(options.headers.apikey, 'apikey header should be present');
+      assert.ok(options.headers.Authorization, 'Authorization header should be present');
+
       return {
         ok: true,
         json: async () => [
@@ -67,14 +70,17 @@ test('news-sitemap handler', async (t) => {
     let consoleErrorCalled = false;
     console.error = () => { consoleErrorCalled = true; };
 
-    const response = await handler();
+    try {
+      const response = await handler();
 
-    console.error = originalConsoleError;
-
-    assert.strictEqual(consoleErrorCalled, true, 'console.error should have been called');
-    assert.strictEqual(response.statusCode, 200);
-    assert.ok(response.body.includes('<urlset'), 'Body should contain urlset');
-    assert.ok(!response.body.includes('<url>'), 'Body should not contain any urls');
+      assert.strictEqual(consoleErrorCalled, true, 'console.error should have been called');
+      assert.strictEqual(response.statusCode, 200);
+      assert.ok(response.body.includes('<urlset'), 'Body should contain urlset');
+      assert.ok(!response.body.includes('<url>'), 'Body should not contain any urls');
+    } finally {
+      // Ensure console.error is always restored
+      console.error = originalConsoleError;
+    }
   });
 
   await t.test('escapes XML special characters correctly', async () => {

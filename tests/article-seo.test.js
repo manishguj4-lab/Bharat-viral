@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import { toKeywordList } from './article-seo.ts';
+import { toKeywordList } from '../netlify/edge-functions/article-seo.ts';
 
 test('toKeywordList edge cases', async (t) => {
   await t.test('handles empty and undefined inputs', () => {

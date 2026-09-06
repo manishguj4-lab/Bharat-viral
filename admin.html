@@ -4230,8 +4230,6 @@ function collect(status){
         const ins=await sb.from("article_tags").insert(rows);
         if(ins.error) throw ins.error;
       }
-
-      console.log("Bharat Viral: auto/manual tags synced", [...unique.values()].map(t=>t.name));
     }catch(err){
       console.warn("Bharat Viral auto tags:",err.message||err);
     }

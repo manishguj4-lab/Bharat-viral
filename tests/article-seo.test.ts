@@ -1,5 +1,5 @@
 import { assertEquals, assertStringIncludes } from "https://deno.land/std@0.200.0/assert/mod.ts";
-import handler from "./netlify/edge-functions/article-seo.ts";
+import handler from "../netlify/edge-functions/article-seo.ts";
 
 const originalFetch = globalThis.fetch;
 

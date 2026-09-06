@@ -2548,6 +2548,20 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
   textarea.setSelectionRange(pos,pos);
  }
 
+
+ async function uploadToSupabaseStorage(path, file, contentType) {
+  const upload = await window.supabaseClient.storage
+    .from("article-images")
+    .upload(path, file, {
+      upsert: false,
+      contentType: contentType
+    });
+  if (upload.error) throw upload.error;
+  return window.supabaseClient.storage
+    .from("article-images")
+    .getPublicUrl(path).data.publicUrl;
+ }
+
  async function uploadInlineImage(file){
   const session=await window.supabaseClient.auth.getUser();
   if(!session.data.user) throw new Error("Admin login session नहीं मिली।");
@@ -2555,9 +2569,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
   if(file.size>5*1024*1024) throw new Error("Inline photo 5 MB से छोटी रखें।");
   const safeName=file.name.toLowerCase().replace(/[^a-z0-9._-]/g,"-");
   const path=session.data.user.id+"/inline-"+Date.now()+"-"+safeName;
-  const upload=await window.supabaseClient.storage.from("article-images").upload(path,file,{upsert:false,contentType:file.type});
-  if(upload.error) throw upload.error;
-  return window.supabaseClient.storage.from("article-images").getPublicUrl(path).data.publicUrl;
+  return await uploadToSupabaseStorage(path, file, file.type);
  }
 
  document.getElementById("insertInlineImage").addEventListener("click",async function(){
@@ -2593,9 +2605,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
   if(file.size>20*1024*1024) throw new Error("PDF 20 MB से छोटी रखें।");
   const safeName=file.name.toLowerCase().replace(/[^a-z0-9._-]/g,"-");
   const path=session.data.user.id+"/inline-pdf-"+Date.now()+"-"+safeName;
-  const upload=await window.supabaseClient.storage.from("article-images").upload(path,file,{upsert:false,contentType:"application/pdf"});
-  if(upload.error) throw upload.error;
-  return window.supabaseClient.storage.from("article-images").getPublicUrl(path).data.publicUrl;
+  return await uploadToSupabaseStorage(path, file, "application/pdf");
  }
 
  document.getElementById("insertInlinePdf").addEventListener("click",async function(){
@@ -2705,18 +2715,7 @@ function collect(status){
     const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
     const path = session.data.user.id + "/" + Date.now() + "-" + safeName;
 
-    const upload = await window.supabaseClient.storage
-      .from("article-images")
-      .upload(path, file, {
-        upsert: false,
-        contentType: file.type
-      });
-
-    if (upload.error) throw upload.error;
-
-    return window.supabaseClient.storage
-      .from("article-images")
-      .getPublicUrl(path).data.publicUrl;
+    return await uploadToSupabaseStorage(path, file, file.type);
   }
 
   async function prepareUniqueSourceUrl(article) {
@@ -2986,18 +2985,7 @@ function collect(status){
     const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
     const path = userResult.data.user.id + "/" + Date.now() + "-" + safeName;
 
-    const upload = await window.supabaseClient.storage
-      .from("article-images")
-      .upload(path, file, {
-        upsert: false,
-        contentType: file.type
-      });
-
-    if (upload.error) throw upload.error;
-
-    return window.supabaseClient.storage
-      .from("article-images")
-      .getPublicUrl(path).data.publicUrl;
+    return await uploadToSupabaseStorage(path, file, file.type);
   }
 
   async function updateArticle() {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import handler from './article-seo';
+import handler from '../netlify/edge-functions/article-seo';
 
 const originalFetch = global.fetch;
 

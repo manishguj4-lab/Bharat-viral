@@ -8,10 +8,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-  <link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0b2a5b">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5768457082251884"
      crossorigin="anonymous"></script>
@@ -687,7 +684,11 @@ function openArticle(title){
   }
 
   // Fallback for a title-only article link.
-  window.location.href = "https://bharat-viral.netlify.app/article.html?title=" + encodeURIComponent(title || "");
+  if(article && article.slug) {
+    window.location.href = "https://bharat-viral.netlify.app/article/" + encodeURIComponent(article.slug);
+  } else {
+    window.location.href = "https://bharat-viral.netlify.app/article.html?title=" + encodeURIComponent(title || "");
+  }
 }
 
 function openArticleById(id){
@@ -704,20 +705,18 @@ function openArticleById(id){
   const params = new URLSearchParams();
   params.set("id", String(id));
 
-  if(article && article.slug){
-    params.set("slug", String(article.slug));
+  if(article && article.slug) {
+    window.location.href = "https://bharat-viral.netlify.app/article/" + encodeURIComponent(article.slug);
+  } else {
+    window.location.href = "https://bharat-viral.netlify.app/article.html?" + params.toString();
   }
-
-  window.location.href = "https://bharat-viral.netlify.app/article.html?" + params.toString();
 }
 
 let publishedArticles=[];
 let heroIndex=0;
 let heroTimer=null;
 
-function openCategory(id){
-  window.location.href="category.html?category="+encodeURIComponent(id);
-}
+function openCategory(id){ window.location.href = "https://bharat-viral.netlify.app/category.html?category=" + encodeURIComponent(id); }
 
 function renderHeroSlide(){
   const heroList=Array.isArray(window.bvTop6Articles)?window.bvTop6Articles:[];
@@ -808,7 +807,7 @@ async function loadPublishedArticles(){
     // Categories are independent from articles.
     const catRes=await fetch(
       U+"/rest/v1/categories?select=*&is_active=eq.true&order=sort_order.asc,created_at.asc",
-      {headers:H,cache:"no-store"}
+      {headers:H,cache:"default"}
     );
 
     if(!catRes.ok){
@@ -848,7 +847,7 @@ async function loadPublishedArticles(){
     let articles=[];
     let articleRes=await fetch(
       U+"/rest/v1/articles?select=*&order=created_at.desc&limit=200",
-      {headers:H,cache:"no-store"}
+      {headers:H,cache:"default"}
     );
 
     if(articleRes.ok){
@@ -888,15 +887,15 @@ async function loadPublishedArticles(){
         ? '<div class="news-img"><img src="'+escLocal(a.image_url)+'" alt="'+title+'" loading="lazy"></div>'
         : '';
       const id=String(a.id||"").replace(/'/g,"\\'");
-      return `<article class="news-card" onclick="openArticleById('${id}')" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openArticleById('${id}')}" >
+      return `<article class="news-card"><a href="${a.slug ? '/article/'+encodeURIComponent(a.slug) : 'article.html?id='+encodeURIComponent(id)}" class="bv-card-link-wrapper" style="display:block;height:100%;text-decoration:none;color:inherit;">
         ${image}
         <div class="news-body">
           <span class="news-category">${cat}</span>
           <h3>${title}</h3>
           <p>${excerpt}</p>
-          <button type="button" class="read-btn" onclick="event.stopPropagation();openArticleById('${id}')">Read More</button>
+          <span class="read-btn">Read More</span>
         </div>
-      </article>`;
+      </a></article>`;
     };
 
     if(sections){
@@ -1129,7 +1128,7 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
         track.style.animation="none";
         return;
       }
-      const set=rows.map(n=>'<span class="bv-breaking-item">'+esc(n.title)+'</span>').join("");
+      const set=rows.map(n=>'<span class="bv-breaking-item">' + (n.url ? '<a href="'+esc(n.url)+'" style="color:#fff;text-decoration:none;">' : '') + esc(n.title) + (n.url ? '</a>' : '') + '</span>').join("");
       track.innerHTML='<div class="bv-breaking-set">'+set+'</div><div class="bv-breaking-set">'+set+'</div>';
       track.style.animation="bvBreakingMoveFinal 36s linear infinite";
     }catch(e){
@@ -1241,14 +1240,12 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
 
     if(!hits.length){suggestions.hidden=true;suggestions.innerHTML='';return;}
     suggestions.innerHTML=hits.map(a=>
-      '<button type="button" class="bv-search-suggestion" data-id="'+esc(a.id)+'">'+
+      '<a href="'+(a.slug ? '/article/'+encodeURIComponent(a.slug) : 'article.html?id='+encodeURIComponent(a.id))+'" class="bv-search-suggestion" style="display:block;text-decoration:none;color:inherit;">'+
       esc(a.title||'खबर')+
-      '<small>पूरी खबर पढ़ने के लिए टैप करें</small></button>'
+      '<small>पूरी खबर पढ़ने के लिए टैप करें</small></a>'
     ).join('');
     suggestions.hidden=false;
-    suggestions.querySelectorAll('.bv-search-suggestion').forEach(b=>{
-      b.onclick=()=>openArticleById(b.dataset.id);
-    });
+
   }
 
   input.addEventListener('input',()=>showSuggestions(input.value));

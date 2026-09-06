@@ -147,3 +147,4 @@ exports.handler = async function () {
     };
   }
 };
+exports.xmlEscape = xmlEscape;

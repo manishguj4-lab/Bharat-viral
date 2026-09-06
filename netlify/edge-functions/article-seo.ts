@@ -1,5 +1,5 @@
-const SUPABASE_URL = (typeof process !== 'undefined' && process.env.SUPABASE_URL) ? process.env.SUPABASE_URL : "https://ocarsylhsyxjqpzidndb.supabase.co";
-const SUPABASE_KEY = typeof process !== 'undefined' ? process.env.SUPABASE_KEY : undefined;
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || "https://ocarsylhsyxjqpzidndb.supabase.co";
+const SUPABASE_KEY = Deno.env.get('SUPABASE_KEY');
 const SITE = "https://bharat-viral.netlify.app";
 
 function esc(value: unknown): string {

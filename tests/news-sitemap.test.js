@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const { handler } = require('./news-sitemap.js');
+const { handler } = require('../netlify/functions/news-sitemap.js');
 
 test('news-sitemap handler', async (t) => {
   const originalFetch = global.fetch;

@@ -1,5 +1,5 @@
-const SUPABASE_URL = process.env.SUPABASE_URL || "https://ocarsylhsyxjqpzidndb.supabase.co";
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
+const SUPABASE_URL = (typeof process !== 'undefined' && process.env.SUPABASE_URL) ? process.env.SUPABASE_URL : "https://ocarsylhsyxjqpzidndb.supabase.co";
+const SUPABASE_KEY = typeof process !== 'undefined' ? process.env.SUPABASE_KEY : undefined;
 const SITE = "https://bharat-viral.netlify.app";
 
 function esc(value: unknown): string {

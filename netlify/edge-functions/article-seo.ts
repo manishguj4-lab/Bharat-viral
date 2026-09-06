@@ -2,6 +2,8 @@ const SUPABASE_URL = "https://ocarsylhsyxjqpzidndb.supabase.co";
 const SUPABASE_KEY = "sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
 const SITE = "https://bharat-viral.netlify.app";
 
+import { toKeywordList } from "./utils.ts";
+
 function esc(value: unknown): string {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -26,26 +28,6 @@ function toAbsoluteUrl(value: unknown): string {
   } catch {
     return `${SITE}/icon-192.png`;
   }
-}
-
-export function toKeywordList(...values: unknown[]): string[] {
-  const result: string[] = [];
-  for (const value of values) {
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        const v = String(item ?? "").trim();
-        if (v && !result.includes(v)) result.push(v);
-      }
-    } else {
-      const raw = String(value ?? "").trim();
-      if (!raw) continue;
-      for (const item of raw.split(/[,|]/g)) {
-        const v = item.trim();
-        if (v && !result.includes(v)) result.push(v);
-      }
-    }
-  }
-  return result.slice(0, 30);
 }
 
 function getCategoryUrl(category: string, categorySlug: string): string {

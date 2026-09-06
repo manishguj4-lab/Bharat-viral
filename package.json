@@ -1,0 +1,24 @@
+{
+  "devDependencies": {
+    "jest": "^30.5.1"
+  },
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "jest",
+    "build": "echo 'No build required'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manishguj4-lab/Bharat-viral.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/manishguj4-lab/Bharat-viral/issues"
+  },
+  "homepage": "https://github.com/manishguj4-lab/Bharat-viral#readme"
+}

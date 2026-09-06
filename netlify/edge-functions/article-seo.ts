@@ -1,5 +1,13 @@
-const SUPABASE_URL = Netlify.env.get("SUPABASE_URL") || "https://ocarsylhsyxjqpzidndb.supabase.co";
-const SUPABASE_KEY = Netlify.env.get("SUPABASE_KEY") || "";
+const getEnv = (key: string) => {
+  if (typeof Netlify !== "undefined" && Netlify.env) return Netlify.env.get(key);
+  if (typeof process !== "undefined" && process.env) return process.env[key];
+  // @ts-ignore
+  if (typeof Deno !== "undefined" && Deno.env) return Deno.env.get(key);
+  return "";
+};
+
+const SUPABASE_URL = getEnv("SUPABASE_URL") || "https://ocarsylhsyxjqpzidndb.supabase.co";
+const SUPABASE_KEY = getEnv("SUPABASE_KEY") || "";
 const SITE = "https://bharat-viral.netlify.app";
 
 function esc(value: unknown): string {

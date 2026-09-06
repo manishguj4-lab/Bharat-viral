@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const { xmlEscape } = require('./sitemap.js');
+const { xmlEscape } = require('../netlify/functions/sitemap.js');
 
 test('xmlEscape - normal strings', () => {
   assert.strictEqual(xmlEscape('hello world'), 'hello world');

@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.208.0/assert/mod.ts";
-import handler from "./article-seo.ts";
+import handler from "../netlify/edge-functions/article-seo.ts";
 
 Deno.test("handler gracefully handles Supabase fetch error (e.g., 500)", async () => {
   // Store the original fetch

@@ -1,6 +1,14 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const { xmlEscape } = require('../netlify/functions/sitemap.js');
+const fs = require('fs');
+
+const sourceCode = fs.readFileSync('netlify/functions/sitemap.js', 'utf8');
+const fnMatch = sourceCode.match(/function xmlEscape[\s\S]*?^}/m)[0];
+
+const xmlEscape = new Function(`
+  ${fnMatch}
+  return xmlEscape;
+`)();
 
 test('xmlEscape - normal strings', () => {
   assert.strictEqual(xmlEscape('hello world'), 'hello world');

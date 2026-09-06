@@ -1,8 +1,8 @@
+import { toKeywordList } from "../utils/seo.ts";
+
 const SUPABASE_URL = "https://ocarsylhsyxjqpzidndb.supabase.co";
 const SUPABASE_KEY = "sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
 const SITE = "https://bharat-viral.netlify.app";
-
-import { toKeywordList } from "./utils.ts";
 
 function esc(value: unknown): string {
   return String(value ?? "")

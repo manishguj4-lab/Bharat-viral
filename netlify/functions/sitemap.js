@@ -1,13 +1,5 @@
-const getEnv = (key) => {
-  if (typeof globalThis !== "undefined") {
-    if (globalThis.process && globalThis.process.env) return globalThis.process.env[key];
-    if (globalThis.Netlify && globalThis.Netlify.env) return globalThis.Netlify.env.get(key);
-  }
-  return "";
-};
-
-const SUPABASE_URL = getEnv("SUPABASE_URL") || "https://ocarsylhsyxjqpzidndb.supabase.co";
-const SUPABASE_KEY = getEnv("SUPABASE_KEY") || "";
+const SUPABASE_URL = (typeof process !== "undefined" && process.env ? process.env.SUPABASE_URL : null) || (typeof Netlify !== "undefined" && Netlify.env ? Netlify.env.get("SUPABASE_URL") : null) || "https://ocarsylhsyxjqpzidndb.supabase.co";
+const SUPABASE_KEY = (typeof process !== "undefined" && process.env ? process.env.SUPABASE_KEY : null) || (typeof Netlify !== "undefined" && Netlify.env ? Netlify.env.get("SUPABASE_KEY") : null) || "";
 
 const SITE = "https://bharat-viral.netlify.app";
 

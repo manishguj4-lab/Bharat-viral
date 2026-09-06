@@ -1,17 +1,10 @@
-const getEnv = (key: string) => {
-  if (typeof globalThis !== "undefined") {
-    // @ts-ignore
-    if (globalThis.Netlify && globalThis.Netlify.env) return globalThis.Netlify.env.get(key);
-    // @ts-ignore
-    if (globalThis.process && globalThis.process.env) return globalThis.process.env[key];
-    // @ts-ignore
-    if (globalThis.Deno && globalThis.Deno.env) return globalThis.Deno.env.get(key);
-  }
-  return "";
-};
+declare const Netlify: any;
+declare const process: any;
+declare const Deno: any;
 
-const SUPABASE_URL = getEnv("SUPABASE_URL") || "https://ocarsylhsyxjqpzidndb.supabase.co";
-const SUPABASE_KEY = getEnv("SUPABASE_KEY") || "";
+const SUPABASE_URL = (typeof Netlify !== 'undefined' ? Netlify.env.get("SUPABASE_URL") : null) || (typeof Deno !== 'undefined' ? Deno.env.get("SUPABASE_URL") : null) || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : null) || "https://ocarsylhsyxjqpzidndb.supabase.co";
+const SUPABASE_KEY = (typeof Netlify !== 'undefined' ? Netlify.env.get("SUPABASE_KEY") : null) || (typeof Deno !== 'undefined' ? Deno.env.get("SUPABASE_KEY") : null) || (typeof process !== 'undefined' ? process.env.SUPABASE_KEY : null) || "";
+
 const SITE = "https://bharat-viral.netlify.app";
 
 function esc(value: unknown): string {

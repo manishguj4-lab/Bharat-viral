@@ -748,208 +748,211 @@ function restartHeroTimer(){const list=Array.isArray(window.bvTop6Articles)?wind
 document.getElementById("heroNext").addEventListener("click",(e)=>{e.stopPropagation();nextHero();restartHeroTimer();});
 document.getElementById("heroPrev").addEventListener("click",(e)=>{e.stopPropagation();prevHero();restartHeroTimer();});
 
-async function loadPublishedArticles(){
-  const U="https://ocarsylhsyxjqpzidndb.supabase.co";
-  const K="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
-  const H={apikey:K,Authorization:"Bearer "+K};
+const U="https://ocarsylhsyxjqpzidndb.supabase.co";
+const K="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+const H={apikey:K,Authorization:"Bearer "+K};
 
-  const norm=v=>String(v??"").toLowerCase().trim().replace(/[\s_-]+/g,"-");
-  const catsOf=(a,categoryList)=>{
-    let v=[];
-    const add=value=>{
-      if(value===null||value===undefined||value==="")return;
-      if(Array.isArray(value)){value.forEach(add);return;}
-      if(typeof value==="string"){
-        try{
-          const p=JSON.parse(value);
-          if(Array.isArray(p)){p.forEach(add);return;}
-        }catch(e){}
-        value.split(",").forEach(x=>{
-          const s=String(x).trim();
-          if(s)v.push(s);
-        });
-        return;
-      }
-      v.push(String(value));
-    };
-
-    add(a.categories);
-    add(a.category);
-    add(a.category_slug);
-    add(a.category_name);
-    add(a.category_id);
-    add(a.category_ids);
-
-    const expanded=[];
-    for(const value of v){
-      const raw=String(value).trim();
-      const n=norm(raw);
-      expanded.push(raw,n);
-
-      const match=(categoryList||[]).find(c=>
-        String(c.id)===raw ||
-        norm(c.slug)===n ||
-        norm(c.name)===n
-      );
-      if(match){
-        expanded.push(String(match.id),String(match.slug),String(match.name),norm(match.name));
-      }
+const norm=v=>String(v??"").toLowerCase().trim().replace(/[\s_-]+/g,"-");
+const catsOf=(a,categoryList)=>{
+  let v=[];
+  const add=value=>{
+    if(value===null||value===undefined||value==="")return;
+    if(Array.isArray(value)){value.forEach(add);return;}
+    if(typeof value==="string"){
+      try{
+        const p=JSON.parse(value);
+        if(Array.isArray(p)){p.forEach(add);return;}
+      }catch(e){}
+      value.split(",").forEach(x=>{
+        const s=String(x).trim();
+        if(s)v.push(s);
+      });
+      return;
     }
-    return [...new Set(expanded.map(norm).filter(Boolean))];
+    v.push(String(value));
   };
 
-  const escLocal=v=>typeof escapeHtml==="function"
-    ? escapeHtml(v)
-    : String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+  add(a.categories);
+  add(a.category);
+  add(a.category_slug);
+  add(a.category_name);
+  add(a.category_id);
+  add(a.category_ids);
 
-  const icons=["📰","🔥","🇮🇳","📱","⚡","🎬","🏏","💻","💡","✅","🌐","🎯"];
+  const expanded=[];
+  for(const value of v){
+    const raw=String(value).trim();
+    const n=norm(raw);
+    expanded.push(raw,n);
 
-  try{
-    // Categories are independent from articles.
-    const catRes=await fetch(
-      U+"/rest/v1/categories?select=*&is_active=eq.true&order=sort_order.asc,created_at.asc",
-      {headers:H,cache:"no-store"}
+    const match=(categoryList||[]).find(c=>
+      String(c.id)===raw ||
+      norm(c.slug)===n ||
+      norm(c.name)===n
     );
-
-    if(!catRes.ok){
-      const txt=await catRes.text().catch(()=> "");
-      throw new Error("Categories HTTP "+catRes.status+" "+txt);
+    if(match){
+      expanded.push(String(match.id),String(match.slug),String(match.name),norm(match.name));
     }
+  }
+  return [...new Set(expanded.map(norm).filter(Boolean))];
+};
 
-    const categories=await catRes.json();
+const escLocal=v=>typeof escapeHtml==="function"
+  ? escapeHtml(v)
+  : String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+
+async function fetchCategories() {
+  const catRes=await fetch(
+    U+"/rest/v1/categories?select=*&is_active=eq.true&order=sort_order.asc,created_at.asc",
+    {headers:H,cache:"no-store"}
+  );
+
+  if(!catRes.ok){
+    const txt=await catRes.text().catch(()=> "");
+    throw new Error("Categories HTTP "+catRes.status+" "+txt);
+  }
+
+  return await catRes.json();
+}
+
+function renderCategoryNavigation(categories) {
+  const nav=document.getElementById("dynamicCategoryNav");
+  const shortcuts=document.getElementById("dynamicCategoryCards");
+
+  if(nav){
+    nav.innerHTML=categories.length
+      ? categories.filter(c=>String(c.name||"").trim().toLowerCase()!=="notice" && String(c.slug||"").trim().toLowerCase()!=="notice").map(c=>
+        `<a href="https://bharat-viral.netlify.app/category.html?category=${encodeURIComponent(c.slug)}" class="nav-item">${escLocal(c.icon||"📰")} ${escLocal(c.name)}</a>`
+      ).join("")
+      : "<span class='bv-category-nav-loading'>अभी कोई category नहीं है</span>";
+  }
+
+  if(shortcuts){
+    shortcuts.innerHTML=categories.length
+      ? categories.filter(c=>String(c.name||"").trim().toLowerCase()!=="notice" && String(c.slug||"").trim().toLowerCase()!=="notice").map(c=>
+        `<a href="https://bharat-viral.netlify.app/category.html?category=${encodeURIComponent(c.slug)}" class="category">
+          <div class="category-icon">${escLocal(c.icon||"📰")}</div>
+          <h3>${escLocal(c.name)}</h3>
+        </a>`
+      ).join("")
+      : '<div class="dynamic-empty">अभी कोई category उपलब्ध नहीं है।</div>';
+  }
+}
+
+async function fetchPublishedArticlesData() {
+  let articleRes=await fetch(
+    U+"/rest/v1/articles?select=*&order=created_at.desc&limit=200",
+    {headers:H,cache:"no-store"}
+  );
+
+  if(!articleRes.ok){
+    console.warn("Articles could not be loaded:",articleRes.status,await articleRes.text().catch(()=> ""));
+    return [];
+  }
+
+  const parsed=await articleRes.json();
+  const rows=Array.isArray(parsed)?parsed:[];
+
+  let articles=rows.filter(a=>{
+    const status=String(a.status??"").trim().toLowerCase();
+    if(status==="") return true;
+    if(["published","publish","live","active"].includes(status)) return true;
+    if(a.is_published===true || a.published===true) return true;
+    return false;
+  });
+
+  if(!articles.length && rows.length){
+    console.warn("No published rows matched known status values. Showing rows so existing articles remain visible.");
+    articles=rows;
+  }
+  return articles;
+}
+
+const renderNewsCard=a=>{
+  const title=escLocal(a.title||"बड़ी खबर");
+  const excerpt=escLocal(a.excerpt||a.summary||stripHtml(a.content||"").slice(0,120)||"पूरी खबर पढ़ें");
+  const cat=escLocal(a.category||a.article_type||"News");
+  const image=a.image_url
+    ? '<div class="news-img"><img src="'+escLocal(a.image_url)+'" alt="'+title+'" loading="lazy"></div>'
+    : '';
+  const id=String(a.id||"").replace(/'/g,"\\'");
+  return `<article class="news-card" onclick="openArticleById('${id}')" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openArticleById('${id}')}" >
+    ${image}
+    <div class="news-body">
+      <span class="news-category">${cat}</span>
+      <h3>${title}</h3>
+      <p>${excerpt}</p>
+      <button type="button" class="read-btn" onclick="event.stopPropagation();openArticleById('${id}')">Read More</button>
+    </div>
+  </article>`;
+};
+
+function renderCategorySections(articles, categories) {
+  const sections=document.getElementById("dynamicCategorySections");
+  if(!sections) return;
+
+  const publishedTime=a=>new Date(a.published_at||a.created_at||0);
+
+  const isRashifal=a=>{
+    const vals=[
+      a.category,a.article_type,a.category_slug,a.slug,
+      ...(Array.isArray(a.categories)?a.categories:[])
+    ].map(v=>String(v??'').toLowerCase().trim());
+    return vals.some(v=>
+      v==='rashifal' ||
+      v==='राशिफल' ||
+      v.includes('rashifal') ||
+      v.includes('राशिफल')
+    );
+  };
+
+  const top6=articles
+    .filter(a=>!isRashifal(a))
+    .sort((a,b)=>publishedTime(b)-publishedTime(a))
+    .slice(0,6);
+  window.bvTop6Articles=top6;
+
+  sections.innerHTML=categories.filter(c=>{
+    const n=String(c.name||"").trim().toLowerCase();
+    const slug=String(c.slug||"").trim().toLowerCase();
+    return n!=="notice" && slug!=="notice" && n!=="trending" && slug!=="trending";
+  }).map(c=>{
+    const items=articles.filter(a=>
+      (catsOf(a,categories).includes(norm(c.slug)) ||
+       catsOf(a,categories).includes(norm(c.id))))
+      .sort((a,b)=>publishedTime(b)-publishedTime(a))
+      .slice(0,4);
+
+    const cards=items.map(renderNewsCard).join("")||
+      '<div class="dynamic-empty">इस category में आज कोई प्रकाशित खबर नहीं है।</div>';
+
+    return `<section class="section bv-dynamic-section" id="cat-${escLocal(norm(c.slug))}">
+      <div class="section-head">
+        <h2 class="section-title"><a class="bv-section-link" href="category.html?category=${encodeURIComponent(c.slug)}">${escLocal(c.icon||"📰")} ${escLocal(c.name)}</a></h2>
+        <a class="bv-section-more" href="category.html?category=${encodeURIComponent(c.slug)}">सभी देखें →</a>
+      </div>
+      <div class="news-grid">${cards}</div>
+    </section>`;
+  }).join("");
+}
+
+async function loadPublishedArticles(){
+  try{
+    const categories = await fetchCategories();
     window.bvHomepageCategories=Array.isArray(categories)?categories:[];
 
-    const nav=document.getElementById("dynamicCategoryNav");
-    const shortcuts=document.getElementById("dynamicCategoryCards");
-    const sections=document.getElementById("dynamicCategorySections");
+    renderCategoryNavigation(window.bvHomepageCategories);
 
-    if(nav){
-      nav.innerHTML=window.bvHomepageCategories.length
-        ? window.bvHomepageCategories.filter(c=>String(c.name||"").trim().toLowerCase()!=="notice" && String(c.slug||"").trim().toLowerCase()!=="notice").map(c=>
-          `<a href="https://bharat-viral.netlify.app/category.html?category=${encodeURIComponent(c.slug)}" class="nav-item">${escLocal(c.icon||"📰")} ${escLocal(c.name)}</a>`
-        ).join("")
-        : "<span class='bv-category-nav-loading'>अभी कोई category नहीं है</span>";
-    }
-
-    if(shortcuts){
-      shortcuts.innerHTML=window.bvHomepageCategories.length
-        ? window.bvHomepageCategories.filter(c=>String(c.name||"").trim().toLowerCase()!=="notice" && String(c.slug||"").trim().toLowerCase()!=="notice").map(c=>
-          `<a href="https://bharat-viral.netlify.app/category.html?category=${encodeURIComponent(c.slug)}" class="category">
-            <div class="category-icon">${escLocal(c.icon||"📰")}</div>
-            <h3>${escLocal(c.name)}</h3>
-          </a>`
-        ).join("")
-        : '<div class="dynamic-empty">अभी कोई category उपलब्ध नहीं है।</div>';
-    }
-
-    // Load articles separately. Do NOT filter status in the URL because
-    // older Bharat Viral rows may use Published/published or another
-    // publication flag. We filter flexibly in JavaScript.
-    let articles=[];
-    let articleRes=await fetch(
-      U+"/rest/v1/articles?select=*&order=created_at.desc&limit=200",
-      {headers:H,cache:"no-store"}
-    );
-
-    if(articleRes.ok){
-      const parsed=await articleRes.json();
-      const rows=Array.isArray(parsed)?parsed:[];
-
-      articles=rows.filter(a=>{
-        const status=String(a.status??"").trim().toLowerCase();
-        if(status==="") return true;
-        if(["published","publish","live","active"].includes(status)) return true;
-        if(a.is_published===true || a.published===true) return true;
-        return false;
-      });
-
-      // If status exists but no row survived, don't silently show an empty
-      // homepage: the database may use a different publication convention.
-      if(!articles.length && rows.length){
-        console.warn("No published rows matched known status values. Showing rows so existing articles remain visible.");
-        articles=rows;
-      }
-    }else{
-      console.warn("Articles could not be loaded:",articleRes.status,await articleRes.text().catch(()=> ""));
-    }
-
+    const articles = await fetchPublishedArticlesData();
     publishedArticles=articles;
     window.publishedArticles=publishedArticles;
+
     if(publishedArticles.length){
       try{renderHeroSlide();restartHeroTimer();}catch(e){console.warn("Hero render:",e)}
       try{window.dispatchEvent(new Event("bvArticlesLoaded"));}catch(e){}
     }
 
-    const card=a=>{
-      const title=escLocal(a.title||"बड़ी खबर");
-      const excerpt=escLocal(a.excerpt||a.summary||stripHtml(a.content||"").slice(0,120)||"पूरी खबर पढ़ें");
-      const cat=escLocal(a.category||a.article_type||"News");
-      const image=a.image_url
-        ? '<div class="news-img"><img src="'+escLocal(a.image_url)+'" alt="'+title+'" loading="lazy"></div>'
-        : '';
-      const id=String(a.id||"").replace(/'/g,"\\'");
-      return `<article class="news-card" onclick="openArticleById('${id}')" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openArticleById('${id}')}" >
-        ${image}
-        <div class="news-body">
-          <span class="news-category">${cat}</span>
-          <h3>${title}</h3>
-          <p>${excerpt}</p>
-          <button type="button" class="read-btn" onclick="event.stopPropagation();openArticleById('${id}')">Read More</button>
-        </div>
-      </article>`;
-    };
-
-    if(sections){
-      const today=new Date();
-      const todayKey=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).format(today);
-      const publishedTime=a=>new Date(a.published_at||a.created_at||0);
-
-      // Homepage hero slider: latest 6 published news articles.
-      // Rashifal is explicitly excluded from the slider.
-      const isRashifal=a=>{
-        const vals=[
-          a.category,a.article_type,a.category_slug,a.slug,
-          ...(Array.isArray(a.categories)?a.categories:[])
-        ].map(v=>String(v??'').toLowerCase().trim());
-        return vals.some(v=>
-          v==='rashifal' ||
-          v==='राशिफल' ||
-          v.includes('rashifal') ||
-          v.includes('राशिफल')
-        );
-      };
-
-      const top6=articles
-        .filter(a=>!isRashifal(a))
-        .sort((a,b)=>publishedTime(b)-publishedTime(a))
-        .slice(0,6);
-      window.bvTop6Articles=top6;
-
-      sections.innerHTML=window.bvHomepageCategories.filter(c=>{
-        const n=String(c.name||"").trim().toLowerCase();
-        const slug=String(c.slug||"").trim().toLowerCase();
-        // Trending has been removed and must never be rendered as a category.
-        return n!=="notice" && slug!=="notice" && n!=="trending" && slug!=="trending";
-      }).map(c=>{
-        // Every homepage category shows its latest Top 4 by views, horizontally.
-        const items=articles.filter(a=>
-          (catsOf(a,window.bvHomepageCategories).includes(norm(c.slug)) ||
-           catsOf(a,window.bvHomepageCategories).includes(norm(c.id))))
-          .sort((a,b)=>publishedTime(b)-publishedTime(a))
-          .slice(0,4);
-
-        const cards=items.map(card).join("")||
-          '<div class="dynamic-empty">इस category में आज कोई प्रकाशित खबर नहीं है।</div>';
-
-        return `<section class="section bv-dynamic-section" id="cat-${escLocal(norm(c.slug))}">
-          <div class="section-head">
-            <h2 class="section-title"><a class="bv-section-link" href="category.html?category=${encodeURIComponent(c.slug)}">${escLocal(c.icon||"📰")} ${escLocal(c.name)}</a></h2>
-            <a class="bv-section-more" href="category.html?category=${encodeURIComponent(c.slug)}">सभी देखें →</a>
-          </div>
-          <div class="news-grid">${cards}</div>
-        </section>`;
-      }).join("");
-    }
+    renderCategorySections(articles, window.bvHomepageCategories);
 
   }catch(e){
     console.error("Dynamic category load failed:",e);

@@ -1,6 +1,8 @@
 const getEnv = (key) => {
-  if (typeof process !== "undefined" && process.env) return process.env[key];
-  if (typeof Netlify !== "undefined" && Netlify.env) return Netlify.env.get(key);
+  if (typeof globalThis !== "undefined") {
+    if (globalThis.process && globalThis.process.env) return globalThis.process.env[key];
+    if (globalThis.Netlify && globalThis.Netlify.env) return globalThis.Netlify.env.get(key);
+  }
   return "";
 };
 

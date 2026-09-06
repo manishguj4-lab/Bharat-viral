@@ -1,8 +1,12 @@
 const getEnv = (key: string) => {
-  if (typeof Netlify !== "undefined" && Netlify.env) return Netlify.env.get(key);
-  if (typeof process !== "undefined" && process.env) return process.env[key];
-  // @ts-ignore
-  if (typeof Deno !== "undefined" && Deno.env) return Deno.env.get(key);
+  if (typeof globalThis !== "undefined") {
+    // @ts-ignore
+    if (globalThis.Netlify && globalThis.Netlify.env) return globalThis.Netlify.env.get(key);
+    // @ts-ignore
+    if (globalThis.process && globalThis.process.env) return globalThis.process.env[key];
+    // @ts-ignore
+    if (globalThis.Deno && globalThis.Deno.env) return globalThis.Deno.env.get(key);
+  }
   return "";
 };
 
@@ -362,5 +366,4 @@ ${content}
       }
     );
   }
-          }
-  
+}

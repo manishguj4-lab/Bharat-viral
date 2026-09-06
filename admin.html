@@ -4001,67 +4001,75 @@ function collect(status){
 
 <script id="BV-ULTIMATE-CONTROLLER">
 (function(){
-  function init(){
-    const hardMenu=document.getElementById('bvHardMenuBtn');
-    const sidebar=document.getElementById('sidebar');
-    const overlay=document.getElementById('menuOverlay');
-    const floatingBack=document.getElementById('bvFloatingBack');
-    const theme=document.getElementById('themeBtn');
+  let hardMenu;
+  let sidebar;
+  let overlay;
+  let floatingBack;
+  let theme;
 
-    let historyStack=['dashboard'];
-    let goingBack=false;
+  let historyStack=['dashboard'];
+  let goingBack=false;
 
-    function page(){
-      const visible=[...document.querySelectorAll('[id^="page-"]')].find(x=>!x.classList.contains('hidden'));
-      return visible ? visible.id.slice(5) : 'dashboard';
+  function page(){
+    const visible=[...document.querySelectorAll('[id^="page-"]')].find(x=>!x.classList.contains('hidden'));
+    return visible ? visible.id.slice(5) : 'dashboard';
+  }
+
+  function menuOpen(){
+    return sidebar && sidebar.classList.contains('bv-forced-open');
+  }
+
+  function openMenu(){
+    if(!sidebar) return;
+    sidebar.classList.add('bv-forced-open','open');
+    sidebar.style.setProperty('transform','translate3d(0,0,0)','important');
+    sidebar.style.setProperty('width','290px','important');
+    sidebar.style.setProperty('max-width','84vw','important');
+    if(overlay){
+      overlay.classList.add('bv-forced-show','show');
+      overlay.style.setProperty('display','block','important');
     }
+    hardMenu?.classList.add('bv-menu-open');
+    hardMenu?.setAttribute('aria-label','Close menu');
+    hardMenu?.setAttribute('aria-expanded','true');
+  }
 
-    function menuOpen(){
-      return sidebar && sidebar.classList.contains('bv-forced-open');
+  function closeMenu(){
+    sidebar?.classList.remove('bv-forced-open','open');
+    if(sidebar) sidebar.style.setProperty('transform','translate3d(-110%,0,0)','important');
+    overlay?.classList.remove('bv-forced-show','show');
+    if(overlay) overlay.style.setProperty('display','none','important');
+    hardMenu?.classList.remove('bv-menu-open');
+    hardMenu?.setAttribute('aria-label','Open menu');
+    hardMenu?.setAttribute('aria-expanded','false');
+  }
+
+  function syncBack(){
+    if(!floatingBack) return;
+    const show=window.innerWidth<=720 && page()!=='dashboard';
+    floatingBack.style.display=show?'grid':'none';
+    floatingBack.style.placeItems='center';
+  }
+
+  function go(p, record=true){
+    const cur=page();
+    if(record && !goingBack && p!==cur){
+      historyStack.push(p);
+      if(historyStack.length>40) historyStack.shift();
     }
+    if(typeof window.openPage==='function') window.openPage(p);
+    setTimeout(function(){closeMenu();syncBack();},30);
+  }
 
-    function openMenu(){
-      if(!sidebar) return;
-      sidebar.classList.add('bv-forced-open','open');
-      sidebar.style.setProperty('transform','translate3d(0,0,0)','important');
-      sidebar.style.setProperty('width','290px','important');
-      sidebar.style.setProperty('max-width','84vw','important');
-      if(overlay){
-        overlay.classList.add('bv-forced-show','show');
-        overlay.style.setProperty('display','block','important');
-      }
-      hardMenu?.classList.add('bv-menu-open');
-      hardMenu?.setAttribute('aria-label','Close menu');
-      hardMenu?.setAttribute('aria-expanded','true');
-    }
+  function initializeUI(){
+    hardMenu=document.getElementById('bvHardMenuBtn');
+    sidebar=document.getElementById('sidebar');
+    overlay=document.getElementById('menuOverlay');
+    floatingBack=document.getElementById('bvFloatingBack');
+    theme=document.getElementById('themeBtn');
+  }
 
-    function closeMenu(){
-      sidebar?.classList.remove('bv-forced-open','open');
-      if(sidebar) sidebar.style.setProperty('transform','translate3d(-110%,0,0)','important');
-      overlay?.classList.remove('bv-forced-show','show');
-      if(overlay) overlay.style.setProperty('display','none','important');
-      hardMenu?.classList.remove('bv-menu-open');
-      hardMenu?.setAttribute('aria-label','Open menu');
-      hardMenu?.setAttribute('aria-expanded','false');
-    }
-
-    function syncBack(){
-      if(!floatingBack) return;
-      const show=window.innerWidth<=720 && page()!=='dashboard';
-      floatingBack.style.display=show?'grid':'none';
-      floatingBack.style.placeItems='center';
-    }
-
-    function go(p, record=true){
-      const cur=page();
-      if(record && !goingBack && p!==cur){
-        historyStack.push(p);
-        if(historyStack.length>40) historyStack.shift();
-      }
-      if(typeof window.openPage==='function') window.openPage(p);
-      setTimeout(function(){closeMenu();syncBack();},30);
-    }
-
+  function bindEvents(){
     // Use capture and stopImmediatePropagation so the old duplicate handlers
     // cannot toggle the menu/theme a second time.
     hardMenu?.addEventListener('click',function(e){
@@ -4134,7 +4142,11 @@ function collect(status){
     document.addEventListener('keydown',function(e){
       if(e.key==='Escape') closeMenu();
     });
+  }
 
+  function init(){
+    initializeUI();
+    bindEvents();
     setInterval(syncBack,250);
     syncBack();
   }

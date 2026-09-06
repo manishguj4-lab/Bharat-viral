@@ -131,15 +131,18 @@ function populateDays(){
  const d=document.getElementById('rDay'),m=document.getElementById('rMonth'),y=document.getElementById('rYear');
  const old=Number(d.value)||new Date().getDate();
  const max=new Date(Number(y.value),Number(m.value),0).getDate();
- d.innerHTML='';
- for(let i=1;i<=max;i++)d.insertAdjacentHTML('beforeend','<option value="'+String(i).padStart(2,'0')+'">'+i+'</option>');
+ let opts='';
+ for(let i=1;i<=max;i++)opts+='<option value="'+String(i).padStart(2,'0')+'">'+i+'</option>';
+ d.innerHTML=opts;
  d.value=String(Math.min(old,max)).padStart(2,'0');
 }
 function setupRashifal(){
  picker.style.display='block';
  const now=new Date(),d=document.getElementById('rDay'),m=document.getElementById('rMonth'),y=document.getElementById('rYear');
- for(let i=1;i<=12;i++)m.insertAdjacentHTML('beforeend','<option value="'+String(i).padStart(2,'0')+'">'+i+'</option>');
- for(let i=now.getFullYear();i>=now.getFullYear()-10;i--)y.insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'</option>');
+ let mOpts='', yOpts='';
+ for(let i=1;i<=12;i++)mOpts+='<option value="'+String(i).padStart(2,'0')+'">'+i+'</option>';
+ for(let i=now.getFullYear();i>=now.getFullYear()-10;i--)yOpts+='<option value="'+i+'">'+i+'</option>';
+ m.innerHTML=mOpts; y.innerHTML=yOpts;
  m.value=String(now.getMonth()+1).padStart(2,'0');y.value=String(now.getFullYear());
  populateDays();d.value=String(now.getDate()).padStart(2,'0');
  m.addEventListener('change',populateDays);y.addEventListener('change',populateDays);

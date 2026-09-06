@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import handler from '../netlify/edge-functions/article-seo';
+import handler from '../../netlify/edge-functions/article-seo';
 
 describe('article-seo handler', () => {
   it('returns 404 when the mock fetch returns an empty array', async () => {

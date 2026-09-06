@@ -85,7 +85,7 @@ function card(a){
  const c=catalog.find(x=>x.slug===a.category_slug);
  const label=esc(c?((c.icon||'')+' '+c.name):a.category_slug||'NEWS');
  const title=esc(a.title||'बड़ी खबर');
- return '<article class="card"><a class="card-link" href="article.html?id='+encodeURIComponent(a.id)+
+ return '<article class="card"><a class="card-link" href="'+(a.slug ? '/article/'+encodeURIComponent(a.slug) : 'article.html?id='+encodeURIComponent(a.id))+
  '" aria-label="'+title+'">'+imageMarkup(a)+
  '<div class="body"><span class="cat">'+label+'</span><h3>'+title+
  '</h3><p>'+esc(a.excerpt||'पूरी खबर पढ़ें')+

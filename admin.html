@@ -2125,7 +2125,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
   }
 
   body.innerHTML=rows.map(a=>{
-    const canonical=a.slug ? origin+"/"+encodeURIComponent(a.slug) : origin+"/article.html?id="+encodeURIComponent(a.id||"");
+    const canonical=a.slug ? origin+"/article/"+encodeURIComponent(a.slug) : origin+"/article.html?id="+encodeURIComponent(a.id||"");
     const st=String(a.status||"draft").toLowerCase();
     const robots=st==="published"?"index, follow":"noindex, follow";
     const title=String(a.seo_title||"").trim();

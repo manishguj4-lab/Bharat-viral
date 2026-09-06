@@ -5,9 +5,9 @@
   "name": "app",
   "version": "1.0.0",
   "description": "",
-  "main": "admin-sw.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "echo 'No build required'"
   },
   "repository": {
     "type": "git",

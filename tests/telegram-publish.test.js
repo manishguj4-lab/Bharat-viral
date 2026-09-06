@@ -1,6 +1,6 @@
 import { test, describe, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert';
-import handler from './telegram-publish.js';
+import handler from '../netlify/functions/telegram-publish.js';
 
 describe('telegram-publish', () => {
   let originalEnv;

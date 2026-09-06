@@ -1,5 +1,5 @@
-const SUPABASE_URL = Netlify.env.get("SUPABASE_URL") || Deno.env.get("SUPABASE_URL");
-const SUPABASE_KEY = Netlify.env.get("SUPABASE_KEY") || Deno.env.get("SUPABASE_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_KEY = Deno.env.get("SUPABASE_KEY");
 const SITE = "https://bharat-viral.netlify.app";
 
 function esc(value: unknown): string {

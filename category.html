@@ -132,14 +132,17 @@ function populateDays(){
  const old=Number(d.value)||new Date().getDate();
  const max=new Date(Number(y.value),Number(m.value),0).getDate();
  d.innerHTML='';
- for(let i=1;i<=max;i++)d.insertAdjacentHTML('beforeend','<option value="'+String(i).padStart(2,'0')+'">'+i+'</option>');
+ let h='';for(let i=1;i<=max;i++)h+='<option value="'+String(i).padStart(2,'0')+'">'+i+'</option>';d.insertAdjacentHTML('beforeend',h);
  d.value=String(Math.min(old,max)).padStart(2,'0');
 }
 function setupRashifal(){
  picker.style.display='block';
  const now=new Date(),d=document.getElementById('rDay'),m=document.getElementById('rMonth'),y=document.getElementById('rYear');
- for(let i=1;i<=12;i++)m.insertAdjacentHTML('beforeend','<option value="'+String(i).padStart(2,'0')+'">'+i+'</option>');
- for(let i=now.getFullYear();i>=now.getFullYear()-10;i--)y.insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'</option>');
+ let mh='',yh='';
+ for(let i=1;i<=12;i++)mh+='<option value="'+String(i).padStart(2,'0')+'">'+i+'</option>';
+ m.insertAdjacentHTML('beforeend',mh);
+ for(let i=now.getFullYear();i>=now.getFullYear()-10;i--)yh+='<option value="'+i+'">'+i+'</option>';
+ y.insertAdjacentHTML('beforeend',yh);
  m.value=String(now.getMonth()+1).padStart(2,'0');y.value=String(now.getFullYear());
  populateDays();d.value=String(now.getDate()).padStart(2,'0');
  m.addEventListener('change',populateDays);y.addEventListener('change',populateDays);

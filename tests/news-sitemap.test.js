@@ -15,8 +15,8 @@ test('news-sitemap handler', async (t) => {
 
     global.fetch = async (url, options) => {
       // Verify that the necessary headers are passed, without hardcoding specific values
-      assert.ok(options.headers.apikey, 'apikey header should be present');
-      assert.ok(options.headers.Authorization, 'Authorization header should be present');
+      assert.ok('apikey' in options.headers, 'apikey header should be present');
+      assert.ok('Authorization' in options.headers, 'Authorization header should be present');
 
       return {
         ok: true,

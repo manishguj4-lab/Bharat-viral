@@ -44,6 +44,7 @@ table { max-width: 100% !important; }
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5768457082251884" crossorigin="anonymous"></script>
 
 <script type="application/ld+json" id="articleSchema">{"@context":"https://schema.org","@type":"NewsArticle","headline":"Bharat Viral","publisher":{"@type":"Organization","name":"Bharat Viral"}}</script>
+
 </head>
 
 <body>
@@ -249,26 +250,6 @@ function setupSEO(a){
    document.head.appendChild(meta);
  }
 
- document.getElementById('articleSchema')?.remove();
- const script=document.createElement('script');
- script.type='application/ld+json';
- script.id='articleSchema';
- script.textContent=JSON.stringify({
-   "@context":"https://schema.org",
-   "@type":"NewsArticle",
-   "mainEntityOfPage":{"@type":"WebPage","@id":url},
-   "headline":title,
-   "description":description,
-   "image":[image],
-   "datePublished":published,
-   "dateModified":modified,
-   "keywords":[...tags,...keywords].filter(Boolean).filter((v,i,arr)=>arr.indexOf(v)===i),
-   "articleSection":Array.isArray(a.categories)?a.categories:[],
-   "author":{"@type":"Person","name":a.author_name||"Bharat Viral"},
-   "publisher":{"@type":"Organization","name":"Bharat Viral","url":"https://bharat-viral.pages.dev/"},
-   "url":url
- }).replace(/</g,'\u003c');
- document.head.appendChild(script);
 }
 
 async function loadRelatedNews(currentArticle){

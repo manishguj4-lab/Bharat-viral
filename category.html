@@ -139,8 +139,10 @@ function populateDays(){
 function setupRashifal(){
  picker.style.display='block';
  const now=new Date(),d=document.getElementById('rDay'),m=document.getElementById('rMonth'),y=document.getElementById('rYear');
- for(let i=1;i<=12;i++)m.insertAdjacentHTML('beforeend','<option value="'+String(i).padStart(2,'0')+'">'+i+'</option>');
- for(let i=now.getFullYear();i>=now.getFullYear()-10;i--)y.insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+'</option>');
+ let mh='',yh='';
+ for(let i=1;i<=12;i++)mh+='<option value="'+String(i).padStart(2,'0')+'">'+i+'</option>';
+ for(let i=now.getFullYear();i>=now.getFullYear()-10;i--)yh+='<option value="'+i+'">'+i+'</option>';
+ m.innerHTML=mh; y.innerHTML=yh;
  m.value=String(now.getMonth()+1).padStart(2,'0');y.value=String(now.getFullYear());
  populateDays();d.value=String(now.getDate()).padStart(2,'0');
  m.addEventListener('change',populateDays);y.addEventListener('change',populateDays);

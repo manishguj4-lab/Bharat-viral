@@ -1,46 +1,57 @@
-import { describe, it, expect, vi } from 'vitest';
-import { onRequest as handler } from '../../functions/article/[slug].js';
+import { describe, it } from 'node:test';
+import assert from 'node:assert';
 
 describe('article-seo handler', () => {
   it('returns 404 when the mock fetch returns an empty array', async () => {
+    // Dynamic import to bypass the syntax error
+    const { onRequest } = await import('../../functions/article/[slug].js');
+
     // Mock the global fetch
-    const mockFetch = vi.fn().mockResolvedValue({
+    const originalFetch = global.fetch;
+    global.fetch = async () => ({
       ok: true,
       json: async () => [],
+      text: async () => '[]'
     });
 
-    // Assign to globalThis
-    vi.stubGlobal('fetch', mockFetch);
-
-    // Create a mock request. Must have a slug in the url to bypass the early 404.
-    const req = new Request('https://bharat-viral.pages.dev/article/test-article');
+    // Mock HTMLRewriter since it is a Cloudflare global, not present in Node
+    class MockHTMLRewriter {
+      on() {
+        return this; // Chainable mock
+      }
+      transform(response) {
+        return response; // Just return original response for testing purposes
+      }
+    }
+    global.HTMLRewriter = MockHTMLRewriter;
 
     const context = {
-      request: req,
       params: { slug: 'test-article' },
       env: {
-        SUPABASE_URL: 'https://test.supabase.co',
+        SUPABASE_URL: 'http://localhost',
         SUPABASE_KEY: 'test-key',
         ASSETS: {
-          fetch: vi.fn().mockResolvedValue(new Response('Template HTML'))
+          fetch: async () => new Response("Template content")
         }
-      }
+      },
+      request: new Request('https://bharat-viral.pages.dev/article/test-article')
     };
 
-    const response = await handler(context);
+    const response = await onRequest(context);
 
     // Check status
-    expect(response.status).toBe(404);
+    assert.strictEqual(response.status, 404);
 
     // Check response body
     const text = await response.text();
-    expect(text).toBe('Article not found');
+    assert.strictEqual(text, 'Article not found');
 
     // Check headers
-    expect(response.headers.get('Content-Type')).toBe('text/plain; charset=UTF-8');
-    expect(response.headers.get('X-Robots-Tag')).toBe('noindex');
+    assert.strictEqual(response.headers.get('Content-Type'), 'text/plain; charset=UTF-8');
+    assert.strictEqual(response.headers.get('X-Robots-Tag'), 'noindex');
 
     // Clean up
-    vi.unstubAllGlobals();
+    global.fetch = originalFetch;
+    delete global.HTMLRewriter;
   });
 });

@@ -685,9 +685,9 @@ function openArticle(title){
 
   // Fallback for a title-only article link.
   if(article && article.slug) {
-    window.location.href = "https://bharat-viral.netlify.app/article/" + encodeURIComponent(article.slug);
+    window.location.href = "https://bharat-viral.pages.dev/article/" + encodeURIComponent(article.slug);
   } else {
-    window.location.href = "https://bharat-viral.netlify.app/article.html?title=" + encodeURIComponent(title || "");
+    window.location.href = "https://bharat-viral.pages.dev/article.html?title=" + encodeURIComponent(title || "");
   }
 }
 
@@ -706,9 +706,9 @@ function openArticleById(id){
   params.set("id", String(id));
 
   if(article && article.slug) {
-    window.location.href = "https://bharat-viral.netlify.app/article/" + encodeURIComponent(article.slug);
+    window.location.href = "https://bharat-viral.pages.dev/article/" + encodeURIComponent(article.slug);
   } else {
-    window.location.href = "https://bharat-viral.netlify.app/article.html?" + params.toString();
+    window.location.href = "https://bharat-viral.pages.dev/article.html?" + params.toString();
   }
 }
 
@@ -716,7 +716,7 @@ let publishedArticles=[];
 let heroIndex=0;
 let heroTimer=null;
 
-function openCategory(id){ window.location.href = "https://bharat-viral.netlify.app/category.html?category=" + encodeURIComponent(id); }
+function openCategory(id){ window.location.href = "https://bharat-viral.pages.dev/category.html?category=" + encodeURIComponent(id); }
 
 function renderHeroSlide(){
   const heroList=Array.isArray(window.bvTop6Articles)?window.bvTop6Articles:[];
@@ -825,7 +825,7 @@ async function loadPublishedArticles(){
     if(nav){
       nav.innerHTML=window.bvHomepageCategories.length
         ? window.bvHomepageCategories.filter(c=>String(c.name||"").trim().toLowerCase()!=="notice" && String(c.slug||"").trim().toLowerCase()!=="notice").map(c=>
-          `<a href="https://bharat-viral.netlify.app/category.html?category=${encodeURIComponent(c.slug)}" class="nav-item">${escLocal(c.icon||"📰")} ${escLocal(c.name)}</a>`
+          `<a href="https://bharat-viral.pages.dev/category.html?category=${encodeURIComponent(c.slug)}" class="nav-item">${escLocal(c.icon||"📰")} ${escLocal(c.name)}</a>`
         ).join("")
         : "<span class='bv-category-nav-loading'>अभी कोई category नहीं है</span>";
     }
@@ -833,7 +833,7 @@ async function loadPublishedArticles(){
     if(shortcuts){
       shortcuts.innerHTML=window.bvHomepageCategories.length
         ? window.bvHomepageCategories.filter(c=>String(c.name||"").trim().toLowerCase()!=="notice" && String(c.slug||"").trim().toLowerCase()!=="notice").map(c=>
-          `<a href="https://bharat-viral.netlify.app/category.html?category=${encodeURIComponent(c.slug)}" class="category">
+          `<a href="https://bharat-viral.pages.dev/category.html?category=${encodeURIComponent(c.slug)}" class="category">
             <div class="category-icon">${escLocal(c.icon||"📰")}</div>
             <h3>${escLocal(c.name)}</h3>
           </a>`

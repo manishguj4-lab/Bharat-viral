@@ -2,8 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 
-const sourceCode = fs.readFileSync('netlify/functions/sitemap.js', 'utf8');
-const fnMatch = sourceCode.match(/function xmlEscape[\s\S]*?^}/m)[0];
+const sourceCode = fs.readFileSync('functions/sitemap.xml.js', 'utf8');
+const fnMatch = sourceCode.match(/function xmlEscape[\s\S]*?\n    }/m)[0];
 
 const xmlEscape = new Function(`
   ${fnMatch}

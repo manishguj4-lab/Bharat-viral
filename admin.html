@@ -1711,7 +1711,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
           <div class="field full"><label>Default SEO Title</label><input id="webSeoTitle" placeholder="Bharat Viral — Latest News"></div>
           <div class="field full"><label>Default SEO Description</label><textarea id="webSeoDescription"></textarea></div>
           <div class="field"><label>Default Focus Keyword</label><input id="webFocusKeyword"></div>
-          <div class="field"><label>Canonical Base URL</label><input id="webCanonical" type="url" value="https://bharat-viral.netlify.app"></div>
+          <div class="field"><label>Canonical Base URL</label><input id="webCanonical" type="url" value="https://bharat-viral.pages.dev"></div>
           <div class="field"><label>Robots</label><select id="webRobots"><option value="index, follow">index, follow</option><option value="noindex, follow">noindex, follow</option><option value="noindex, nofollow">noindex, nofollow</option></select></div>
           <div class="field"><label>Sitemap Enabled</label><select id="webSitemap"><option value="true">Enabled</option><option value="false">Disabled</option></select></div>
         </div>
@@ -2483,7 +2483,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
    btn.disabled=true;
    btn.textContent="Refreshing…";
    try{
-     const url=window.location.origin+"/.netlify/functions/sitemap?refresh="+Date.now();
+     const url=window.location.origin+"/sitemap.xml?refresh="+Date.now();
      const r=await fetch(url,{method:"GET",cache:"no-store",credentials:"omit"});
      if(!r.ok) throw new Error("HTTP "+r.status);
      alert("✅ Sitemap refresh request सफल रहा।");
@@ -2791,7 +2791,7 @@ function collect(status){
       if (status === "published") {
         saveStage = "sitemap refresh";
         try {
-          const sitemapUrl = window.location.origin + "/.netlify/functions/sitemap";
+          const sitemapUrl = window.location.origin + "/sitemap.xml";
           await fetch(sitemapUrl + "?refresh=" + Date.now(), {
             method: "GET",
             cache: "no-store",
@@ -4289,7 +4289,7 @@ if ("serviceWorker" in navigator) {
     confirmDelete:"true",adminNotifications:"true",
     primaryColor:"#123a63",accentColor:"#e30613",footerText:"",
     seoTitle:"Bharat Viral",seoDescription:"",focusKeyword:"",
-    canonical:"https://bharat-viral.netlify.app",robots:"index, follow",sitemap:"true",
+    canonical:"https://bharat-viral.pages.dev",robots:"index, follow",sitemap:"true",
     telegram:"",facebook:"",instagram:"",youtube:"",twitter:"",webContactEmail:"",
     gaId:"",gscVerification:"",headCode:"",footerCode:"",
     adsEnabled:"true",adsAuto:"false",adsHomepage:"true",adsArticles:"true",

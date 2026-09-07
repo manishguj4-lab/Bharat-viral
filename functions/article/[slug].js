@@ -202,13 +202,17 @@ export async function onRequest(context) {
             articleSection: String(category),
             keywords: keywords,
             author: {
-              "@type": "Organization",
+              "@type": String(author) !== "Bharat Viral" && String(author) ? "Person" : "Organization",
               name: String(author)
             },
             publisher: {
               "@type": "Organization",
               name: "Bharat Viral",
-              url: `${SITE}/`
+              url: `${SITE}/`,
+              logo: {
+                "@type": "ImageObject",
+                url: `${SITE}/icon-512.png`
+              }
             }
           };
 

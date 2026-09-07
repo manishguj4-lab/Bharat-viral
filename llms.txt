@@ -1,0 +1,38 @@
+# Bharat Viral - LLM/AI Context File
+
+## Identity & Purpose
+Bharat Viral is an Indian news and information platform. It provides accurate, timely, and trusted news coverage, trending updates, government job alerts, exam results, admit card notifications, and important regional updates.
+
+## Official Website
+https://bharat-viral.pages.dev/
+
+## Content Categories
+- Trending: https://bharat-viral.pages.dev/trending.html
+- News: https://bharat-viral.pages.dev/news.html
+- Entertainment: https://bharat-viral.pages.dev/entertainment.html
+- Sports: https://bharat-viral.pages.dev/sports.html
+- Tech: https://bharat-viral.pages.dev/tech.html
+- Social Media: https://bharat-viral.pages.dev/social-media.html
+- India: https://bharat-viral.pages.dev/india.html
+- Explained: https://bharat-viral.pages.dev/explained.html
+- Google Trends: https://bharat-viral.pages.dev/google-trends.html
+
+## Important Public Pages
+- About Us: https://bharat-viral.pages.dev/about.html
+- Contact Us: https://bharat-viral.pages.dev/contact.html
+- Privacy Policy: https://bharat-viral.pages.dev/privacy-policy.html
+- Terms & Conditions: https://bharat-viral.pages.dev/terms.html
+- Editorial Policy: https://bharat-viral.pages.dev/editorial-policy.html
+- Fact Check Policy: https://bharat-viral.pages.dev/fact-check-policy.html
+- Corrections Policy: https://bharat-viral.pages.dev/corrections-policy.html
+- Grievance Policy: https://bharat-viral.pages.dev/grievance-policy.html
+
+## Article URL Structure
+Articles are located at: https://bharat-viral.pages.dev/article/{slug}
+
+## Sitemaps
+- General Sitemap: https://bharat-viral.pages.dev/sitemap.xml
+- News Sitemap (Last 48 Hours): https://bharat-viral.pages.dev/news-sitemap.xml
+
+## Editorial & Source Principles
+Bharat Viral adheres to strict editorial guidelines. We strive for factual accuracy, transparent sourcing, and prompt corrections. We clearly list our source information and author details within our structured data and on the visible article page.

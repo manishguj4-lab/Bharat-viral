@@ -1,34 +1,55 @@
-import { describe, it, expect, vi } from 'vitest';
-import handler from '../../netlify/edge-functions/article-seo';
+import { describe, it } from 'node:test';
+import assert from 'node:assert';
+import { onRequest } from '../../functions/article/[slug].js';
 
 describe('article-seo handler', () => {
   it('returns 404 when the mock fetch returns an empty array', async () => {
     // Mock the global fetch
-    const mockFetch = vi.fn().mockResolvedValue({
+    const originalFetch = global.fetch;
+    global.fetch = async () => ({
       ok: true,
       json: async () => [],
+      text: async () => '[]'
     });
 
-    // Assign to globalThis
-    vi.stubGlobal('fetch', mockFetch);
+    // Mock HTMLRewriter since it is a Cloudflare global, not present in Node
+    class MockHTMLRewriter {
+      on() {
+        return this; // Chainable mock
+      }
+      transform(response) {
+        return response; // Just return original response for testing purposes
+      }
+    }
+    global.HTMLRewriter = MockHTMLRewriter;
 
-    // Create a mock request. Must have a slug in the url to bypass the early 404.
-    const req = new Request('https://bharat-viral.netlify.app/article/test-article');
+    const context = {
+      params: { slug: 'test-article' },
+      env: {
+        SUPABASE_URL: 'http://localhost',
+        SUPABASE_KEY: 'test-key',
+        ASSETS: {
+          fetch: async () => new Response("Template content")
+        }
+      },
+      request: new Request('https://bharat-viral.pages.dev/article/test-article')
+    };
 
-    const response = await handler(req);
+    const response = await onRequest(context);
 
     // Check status
-    expect(response.status).toBe(404);
+    assert.strictEqual(response.status, 404);
 
     // Check response body
     const text = await response.text();
-    expect(text).toBe('Article not found');
+    assert.strictEqual(text, 'Article not found');
 
     // Check headers
-    expect(response.headers.get('Content-Type')).toBe('text/plain; charset=UTF-8');
-    expect(response.headers.get('X-Robots-Tag')).toBe('noindex');
+    assert.strictEqual(response.headers.get('Content-Type'), 'text/plain; charset=UTF-8');
+    assert.strictEqual(response.headers.get('X-Robots-Tag'), 'noindex');
 
     // Clean up
-    vi.unstubAllGlobals();
+    global.fetch = originalFetch;
+    delete global.HTMLRewriter;
   });
 });

@@ -2,8 +2,9 @@
   "name": "app",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "scripts": {
-    "test": "vitest run",
+    "test": "node --import tsx --test tests/**/*.ts",
     "build": "echo \"No build needed\""
   },
   "repository": {
@@ -13,14 +14,13 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/manishguj4-lab/Bharat-viral/issues"
   },
   "homepage": "https://github.com/manishguj4-lab/Bharat-viral#readme",
   "devDependencies": {
     "@types/node": "^26.4.1",
-    "typescript": "^7.0.2",
-    "vitest": "^5.0.0"
+    "tsx": "^4.23.13",
+    "typescript": "^5.0.0"
   }
 }

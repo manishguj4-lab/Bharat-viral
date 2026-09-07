@@ -1,3 +1,2 @@
-test/
-tests/
-.tests/
+node_modules
+functions/node_modules

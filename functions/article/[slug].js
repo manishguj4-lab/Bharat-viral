@@ -1,3 +1,5 @@
+import xss from 'xss';
+
 export async function onRequest(context) {
   const SUPABASE_URL = context.env.SUPABASE_URL;
   const SUPABASE_KEY = context.env.SUPABASE_KEY;
@@ -59,6 +61,37 @@ export async function onRequest(context) {
       : `${SITE}/`;
   }
 
+  function renderArticleHtml(raw) {
+    let source = String(raw ?? "");
+    // Minimal regex replacement for [[IMAGE|url|label]]
+    source = source.replace(/\[\[IMAGE\|([^|\]]+)\|([^\]]*)\]\]/g, (match, url, label) => {
+      let decodedUrl = url;
+      try { decodedUrl = decodeURIComponent(url); } catch(e){}
+      let decodedLabel = label;
+      try { decodedLabel = decodeURIComponent(label); } catch(e){}
+      return `<img class="inline-article-image" src="${esc(decodedUrl)}" alt="${esc(decodedLabel || 'Article image')}">`;
+    });
+
+    // Sanitize the HTML server-side using xss library, allowing target attribute for links and classes for images
+    return xss(source, {
+      whiteList: {
+        ...xss.whiteList,
+        a: ['href', 'title', 'target', 'rel'],
+        img: ['src', 'alt', 'class']
+      }
+    });
+  }
+
+  function formatTime(v) {
+    if(!v) return '';
+    const d = new Date(v);
+    const m = Math.max(1, Math.floor((Date.now() - d.getTime()) / 60000));
+    if (m < 60) return m + ' मिनट पहले';
+    const h = Math.floor(m / 60);
+    if (h < 24) return h + ' घंटे पहले';
+    return Math.floor(h / 24) + ' दिन पहले';
+  }
+
   try {
     const slug = context.params.slug;
 
@@ -115,9 +148,8 @@ export async function onRequest(context) {
       article.title ||
       "Bharat Viral पर ताजा खबरें पढ़ें।";
 
-    const image = toAbsoluteUrl(
-      article.image_url || article.featured_image || article.image
-    );
+    const image = article.image_url || article.featured_image || article.image || "";
+    const absoluteImage = toAbsoluteUrl(image);
 
     const category = article.category_name || article.category || article.category_slug || "News";
     const categorySlug = article.category_slug || article.category_slug_name || "";
@@ -137,6 +169,7 @@ export async function onRequest(context) {
     const canonical = `${SITE}/article/` + encodeURIComponent(String(article.slug));
 
     const content = article.content || article.body || article.article_content || "";
+    const excerpt = article.excerpt || "";
 
     const newsArticle = {
       "@context": "https://schema.org",
@@ -150,7 +183,7 @@ export async function onRequest(context) {
       },
       image: [{
         "@type": "ImageObject",
-        url: String(image)
+        url: String(absoluteImage)
       }],
       datePublished: published,
       dateModified: modified,
@@ -192,61 +225,123 @@ export async function onRequest(context) {
       ]
     };
 
-    const html = `<!doctype html>
-<html lang="hi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${esc(title)} | Bharat Viral</title>
-<meta name="description" content="${esc(String(description).slice(0, 160))}">
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-<link rel="canonical" href="${esc(canonical)}">
-<meta property="og:type" content="article">
-<meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(String(description).slice(0, 160))}">
-<meta property="og:url" content="${esc(canonical)}">
-<meta property="og:image" content="${esc(image)}">
-<meta name="keywords" content="${esc(keywords.join(", "))}">
-<meta property="og:image:alt" content="${esc(title)}">
-<meta property="article:published_time" content="${esc(published)}">
-<meta property="article:modified_time" content="${esc(modified)}">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${esc(title)}">
-<meta name="twitter:description" content="${esc(String(description).slice(0, 160))}">
-<meta name="twitter:image" content="${esc(image)}">
-<script type="application/ld+json">${jsonLd(newsArticle)}</script>
-<script type="application/ld+json">${jsonLd(breadcrumb)}</script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5768457082251884"
-     crossorigin="anonymous"></script>
-</head>
-<body>
-<main>
-<article itemscope itemtype="https://schema.org/NewsArticle">
-<h1 itemprop="headline">${esc(title)}</h1>
-<div class="article-meta">
-  <span>${esc(category)}</span>
-  <time itemprop="datePublished" datetime="${esc(published)}">${esc(published)}</time>
-  <time itemprop="dateModified" datetime="${esc(modified)}">${esc(modified)}</time>
-</div>
-${image ? `<img src="${esc(image)}" alt="${esc(title)}" itemprop="image" loading="eager" decoding="async">` : ""}
-<div itemprop="articleBody">
-${content}
-</div>
-</article>
-</main>
-<script>
-  window.location.replace('/article/' + encodeURIComponent('${esc(article.slug)}'));
-</script>
-</body>
-</html>`;
+    // Construct the server-rendered HTML for the article body exactly like the client would.
+    const heroImageHtml = image ? `<img class="hero" src="${esc(absoluteImage)}" alt="${esc(title)}" loading="eager">` : '';
+    const displayCat = (Array.isArray(article.categories) && article.categories[0]) ? String(article.categories[0]).replace(/-/g,' ').toUpperCase() : String(article.article_type || 'NEWS').replace(/_/g,' ').toUpperCase();
+    const sourceHtml = article.source_url ? `<a href="${esc(article.source_url)}" target="_blank" rel="noopener noreferrer">${esc(article.source_name||'Source')}</a>` : esc(article.source_name||'');
+    const viewsStr = Number(article.views || 0).toLocaleString('en-IN');
+    const authorStr = article.author_name ? `By ${esc(article.author_name)} • ` : '';
+    const dateStr = formatTime(published);
 
-    return new Response(html, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/html; charset=UTF-8",
-        "Cache-Control": "public, max-age=300, s-maxage=300"
-      }
-    });
+    const fullArticleHtml = `
+      ${heroImageHtml}
+      <div class="body">
+        <div class="cat">${esc(displayCat)}</div>
+        <h1 class="title">${esc(title)}</h1>
+        <div class="meta">${authorStr}${esc(dateStr)}</div>
+        <div class="views">👁 ${viewsStr} views</div>
+        <div class="share">
+          <button class="wa" onclick="shareWhatsApp()">WhatsApp</button>
+          <button class="tg" onclick="shareTelegram()">Telegram</button>
+          <button class="ig" onclick="shareInstagram()">Instagram</button>
+          <button class="copy" onclick="copyLink()">Copy Link</button>
+        </div>
+        ${excerpt ? `<div class="excerpt">${esc(excerpt)}</div>` : ''}
+        <div class="bv-manual-ad-slot" data-ad-slot="article_middle" style="display:none;width:100%;max-width:100%;margin:18px auto;text-align:center;overflow:hidden;"></div>
+        <div class="content">${renderArticleHtml(content)}</div>
+        ${sourceHtml ? `<div class="source">Source: ${sourceHtml}</div>` : ''}
+      </div>
+    `;
+
+
+    // Fetch the static article.html template
+    const staticRequest = new Request(new URL('/article.html', context.request.url));
+    const staticResponse = await context.env.ASSETS.fetch(staticRequest);
+
+    if (!staticResponse.ok) {
+      return new Response("Template not found", { status: 500 });
+    }
+
+    const rawTitle = String(title);
+    const rawDesc = String(description).slice(0, 160);
+    const rawImage = absoluteImage;
+    const rawUrl = canonical;
+
+    // Use HTMLRewriter to inject SEO metadata and body HTML
+    // Note: setAttribute and setInnerContent automatically escape text values,
+    // so we pass the raw strings to avoid double-escaping.
+    const rewriter = new HTMLRewriter()
+      .on('title', {
+        element(el) {
+          el.setInnerContent(`${rawTitle} | Bharat Viral`);
+        }
+      })
+      .on('meta[name="description"]', {
+        element(el) {
+          el.setAttribute('content', rawDesc);
+        }
+      })
+      .on('link[rel="canonical"]', {
+        element(el) {
+          el.setAttribute('href', rawUrl);
+        }
+      })
+      .on('meta[property="og:title"]', {
+        element(el) {
+          el.setAttribute('content', rawTitle);
+        }
+      })
+      .on('meta[property="og:description"]', {
+        element(el) {
+          el.setAttribute('content', rawDesc);
+        }
+      })
+      .on('meta[property="og:url"]', {
+        element(el) {
+          el.setAttribute('content', rawUrl);
+        }
+      })
+      .on('meta[property="og:image"]', {
+        element(el) {
+          el.setAttribute('content', rawImage);
+        }
+      })
+      .on('meta[name="twitter:title"]', {
+        element(el) {
+          el.setAttribute('content', rawTitle);
+        }
+      })
+      .on('meta[name="twitter:description"]', {
+        element(el) {
+          el.setAttribute('content', rawDesc);
+        }
+      })
+      .on('meta[name="twitter:image"]', {
+        element(el) {
+          el.setAttribute('content', rawImage);
+        }
+      })
+      .on('script#articleSchema', {
+        element(el) {
+          el.setInnerContent(jsonLd(newsArticle), { html: true });
+        }
+      })
+      .on('head', {
+        element(el) {
+           el.append(`<script type="application/ld+json">${jsonLd(breadcrumb)}</script>`, { html: true });
+           el.append(`<meta name="keywords" content="${esc(keywords.join(", "))}">`, { html: true });
+           el.append(`<meta property="og:image:alt" content="${esc(title)}">`, { html: true });
+           el.append(`<meta property="article:published_time" content="${esc(published)}">`, { html: true });
+           el.append(`<meta property="article:modified_time" content="${esc(modified)}">`, { html: true });
+        }
+      })
+      .on('#articleBox', {
+        element(el) {
+           el.setInnerContent(fullArticleHtml, { html: true });
+        }
+      });
+
+    return rewriter.transform(staticResponse);
 
   } catch (error) {
     console.error("Article SEO error:", error);

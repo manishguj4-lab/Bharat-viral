@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "dependencies": {
+    "xss": "^1.0.15"
+  }
+}

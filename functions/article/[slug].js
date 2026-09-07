@@ -1,7 +1,144 @@
+import xss from 'xss';
+
 export async function onRequest(context) {
   const SUPABASE_URL = context.env.SUPABASE_URL;
   const SUPABASE_KEY = context.env.SUPABASE_KEY;
   const SITE = "https://bharat-viral.pages.dev";
+
+
+  function time(v) {
+    if (!v) return '';
+    const d = new Date(v), m = Math.max(1, Math.floor((Date.now() - d) / 60000));
+    if (m < 60) return m + ' मिनट पहले';
+    const h = Math.floor(m / 60);
+    if (h < 24) return h + ' घंटे पहले';
+    return Math.floor(h / 24) + ' दिन पहले';
+  }
+
+  function decodeHTMLText(raw) {
+    let text = String(raw ?? '');
+    const entities = {
+      '&amp;': '&',
+      '&lt;': '<',
+      '&gt;': '>',
+      '&quot;': '"',
+      '&#39;': "'",
+      '&#039;': "'"
+    };
+    return text.replace(/&amp;|&lt;|&gt;|&quot;|&#39;|&#039;/g, (match) => entities[match] || match);
+  }
+
+  function sanitizeArticleHTML(raw) {
+    let source = String(raw ?? '');
+    source = decodeHTMLText(source);
+
+    const options = {
+      whiteList: {
+        ...xss.whiteList,
+        p: ['style', 'class'],
+        span: ['class'],
+        div: ['class', 'id', 'style'],
+        img: ['src', 'alt', 'class', 'style', 'loading', 'decoding'],
+        a: ['href', 'title', 'target', 'rel', 'class'],
+        table: ['class', 'style', 'width', 'border'],
+        tr: [],
+        td: ['colspan', 'rowspan', 'style'],
+        th: ['colspan', 'rowspan', 'style'],
+        tbody: [],
+        thead: [],
+        h1: [], h2: [], h3: [], h4: [], h5: [], h6: [],
+        strong: [], b: [], em: [], i: [], u: [],
+        ul: [], ol: [], li: [], br: [], blockquote: [],
+        button: ['type', 'class', 'data-pdf-url', 'data-pdf-name']
+      },
+      stripIgnoreTag: true,
+      stripIgnoreTagBody: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'link', 'meta']
+    };
+    const filter = new xss.FilterXSS(options);
+
+    // Add target="_blank" to all links
+    source = source.replace(/<a\s+([^>]+)>/gi, (match, attr) => {
+      if (!attr.includes('target=')) attr += ' target="_blank"';
+      if (!attr.includes('rel=')) attr += ' rel="noopener noreferrer"';
+      return `<a ${attr}>`;
+    });
+
+    return filter.process(source);
+  }
+
+  function formatArticleText(text) {
+    let value = String(text ?? "").trim();
+    const decodedValue = decodeHTMLText(value).trim();
+    if (/<\s*(p|div|h[1-6]|strong|b|em|i|u|ul|ol|li|a|br|blockquote|table|img)\b/i.test(decodedValue)) {
+      return sanitizeArticleHTML(decodedValue);
+    }
+    if (/<\s*(p|div|h[1-6]|strong|b|em|i|u|ul|ol|li|a|br|blockquote|table|img)\b/i.test(value)) {
+      return sanitizeArticleHTML(value);
+    }
+
+    let html = esc(value);
+    const links = [];
+
+    function tokenFor(index) {
+      let n = index, s = '';
+      do {
+        s = String.fromCharCode(65 + (n % 26)) + s;
+        n = Math.floor(n / 26) - 1;
+      } while (n >= 0);
+      return '___URLTOKEN' + s + '___';
+    }
+
+    html = html.replace(/https?:\/\/[^\s<>"']+/gi, function(url) {
+      const token = tokenFor(links.length);
+      links.push('<a class="content-link" href="' + url + '" target="_blank" rel="noopener noreferrer">' + url + '</a>');
+      return token;
+    });
+
+    html = html.replace(/([^.!?\n]{2,}\?)/g, '<span class="question-highlight">$1</span>');
+    html = html.replace(/(\d+)/g, '<span class="digit-highlight">$1</span>');
+
+    links.forEach(function(link, i) {
+      html = html.replace(tokenFor(i), link);
+    });
+
+    return html.replace(/\n/g, '<br>');
+  }
+
+  function renderArticleContent(raw) {
+    const value = String(raw ?? '');
+    const tokenRe = /\[\[(IMAGE|PDF)\|([^|\]]+)\|([^\]]*)\]\]/g;
+    let html = '', last = 0, match;
+
+    while ((match = tokenRe.exec(value)) !== null) {
+      html += formatArticleText(value.slice(last, match.index));
+
+      let url = '', label = '';
+      try { url = decodeURIComponent(match[2]); } catch(e) { url = match[2]; }
+      try { label = decodeURIComponent(match[3] || ''); } catch(e) { label = match[3] || ''; }
+
+      if (/^https?:\/\//i.test(url)) {
+        if (match[1] === 'IMAGE') {
+          html += '<img class="inline-article-image" src="' + esc(url) + '" alt="' + esc(label || 'Article image') + '" loading="lazy" decoding="async">';
+        } else {
+          html += '<div class="inline-article-pdf"><div class="inline-article-pdf-title">📄 ' + esc(label || 'PDF Document') + '</div><div class="inline-article-pdf-actions"><a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">📖 PDF देखें</a><button type="button" class="secondary pdf-download-btn" data-pdf-url="' + esc(url) + '" data-pdf-name="' + esc((label || 'PDF Document').replace(/\.pdf$/i, '') + '.pdf') + '">⬇️ Download PDF</button></div></div>';
+        }
+      }
+
+      last = tokenRe.lastIndex;
+    }
+
+    html += formatArticleText(value.slice(last));
+    return html;
+  }
+
+    function esc(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
 
   function jsonLd(value) {
     return JSON.stringify(value)
@@ -136,14 +273,37 @@ export async function onRequest(context) {
       return new Response("Template not found", { status: 404 });
     }
 
-    function esc(value) {
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
+
+
+
+    const articleCategoryDisplay = (Array.isArray(article.categories) && article.categories[0])
+      ? String(article.categories[0]).replace(/-/g, ' ').toUpperCase()
+      : String(article.article_type || 'NEWS').replace(/_/g, ' ').toUpperCase();
+
+    const sourceHtml = article.source_url
+      ? '<a href="' + esc(article.source_url) + '" target="_blank" rel="noopener noreferrer">' + esc(article.source_name || 'Source') + '</a>'
+      : esc(article.source_name || '');
+
+    const heroImageHtml = image && image !== `${SITE}/icon-192.png`
+      ? '<img class="hero" src="' + esc(image) + '" alt="' + esc(title) + '" loading="eager">'
+      : '';
+
+    const fullArticleHtml = heroImageHtml + '<div class="body">' +
+      '<div class="cat">' + esc(articleCategoryDisplay) + '</div>' +
+      '<h1 class="title">' + esc(title) + '</h1>' +
+      '<div class="meta">' + (article.author_name ? 'By ' + esc(article.author_name) + ' • ' : '') + esc(time(published)) + '</div>' +
+      '<div class="views">👁 ' + Number(article.views || 0).toLocaleString('en-IN') + ' views</div>' +
+      '<div class="share">' +
+        '<button class="wa" onclick="shareWhatsApp()">WhatsApp</button>' +
+        '<button class="tg" onclick="shareTelegram()">Telegram</button>' +
+        '<button class="ig" onclick="shareInstagram()">Instagram</button>' +
+        '<button class="copy" onclick="copyLink()">Copy Link</button>' +
+      '</div>' +
+      (article.excerpt ? '<div class="excerpt">' + esc(article.excerpt) + '</div>' : '') +
+      '<div class="bv-manual-ad-slot" data-ad-slot="article_middle" style="display:none;width:100%;max-width:100%;margin:18px auto;text-align:center;overflow:hidden;"></div>' +
+      '<div class="content">' + renderArticleContent(article.content) + '</div>' +
+      (sourceHtml ? '<div class="source">Source: ' + sourceHtml + '</div>' : '') +
+      '</div>';
 
     const rewriter = new HTMLRewriter()
       .on('title', {
@@ -153,6 +313,8 @@ export async function onRequest(context) {
       })
       .on('head', {
         element(element) {
+          element.append('<script>window.__SERVER_RENDERED_ARTICLE_ID = "' + esc(article.id) + '"; window.__SERVER_RENDERED_ARTICLE_JSON = ' + jsonLd(article) + ';</script>', { html: true });
+
           // Remove existing meta tags to avoid duplicates, although we didn't add logic to remove them, it's safer to append new ones.
           // Wait, HTMLRewriter will append them. If base template has them, we should probably remove them, or let it be if it's fine.
           // In the review: "Update the meta tag injection to `.append()` to the `<head>` instead of relying on existing tags to replace"
@@ -181,7 +343,14 @@ export async function onRequest(context) {
       .on('meta[property^="og:"]', { element(el) { if(el.getAttribute('property') !== 'og:type' && el.getAttribute('property') !== 'og:site_name') el.remove(); } })
       .on('meta[property^="article:"]', { element(el) { el.remove(); } })
       .on('meta[name^="twitter:"]', { element(el) { if (el.getAttribute('name') !== 'twitter:card') el.remove(); } })
+
+      .on('article#articleBox', {
+        element(element) {
+          element.setInnerContent(fullArticleHtml, { html: true });
+        }
+      })
       .on('script#articleSchema', {
+
         element(element) {
           const newsArticle = {
             "@context": "https://schema.org",

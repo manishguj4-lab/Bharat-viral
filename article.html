@@ -332,6 +332,19 @@ async function loadRelatedNews(currentArticle){
 }
 
 async function load(){
+  if (window.__SERVER_RENDERED_ARTICLE_ID) {
+    window.dispatchEvent(new Event('bv:article-rendered'));
+    addView(window.__SERVER_RENDERED_ARTICLE_ID);
+    if (window.__SERVER_RENDERED_ARTICLE_JSON) {
+      loadRelatedNews(window.__SERVER_RENDERED_ARTICLE_JSON).then(html => {
+        if(html) {
+          const bodyEl = document.querySelector('#articleBox .body');
+          if (bodyEl) bodyEl.insertAdjacentHTML('beforeend', html);
+        }
+      }).catch(e => console.error(e));
+    }
+    return;
+  }
 const params=new URLSearchParams(location.search);
  const pathParts=location.pathname.split('/').filter(Boolean);
  const pathSlug=(pathParts[0]==='article' && pathParts[1]) ? decodeURIComponent(pathParts[1]) : '';

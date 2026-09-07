@@ -1,6 +1,11 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const { handler } = require('../netlify/functions/news-sitemap.js');
+const handler = async (event) => {
+  const context = { env: { SUPABASE_URL: process.env.SUPABASE_URL, SUPABASE_KEY: process.env.SUPABASE_KEY } };
+  const { onRequest } = await import('../functions/news-sitemap.xml.js');
+  const response = await onRequest(context);
+  return { statusCode: response.status, headers: Object.fromEntries(response.headers.entries()), body: await response.text() };
+};
 
 test('news-sitemap handler', async (t) => {
   const originalFetch = global.fetch;
@@ -33,8 +38,8 @@ test('news-sitemap handler', async (t) => {
 
     const response = await handler();
     assert.strictEqual(response.statusCode, 200);
-    assert.strictEqual(response.headers['Content-Type'], 'application/xml; charset=UTF-8');
-    assert.ok(response.body.includes('<loc>https://bharat-viral.netlify.app/article/recent-article</loc>'), 'Body should contain correct loc');
+    assert.strictEqual(response.headers['content-type'], 'application/xml; charset=UTF-8');
+    assert.ok(response.body.includes('<loc>https://bharat-viral.pages.dev/article/recent-article</loc>'), 'Body should contain correct loc');
     assert.ok(response.body.includes('<news:title>Recent Article</news:title>'), 'Body should contain correct title');
   });
 
@@ -101,7 +106,7 @@ test('news-sitemap handler', async (t) => {
 
     const response = await handler();
     assert.strictEqual(response.statusCode, 200);
-    assert.ok(response.body.includes('<loc>https://bharat-viral.netlify.app/article/article-%26</loc>'), 'Body should contain correctly escaped loc');
+    assert.ok(response.body.includes('<loc>https://bharat-viral.pages.dev/article/article-%26</loc>'), 'Body should contain correctly escaped loc');
     assert.ok(response.body.includes('<news:title>Title &lt; &gt; &quot; &apos; &amp;</news:title>'), 'Body should contain correctly escaped title');
   });
 });

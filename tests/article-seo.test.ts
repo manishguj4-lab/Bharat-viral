@@ -1,7 +1,15 @@
-import { assertEquals } from "https://deno.land/std@0.208.0/assert/mod.ts";
-import handler from "../netlify/edge-functions/article-seo.ts";
+import { test } from 'node:test';
+import * as assert from 'node:assert';
+const handler = async (req) => {
+  const url = new URL(req.url);
+  let slug = url.pathname.split('/article/')[1];
+  if(!slug) slug = url.searchParams.get('slug');
+  const context = { params: { slug }, env: { SUPABASE_URL: 'mock_url', SUPABASE_KEY: 'mock_key' } };
+  const { onRequest } = await import('../functions/article/[slug].js');
+  return onRequest(context);
+};
 
-Deno.test("handler gracefully handles Supabase fetch error (e.g., 500)", async () => {
+test("handler gracefully handles Supabase fetch error (e.g., 500)", async () => {
   const originalFetch = globalThis.fetch;
 
   globalThis.fetch = () => {
@@ -14,13 +22,13 @@ Deno.test("handler gracefully handles Supabase fetch error (e.g., 500)", async (
   };
 
   try {
-    const req = new Request("https://bharat-viral.netlify.app/article/test-slug");
+    const req = new Request("https://bharat-viral.pages.dev/article/test-slug");
     const response = await handler(req);
 
-    assertEquals(response.status, 500);
+    assert.strictEqual(response.status, 500);
     const body = await response.text();
-    assertEquals(body, "Internal Server Error");
-    assertEquals(response.headers.get("Content-Type"), "text/plain; charset=UTF-8");
+    assert.strictEqual(body, "Internal Server Error");
+    assert.strictEqual(response.headers.get("Content-Type"), "text/plain; charset=UTF-8");
   } finally {
     globalThis.fetch = originalFetch;
   }

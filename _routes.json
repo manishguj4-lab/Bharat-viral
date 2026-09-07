@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "include": [
+    "/article/*",
+    "/api/*",
+    "/sitemap.xml",
+    "/news-sitemap.xml"
+  ],
+  "exclude": [
+    "/build/*",
+    "/assets/*",
+    "/*.html",
+    "/*.js",
+    "/*.css"
+  ]
+}

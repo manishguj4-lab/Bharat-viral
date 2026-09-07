@@ -1551,7 +1551,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
   </div>
   <div class="panel"><div class="panel-body">
     <h3>🗺️ Sitemap Management</h3>
-    <p style="color:#718096;line-height:1.7">नया published article और active category sitemap में automatically शामिल होते हैं, बशर्ते Netlify sitemap function deploy हो।</p>
+    <p style="color:#718096;line-height:1.7">नया published article और active category sitemap में automatically शामिल होते हैं, बशर्ते Cloudflare sitemap function deploy हो।</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-red" id="refreshSitemapBtn">🔄 Check Sitemap</button>
       <a class="btn" href="/sitemap.xml" target="_blank" style="font-size:12px;padding:7px 10px;text-decoration:none">🗺️ Open sitemap.xml</a>
@@ -2488,7 +2488,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
      if(!r.ok) throw new Error("HTTP "+r.status);
      alert("✅ Sitemap refresh request सफल रहा।");
    }catch(e){
-     alert("❌ Sitemap refresh नहीं हो पाया। Netlify sitemap function check करें।");
+     alert("❌ Sitemap refresh नहीं हो पाया। Cloudflare sitemap function check करें।");
    }finally{
      btn.disabled=false;
      btn.textContent=old;

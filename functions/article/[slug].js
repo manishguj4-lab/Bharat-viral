@@ -3,15 +3,6 @@ export async function onRequest(context) {
   const SUPABASE_KEY = context.env.SUPABASE_KEY;
   const SITE = "https://bharat-viral.pages.dev";
 
-  function esc(value) {
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
-
   function jsonLd(value) {
     return JSON.stringify(value)
       .replace(/</g, "\\u003c")
@@ -136,117 +127,125 @@ export async function onRequest(context) {
 
     const canonical = `${SITE}/article/` + encodeURIComponent(String(article.slug));
 
-    const content = article.content || article.body || article.article_content || "";
+    // Fetch the base article.html template from the static assets
+    const url = new URL(context.request.url);
+    url.pathname = "/article.html";
+    const assetResponse = await context.env.ASSETS.fetch(new Request(url, context.request));
 
-    const newsArticle = {
-      "@context": "https://schema.org",
-      "@type": "NewsArticle",
-      headline: String(title),
-      description: String(description).slice(0, 160),
-      url: canonical,
-      mainEntityOfPage: {
-        "@type": "WebPage",
-        "@id": canonical
-      },
-      image: [{
-        "@type": "ImageObject",
-        url: String(image)
-      }],
-      datePublished: published,
-      dateModified: modified,
-      articleSection: String(category),
-      keywords: keywords,
-      author: {
-        "@type": "Organization",
-        name: String(author)
-      },
-      publisher: {
-        "@type": "Organization",
-        name: "Bharat Viral",
-        url: `${SITE}/`
-      }
-    };
+    if (!assetResponse.ok) {
+      return new Response("Template not found", { status: 404 });
+    }
 
-    const breadcrumb = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: "Home",
-          item: `${SITE}/`
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: String(category),
-          item: getCategoryUrl(String(category), String(categorySlug))
-        },
-        {
-          "@type": "ListItem",
-          position: 3,
-          name: String(title),
-          item: canonical
+    function esc(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    const rewriter = new HTMLRewriter()
+      .on('title', {
+        element(element) {
+          element.setInnerContent(`${title} | Bharat Viral`);
         }
-      ]
-    };
+      })
+      .on('head', {
+        element(element) {
+          // Remove existing meta tags to avoid duplicates, although we didn't add logic to remove them, it's safer to append new ones.
+          // Wait, HTMLRewriter will append them. If base template has them, we should probably remove them, or let it be if it's fine.
+          // In the review: "Update the meta tag injection to `.append()` to the `<head>` instead of relying on existing tags to replace"
+          // We will just append them. We can also use esc() with { html: true } if we append literal HTML string.
 
-    const html = `<!doctype html>
-<html lang="hi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${esc(title)} | Bharat Viral</title>
-<meta name="description" content="${esc(String(description).slice(0, 160))}">
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-<link rel="canonical" href="${esc(canonical)}">
-<meta property="og:type" content="article">
-<meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(String(description).slice(0, 160))}">
-<meta property="og:url" content="${esc(canonical)}">
-<meta property="og:image" content="${esc(image)}">
-<meta name="keywords" content="${esc(keywords.join(", "))}">
-<meta property="og:image:alt" content="${esc(title)}">
-<meta property="article:published_time" content="${esc(published)}">
-<meta property="article:modified_time" content="${esc(modified)}">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${esc(title)}">
-<meta name="twitter:description" content="${esc(String(description).slice(0, 160))}">
-<meta name="twitter:image" content="${esc(image)}">
-<script type="application/ld+json">${jsonLd(newsArticle)}</script>
-<script type="application/ld+json">${jsonLd(breadcrumb)}</script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5768457082251884"
-     crossorigin="anonymous"></script>
-</head>
-<body>
-<main>
-<article itemscope itemtype="https://schema.org/NewsArticle">
-<h1 itemprop="headline">${esc(title)}</h1>
-<div class="article-meta">
-  <span>${esc(category)}</span>
-  <time itemprop="datePublished" datetime="${esc(published)}">${esc(published)}</time>
-  <time itemprop="dateModified" datetime="${esc(modified)}">${esc(modified)}</time>
-</div>
-${image ? `<img src="${esc(image)}" alt="${esc(title)}" itemprop="image" loading="eager" decoding="async">` : ""}
-<div itemprop="articleBody">
-${content}
-</div>
-</article>
-</main>
-<script>
-  window.location.replace('/article/' + encodeURIComponent('${esc(article.slug)}'));
-</script>
-</body>
-</html>`;
+          const headContent = `
+            <meta name="description" content="${esc(String(description).slice(0, 160))}">
+            <link rel="canonical" href="${esc(canonical)}">
+            <meta property="og:title" content="${esc(title)}">
+            <meta property="og:description" content="${esc(String(description).slice(0, 160))}">
+            <meta property="og:url" content="${esc(canonical)}">
+            <meta property="og:image" content="${esc(image)}">
+            <meta property="article:published_time" content="${esc(published)}">
+            <meta property="article:modified_time" content="${esc(modified)}">
+            <meta name="twitter:title" content="${esc(title)}">
+            <meta name="twitter:description" content="${esc(String(description).slice(0, 160))}">
+            <meta name="twitter:image" content="${esc(image)}">
+            ${keywords.length > 0 ? `<meta name="keywords" content="${esc(keywords.join(', '))}"><meta property="article:tag" content="${esc(keywords.join(', '))}"><meta property="article:section" content="${esc(category)}">` : ''}
+          `;
+          element.append(headContent, { html: true });
+        }
+      })
+      // We will also remove the original meta tags to prevent duplicates.
+      .on('meta[name="description"]', { element(el) { el.remove(); } })
+      .on('link[rel="canonical"]', { element(el) { el.remove(); } })
+      .on('meta[property^="og:"]', { element(el) { if(el.getAttribute('property') !== 'og:type' && el.getAttribute('property') !== 'og:site_name') el.remove(); } })
+      .on('meta[property^="article:"]', { element(el) { el.remove(); } })
+      .on('meta[name^="twitter:"]', { element(el) { if (el.getAttribute('name') !== 'twitter:card') el.remove(); } })
+      .on('script#articleSchema', {
+        element(element) {
+          const newsArticle = {
+            "@context": "https://schema.org",
+            "@type": "NewsArticle",
+            headline: String(title),
+            description: String(description).slice(0, 160),
+            url: canonical,
+            mainEntityOfPage: {
+              "@type": "WebPage",
+              "@id": canonical
+            },
+            image: [{
+              "@type": "ImageObject",
+              url: String(image)
+            }],
+            datePublished: published,
+            dateModified: modified,
+            articleSection: String(category),
+            keywords: keywords,
+            author: {
+              "@type": "Organization",
+              name: String(author)
+            },
+            publisher: {
+              "@type": "Organization",
+              name: "Bharat Viral",
+              url: `${SITE}/`
+            }
+          };
 
-    return new Response(html, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/html; charset=UTF-8",
-        "Cache-Control": "public, max-age=300, s-maxage=300"
-      }
-    });
+          const breadcrumb = {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: `${SITE}/`
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: String(category),
+                item: getCategoryUrl(String(category), String(categorySlug))
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: String(title),
+                item: canonical
+              }
+            ]
+          };
+
+          const schemas = `
+            <script type="application/ld+json" id="articleSchema">${jsonLd(newsArticle)}</script>
+            <script type="application/ld+json">${jsonLd(breadcrumb)}</script>
+          `;
+          element.replace(schemas, { html: true });
+        }
+      });
+
+    return rewriter.transform(assetResponse);
 
   } catch (error) {
     console.error("Article SEO error:", error);

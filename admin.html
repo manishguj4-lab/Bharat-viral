@@ -81,6 +81,14 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px 15p
  .cards{grid-template-columns:1fr 1fr}.page-head{align-items:flex-start}
 }
 @media(max-width:450px){.cards{grid-template-columns:1fr}.page-head{flex-direction:column}.page-head .btn{width:100%}}
+
+/* Global Responsive Resets */
+body { width: 100% !important; margin: 0; padding: 0; }
+img, video, iframe, embed, object { max-width: 100% !important; height: auto !important; }
+.bv-manual-ad-slot, .bv-adsense-auto-slot { width: 100% !important; max-width: 100% !important; overflow: hidden !important; }
+table { max-width: 100% !important; }
+.table-responsive { overflow-x: auto; width: 100%; display: block; -webkit-overflow-scrolling: touch; }
+
 </style>
 
 <style>
@@ -393,7 +401,7 @@ body.bv-dark .bv-category-add-box{background:#0f1726;border-color:#33435c}
 
 <style>
 /* Bharat Viral Admin - final responsive layer */
-@media (max-width: 1024px){
+@media(max-width:1024px){
   .sidebar{width:230px}
   .main{margin-left:230px}
   .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -495,7 +503,7 @@ script{display:none!important}
  #bvHardMenuBtn{display:none!important}
  #bvHardBackBtn{display:none!important}
 }
-@media (max-width:720px){
+@media(max-width:720px){
  #bvHardMenuBtn{display:block!important}
  #bvHardBackBtn{display:none}
  #sidebar.open{transform:translateX(0)!important}
@@ -533,7 +541,7 @@ body.bv-dark .sidebar .nav-btn{color:#dce8f7!important}
 body.bv-dark .sidebar .nav-btn.active,body.bv-dark .sidebar .nav-btn:hover{background:#173253!important;color:#fff!important}
 body.bv-dark .topbar{background:#111b2d!important;color:#e5edf7!important;border-color:#26364e!important}
 @media(max-width:720px){
-  #sidebar{width:280px!important;max-width:82vw!important;height:100dvh!important;max-height:100dvh!important;position:fixed!important;left:0!important;top:0!important;bottom:0!important;overflow-y:auto!important;overflow-x:hidden!important;transform:translateX(-105%)!important;transition:transform .22s ease!important;z-index:10001!important}
+  #sidebar{width:280px!important;max-width:82%!important;height:100dvh!important;max-height:100dvh!important;position:fixed!important;left:0!important;top:0!important;bottom:0!important;overflow-y:auto!important;overflow-x:hidden!important;transform:translateX(-105%)!important;transition:transform .22s ease!important;z-index:10001!important}
   #sidebar.open{transform:translateX(0)!important}
   #menuBtn{display:none!important}
   #bvHardMenuBtn{display:flex!important;position:fixed!important;left:10px!important;top:9px!important;z-index:10050!important}
@@ -556,7 +564,7 @@ body.bv-dark .topbar{background:#111b2d!important;color:#e5edf7!important;border
   }
   #sidebar{
     display:flex!important;
-    width:290px!important;max-width:84vw!important;
+    width:290px!important;max-width:84%!important;
     position:fixed!important;left:0!important;top:0!important;bottom:0!important;
     height:100dvh!important;max-height:100dvh!important;
     overflow-y:auto!important;overflow-x:hidden!important;
@@ -604,7 +612,7 @@ body.bv-dark #bvFloatingBack{
 #page-articles td:last-child{min-width:180px;}
 @media(max-width:720px){
   #page-articles .panel{overflow-x:auto !important;scrollbar-width:thin;}
-  #page-articles table{min-width:720px;}
+  #page-articles table{min-width: 100%; max-width: 720px;}
   #page-articles td:first-child{min-width:250px;}
   #page-articles td:last-child{min-width:180px;}
 }
@@ -626,7 +634,7 @@ html, body {
 
 main {
   width: 100%;
-  max-width: 1500px;
+  max-width:1500px;
   min-width: 0;
   margin-left: auto;
   margin-right: auto;
@@ -643,17 +651,17 @@ main {
 }
 
 /* Keep the menu in the extreme top-left and give it the blue glow requested. */
-@media (max-width: 720px) {
+@media(max-width:720px) {
   .content {
     width: 100% !important;
-    max-width: 100vw !important;
+    max-width: 100% !important;
     margin-left: 0 !important;
     min-width: 0 !important;
   }
 
   .topbar {
     width: 100% !important;
-    max-width: 100vw !important;
+    max-width: 100% !important;
     padding-left: 64px !important;
     padding-right: 10px !important;
     min-width: 0 !important;
@@ -661,7 +669,7 @@ main {
 
   main {
     width: 100% !important;
-    max-width: 100vw !important;
+    max-width: 100% !important;
     min-width: 0 !important;
     padding: 14px 12px !important;
   }
@@ -721,7 +729,7 @@ main {
 
   #sidebar {
     width: 290px !important;
-    max-width: 84vw !important;
+    max-width:84% !important;
   }
 }
 
@@ -745,7 +753,7 @@ main {
 </style>
 
 <style id="BV-RED-WHITE-MENU">
-@media (max-width: 720px) {
+@media(max-width:720px) {
   #bvHardMenuBtn {
     left: 0 !important;
     top: 0 !important;

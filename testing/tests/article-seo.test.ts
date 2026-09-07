@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import handler from '../../netlify/edge-functions/article-seo';
+import { onRequest as handler } from '../../functions/article/[slug].js';
 
 describe('article-seo handler', () => {
   it('returns 404 when the mock fetch returns an empty array', async () => {
@@ -13,9 +13,21 @@ describe('article-seo handler', () => {
     vi.stubGlobal('fetch', mockFetch);
 
     // Create a mock request. Must have a slug in the url to bypass the early 404.
-    const req = new Request('https://bharat-viral.netlify.app/article/test-article');
+    const req = new Request('https://bharat-viral.pages.dev/article/test-article');
 
-    const response = await handler(req);
+    const context = {
+      request: req,
+      params: { slug: 'test-article' },
+      env: {
+        SUPABASE_URL: 'https://test.supabase.co',
+        SUPABASE_KEY: 'test-key',
+        ASSETS: {
+          fetch: vi.fn().mockResolvedValue(new Response('Template HTML'))
+        }
+      }
+    };
+
+    const response = await handler(context);
 
     // Check status
     expect(response.status).toBe(404);

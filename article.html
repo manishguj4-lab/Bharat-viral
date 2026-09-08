@@ -45,6 +45,7 @@ table { max-width: 100% !important; }
 
 <script type="application/ld+json" id="articleSchema">{"@context":"https://schema.org","@type":"NewsArticle","headline":"Bharat Viral","publisher":{"@type":"Organization","name":"Bharat Viral"}}</script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.4.15/purify.min.js"></script>
 </head>
 
 <body>
@@ -70,36 +71,23 @@ function decodeHTMLText(raw){
  return t.value;
 }
 
+let domPurifyHookAdded = false;
 function sanitizeArticleHTML(raw){
  let source=String(raw??'');
- // Supabase content may contain HTML entities such as &lt;p&gt;.
- // Decode them once before parsing so tags are not printed as text.
  source=decodeHTMLText(source);
- let doc;
- try{
-   doc=new DOMParser().parseFromString(source,"text/html");
- }catch(e){
-   return esc(source);
+ if(window.DOMPurify){
+  if (!domPurifyHookAdded) {
+    window.DOMPurify.addHook('afterSanitizeAttributes', function (node) {
+      if ('target' in node) {
+        node.setAttribute('target', '_blank');
+        node.setAttribute('rel', 'noopener noreferrer');
+      }
+    });
+    domPurifyHookAdded = true;
+  }
+  return window.DOMPurify.sanitize(source);
  }
- doc.querySelectorAll("script,style,iframe,object,embed,form,link,meta").forEach(el=>el.remove());
- doc.querySelectorAll("*").forEach(el=>{
-   [...el.attributes].forEach(attr=>{
-     const name=attr.name.toLowerCase();
-     const value=attr.value||"";
-     if(name.startsWith("on") || name==="srcdoc"){
-       el.removeAttribute(attr.name);
-       return;
-     }
-     if((name==="href" || name==="src") && /^\s*javascript:/i.test(value)){
-       el.removeAttribute(attr.name);
-     }
-   });
-   if(el.tagName==="A"){
-     el.setAttribute("target","_blank");
-     el.setAttribute("rel","noopener noreferrer");
-   }
- });
- return doc.body.innerHTML;
+ return esc(source);
 }
 
 function formatArticleText(text){

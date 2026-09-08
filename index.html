@@ -508,6 +508,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
   if(window.supabase) init(); else setTimeout(init,50);
 })();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.4.15/purify.min.js"></script>
 </head>
 
 <body>
@@ -1023,7 +1024,9 @@ function timeAgo(value){
 }
 
 function stripHtml(value){
-  const d=document.createElement("div"); d.innerHTML=String(value||""); return d.textContent||d.innerText||"";
+  const d=document.createElement("div");
+  d.innerHTML=window.DOMPurify ? window.DOMPurify.sanitize(String(value||"")) : String(value||"").replace(/<[^>]*>?/gm, '');
+  return d.textContent||d.innerText||"";
 }
 
 loadPublishedArticles();

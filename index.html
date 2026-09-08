@@ -838,11 +838,17 @@ async function loadPublishedArticles(){
   const icons=["📰","🔥","🇮🇳","📱","⚡","🎬","🏏","💻","💡","✅","🌐","🎯"];
 
   try{
-    // Categories are independent from articles.
-    const catRes=await fetch(
-      U+"/rest/v1/categories?select=*&is_active=eq.true&order=sort_order.asc,created_at.asc",
-      {headers:H,cache:"default"}
-    );
+    // Categories are independent from articles. We fetch them concurrently.
+    const [catRes, articleRes] = await Promise.all([
+      fetch(
+        U+"/rest/v1/categories?select=*&is_active=eq.true&order=sort_order.asc,created_at.asc",
+        {headers:H,cache:"default"}
+      ),
+      fetch(
+        U+"/rest/v1/articles?select=*&order=created_at.desc&limit=200",
+        {headers:H,cache:"default"}
+      )
+    ]);
 
     if(!catRes.ok){
       const txt=await catRes.text().catch(()=> "");
@@ -879,10 +885,6 @@ async function loadPublishedArticles(){
     // older Bharat Viral rows may use Published/published or another
     // publication flag. We filter flexibly in JavaScript.
     let articles=[];
-    let articleRes=await fetch(
-      U+"/rest/v1/articles?select=*&order=created_at.desc&limit=200",
-      {headers:H,cache:"default"}
-    );
 
     if(articleRes.ok){
       const parsed=await articleRes.json();

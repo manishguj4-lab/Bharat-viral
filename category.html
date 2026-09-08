@@ -19,6 +19,7 @@ table { max-width: 100% !important; }
 
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5768457082251884" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.4.15/purify.min.js"></script>
 </head>
 <body>
 <div class="top">🔥 BHARAT VIRAL • वायरल खबरों की सच्ची जानकारी</div>
@@ -157,18 +158,16 @@ function setupRashifal(){
  document.getElementById('rGo').addEventListener('click',loadRashifal);
 }
 function safeRichText(v){
- let raw=String(v??'').trim().replace(/^```(?:html|HTML)?\s*/,'').replace(/\s*```$/,'').trim();
+ let raw=String(v??'').trim().replace(/^\s*\x60\x60\x60(?:html|HTML)?\s*/,'').replace(/\s*\x60\x60\x60$/,'').trim();
  if(/&lt;\/?(?:h[3-5]|p|strong|b|em|i|ul|ol|li|br|blockquote)\b/i.test(raw)){
-  const d=document.createElement('textarea');d.innerHTML=raw;raw=d.value;
+  const d=document.createElement('textarea');
+  d.innerHTML=raw;
+  raw=d.value;
  }
- raw=raw.replace(/<!doctype[^>]*>/ig,'').replace(/<\/?(?:html|head|body)[^>]*>/ig,'');
- const tpl=document.createElement('template');tpl.innerHTML=raw;
- const allowed=new Set(['H3','H4','H5','P','BR','STRONG','B','EM','I','UL','OL','LI','BLOCKQUOTE']);
- const walk=n=>[...n.children].forEach(el=>{
-  if(!allowed.has(el.tagName)){const f=document.createDocumentFragment();while(el.firstChild)f.appendChild(el.firstChild);el.replaceWith(f);return;}
-  [...el.attributes].forEach(a=>el.removeAttribute(a.name));walk(el);
- });
- walk(tpl.content);return tpl.innerHTML;
+ if(window.DOMPurify){
+  return window.DOMPurify.sanitize(raw, { ALLOWED_TAGS: ['h3','h4','h5','p','br','strong','b','em','i','ul','ol','li','blockquote'] });
+ }
+ return String(raw??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
 async function loadRashifal(){
  if(rashifalController)rashifalController.abort();

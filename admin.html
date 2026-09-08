@@ -2095,7 +2095,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
  async function loadSeoTools(){
   const body=document.getElementById("seoAuditBody");
   const health=document.getElementById("seoHealthBox");
-  if(!body) return;
+  if(!body || !window.supabaseClient) return;
 
   body.innerHTML='<tr><td colspan="6"><div class="empty">SEO data load हो रहा है...</div></td></tr>';
 
@@ -2869,6 +2869,7 @@ function collect(status){
 
   async function loadArticlesFromDB() {
     const tbody = document.querySelector("#page-articles tbody");
+    if(!window.supabaseClient) return;
     const result = await window.supabaseClient
       .from("articles")
       .select("*")
@@ -3181,6 +3182,7 @@ function collect(status){
 
   async function loadDashboardFromDB() {
     try {
+      if(!window.supabaseClient) return;
       const result = await window.supabaseClient
         .from("articles")
         .select("*")
@@ -4856,10 +4858,9 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   function fmt(n){return Number(n||0).toLocaleString("en-IN");}
   async function checkAnalyticsHealth(){
     try{
-      if(!window.supabaseClient) throw new Error("Supabase client not ready");
+      if(!window.supabaseClient) return {ok:false,error:"Supabase client not ready"};
       const {data:sessionData,error:sessionError}=await window.supabaseClient.auth.getSession();
-      if(sessionError) throw sessionError;
-      if(!sessionData?.session) throw new Error("Admin login required");
+      if(sessionError || !sessionData?.session) return {ok:false,error:"Admin login required"};
 
       const {data,error}=await window.supabaseClient.rpc("get_analytics_summary",{p_days:7});
       if(error) throw error;

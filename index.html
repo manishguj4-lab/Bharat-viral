@@ -522,9 +522,9 @@ html,body{max-width:100%;overflow-x:hidden!important}
 </div>
 <div class="search-panel" id="searchPanel">
 <div class="search-inner">
-<input type="text" id="searchInput" placeholder="खबर, शिक्षा, टेक्नोलॉजी खोजें..." autocomplete="off">
-<button class="search-submit" onclick="performSearch()">Search</button>
-<button class="close-search" onclick="closeSearch()">✕</button>
+<input type="text" id="searchInput" placeholder="खबर, शिक्षा, टेक्नोलॉजी खोजें..." autocomplete="off" aria-label="खबर या टॉपिक खोजें">
+<button class="search-submit" onclick="performSearch()" aria-label="Search">Search</button>
+<button class="close-search" onclick="closeSearch()" aria-label="Close search">✕</button>
 </div>
 <div id="searchKeywords" class="bv-search-keywords">
   <span class="bv-search-keyword-title">🔍 Popular Keywords</span>
@@ -554,7 +554,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
 <div id="bvHomepageAdTop" class="bv-home-ad" hidden></div>
 
 <nav class="navbar"><div class="nav-inner">
-<a href="#home" class="nav-item home-btn" data-nav>🏠</a><div id="dynamicCategoryNav" class="bv-dynamic-category-nav"><span>Categories…</span></div>
+<a href="#home" class="nav-item home-btn" data-nav aria-label="Home">🏠</a><div id="dynamicCategoryNav" class="bv-dynamic-category-nav"><span>Categories…</span></div>
 </div></nav>
 
 <main id="home"><div class="container">
@@ -631,7 +631,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
 
 <section class="newsletter">
 <div><h2>📩 Bharat Viral से जुड़े रहें</h2><p>नई खबरें, education और important updates सीधे पाएं।</p></div>
-<div class="subscribe"><input type="email" placeholder="आपका Email"><button onclick="subscribeUser()">Subscribe</button></div>
+<div class="subscribe"><input type="email" placeholder="आपका Email" aria-label="Subscribe email address"><button onclick="subscribeUser()">Subscribe</button></div>
 </section>
 
 </div>
@@ -662,7 +662,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
 <div class="copyright footer-text" data-footer-text>© 2026 Bharat Viral. All rights reserved.</div>
 </footer>
 
-<button class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<button class="to-top" id="toTop" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <script>
 const searchBtn=document.getElementById("searchBtn");
@@ -1450,25 +1450,11 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
     });
   }
 
-  async function track(){
-    const sb=client(); if(!sb) return;
-    try{
-      await sb.from("analytics_events").insert({
-        event_name:"page_view",
-        page_url:location.href,
-        referrer:document.referrer||null,
-        user_agent:navigator.userAgent,
-        created_at:new Date().toISOString()
-      });
-    }catch(e){ console.warn("analytics:",e.message||e); }
-  }
-
   async function boot(){
     const s=await getSettings();
     applySettings(s);
     await loadNotices();
     await loadAds();
-    await track();
   }
 
   function start(){

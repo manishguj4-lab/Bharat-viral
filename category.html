@@ -23,15 +23,15 @@ table { max-width: 100% !important; }
 </head>
 <body>
 <div class="top">🔥 BHARAT VIRAL • वायरल खबरों की सच्ची जानकारी</div>
-<header class="head"><div class="headin"><div class="brand"><h1>BHARAT VIRAL</h1><p>जो वायरल है, उसकी सच्ची जानकारी</p></div><button class="home" onclick="location.href='index.html'">🏠 HOME</button></div></header>
-<main class="wrap"><button class="back" onclick="history.back()">← वापस</button><div class="title"><h2 id="heading">News</h2><p id="sub">इस category की प्रकाशित खबरें</p></div>
+<header class="head"><div class="headin"><div class="brand"><h1>BHARAT VIRAL</h1><p>जो वायरल है, उसकी सच्ची जानकारी</p></div><button class="home" onclick="location.href='index.html'" aria-label="Home">🏠 HOME</button></div></header>
+<main class="wrap"><button class="back" onclick="history.back()" aria-label="Go back">← वापस</button><div class="title"><h2 id="heading">News</h2><p id="sub">इस category की प्रकाशित खबरें</p></div>
 <div id="rashifalPicker" style="display:none;background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:15px">
 <label style="font-weight:700;font-size:13px">राशिफल की तारीख चुनें</label>
 <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-<select id="rDay" style="padding:9px;border:1px solid #ccc;border-radius:6px"></select>
-<select id="rMonth" style="padding:9px;border:1px solid #ccc;border-radius:6px"></select>
-<select id="rYear" style="padding:9px;border:1px solid #ccc;border-radius:6px"></select>
-<button id="rGo" class="read" type="button">देखें</button>
+<select id="rDay" style="padding:9px;border:1px solid #ccc;border-radius:6px" aria-label="Day"></select>
+<select id="rMonth" style="padding:9px;border:1px solid #ccc;border-radius:6px" aria-label="Month"></select>
+<select id="rYear" style="padding:9px;border:1px solid #ccc;border-radius:6px" aria-label="Year"></select>
+<button id="rGo" class="read" type="button" aria-label="View Rashifal">देखें</button>
 </div></div>
 <div id="grid" class="grid"></div><div id="pagination" class="pagination" aria-label="Pagination"></div></main>
 <script>

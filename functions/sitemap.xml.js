@@ -23,31 +23,48 @@ export async function onRequest(context) {
       "/rest/v1/articles?select=id,slug,created_at,published_at,updated_at" +
       "&status=eq.published&slug=not.is.null&order=published_at.desc";
 
-    const response = await fetch(endpoint, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: "Bearer " + SUPABASE_KEY
-      }
-    });
+    const categoriesEndpoint = SUPABASE_URL +
+      "/rest/v1/categories?select=*&is_active=eq.true&order=sort_order.asc,created_at.asc";
 
-    if (!response.ok) {
-      throw new Error("Supabase returned HTTP " + response.status);
+    const [articlesRes, categoriesRes] = await Promise.all([
+      fetch(endpoint, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: "Bearer " + SUPABASE_KEY
+        }
+      }),
+      fetch(categoriesEndpoint, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: "Bearer " + SUPABASE_KEY
+        }
+      })
+    ]);
+
+    if (!articlesRes.ok) {
+      throw new Error("Supabase articles returned HTTP " + articlesRes.status);
+    }
+    if (!categoriesRes.ok) {
+      throw new Error("Supabase categories returned HTTP " + categoriesRes.status);
     }
 
-    const articles = await response.json();
+    const articles = await articlesRes.json();
+    const categories = await categoriesRes.json();
 
     const urls = [
-      { loc: `${SITE}/`, lastmod: new Date().toISOString() },
-      { loc: `${SITE}/trending.html` },
-      { loc: `${SITE}/news.html` },
-      { loc: `${SITE}/entertainment.html` },
-      { loc: `${SITE}/sports.html` },
-      { loc: `${SITE}/tech.html` },
-      { loc: `${SITE}/social-media.html` },
-      { loc: `${SITE}/india.html` },
-      { loc: `${SITE}/explained.html` },
-      { loc: `${SITE}/google-trends.html` }
+      { loc: `${SITE}/`, lastmod: new Date().toISOString() }
     ];
+
+    for (const category of categories) {
+      if (!category.slug) continue;
+      // Trending should not be rendered
+      if (category.slug.toLowerCase() === 'trending' || category.slug.toLowerCase() === 'notice') continue;
+
+      urls.push({
+        loc: `${SITE}/category.html?category=` + encodeURIComponent(category.slug),
+        lastmod: isoDate(category.created_at) // isoDate is defined above
+      });
+    }
 
     for (const article of articles) {
       if (!article.slug) continue;
@@ -93,16 +110,7 @@ export async function onRequest(context) {
     }
 
     const fallback = [
-      `${SITE}/`,
-      `${SITE}/trending.html`,
-      `${SITE}/news.html`,
-      `${SITE}/entertainment.html`,
-      `${SITE}/sports.html`,
-      `${SITE}/tech.html`,
-      `${SITE}/social-media.html`,
-      `${SITE}/india.html`,
-      `${SITE}/explained.html`,
-      `${SITE}/google-trends.html`
+      `${SITE}/`
     ];
 
     const urlElements = fallback.map(url =>

@@ -1,18 +1,52 @@
-@media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
-
-.article .content {
-  min-width: 0 !important;
-  max-width: 100% !important;
-  overflow-x: auto !important;
-  overflow-y: visible !important;
-  overflow-wrap: anywhere !important;
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-.article .content table {
+/* ===== ARTICLE MOBILE RESPONSIVE FIX ===== */
+
+.article {
   width: 100% !important;
-  min-width: 0 !important;
   max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.article .body {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.article .content {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+/* ===== TABLE MOBILE FIX ===== */
+
+.article .content table {
+  display: table !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+
   table-layout: fixed !important;
+  border-collapse: collapse !important;
+
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
   white-space: normal !important;
@@ -20,19 +54,83 @@
 
 .article .content table th,
 .article .content table td {
-  max-width: 0 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+
+  padding: 8px !important;
+  box-sizing: border-box !important;
+
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
   white-space: normal !important;
 }
 
-@media (max-width:650px) {
+/* First column */
+.article .content table th:first-child,
+.article .content table td:first-child {
+  width: 28% !important;
+}
+
+/* Second column */
+.article .content table th:not(:first-child),
+.article .content table td:not(:first-child) {
+  width: 72% !important;
+}
+
+/* ===== MOBILE ===== */
+
+@media (max-width: 650px) {
+
+  .wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 8px !important;
+    margin: 12px auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .article {
+    width: 100% !important;
+    border-radius: 10px !important;
+  }
+
+  .article .body {
+    padding: 16px 12px !important;
+  }
+
+  .article .content {
+    width: 100% !important;
+    font-size: 16px !important;
+    line-height: 1.75 !important;
+  }
+
   .article .content table {
-    font-size:13px !important;
+    width: 100% !important;
+    font-size: 12px !important;
   }
 
   .article .content table th,
   .article .content table td {
-    padding:7px 8px !important;
+    padding: 6px !important;
   }
+}
+
+/* Prevent images/media from overflowing */
+.article img,
+.article video,
+.article iframe,
+.article embed,
+.article object {
+  max-width: 100% !important;
+  height: auto !important;
+  box-sizing: border-box !important;
+}
+
+/* Long code/text protection */
+.article pre,
+.article code {
+  max-width: 100% !important;
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
 }

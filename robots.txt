@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
+Disallow: /admin-sw.js
+Disallow: /admin-manifest.json
 
 Sitemap: https://bharat-viral.pages.dev/sitemap.xml
+Sitemap: https://bharat-viral.pages.dev/news-sitemap.xml

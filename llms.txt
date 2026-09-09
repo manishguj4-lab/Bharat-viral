@@ -7,15 +7,14 @@ Bharat Viral is an Indian news and information platform. It provides accurate, t
 https://bharat-viral.pages.dev/
 
 ## Content Categories
-- Trending: https://bharat-viral.pages.dev/trending.html
-- News: https://bharat-viral.pages.dev/news.html
-- Entertainment: https://bharat-viral.pages.dev/entertainment.html
-- Sports: https://bharat-viral.pages.dev/sports.html
-- Tech: https://bharat-viral.pages.dev/tech.html
-- Social Media: https://bharat-viral.pages.dev/social-media.html
-- India: https://bharat-viral.pages.dev/india.html
-- Explained: https://bharat-viral.pages.dev/explained.html
-- Google Trends: https://bharat-viral.pages.dev/google-trends.html
+Categories are accessed via the pattern `https://bharat-viral.pages.dev/category.html?category={slug}`.
+Some of the main categories include:
+- News: https://bharat-viral.pages.dev/category.html?category=news
+- Education: https://bharat-viral.pages.dev/category.html?category=education
+- Sports: https://bharat-viral.pages.dev/category.html?category=sports
+- Technology: https://bharat-viral.pages.dev/category.html?category=technology
+- Social Media: https://bharat-viral.pages.dev/category.html?category=social
+- Rashifal: https://bharat-viral.pages.dev/category.html?category=rashifal
 
 ## Important Public Pages
 - About Us: https://bharat-viral.pages.dev/about.html

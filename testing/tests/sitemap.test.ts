@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert';
 
 describe('sitemap handler', () => {
-  it('returns valid XML with static and article URLs when fetch is successful', async () => {
+  it('returns valid XML with static, category, and article URLs when fetch is successful', async () => {
     const { onRequest } = await import('../../functions/sitemap.xml.js');
     const originalFetch = global.fetch;
     const mockArticles = [
@@ -29,10 +29,29 @@ describe('sitemap handler', () => {
       }
     ];
 
-    global.fetch = async () => ({
-      ok: true,
-      json: async () => mockArticles
-    });
+    const mockCategories = [
+      {
+        slug: 'news',
+        created_at: '2023-01-01T00:00:00.000Z'
+      },
+      {
+        slug: 'trending', // should be ignored
+        created_at: '2023-01-01T00:00:00.000Z'
+      }
+    ];
+
+    global.fetch = async (url) => {
+      if (url.includes('/rest/v1/categories')) {
+        return {
+          ok: true,
+          json: async () => mockCategories
+        };
+      }
+      return {
+        ok: true,
+        json: async () => mockArticles
+      };
+    };
 
     const context = {
       env: {
@@ -53,7 +72,8 @@ describe('sitemap handler', () => {
       assert.ok(body.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'));
 
       assert.ok(body.includes('<loc>https://bharat-viral.pages.dev/</loc>'));
-      assert.ok(body.includes('<loc>https://bharat-viral.pages.dev/trending.html</loc>'));
+      assert.ok(body.includes('<loc>https://bharat-viral.pages.dev/category.html?category=news</loc>'));
+      assert.ok(!body.includes('<loc>https://bharat-viral.pages.dev/category.html?category=trending</loc>'));
 
       assert.ok(body.includes('<loc>https://bharat-viral.pages.dev/article/test-article-1</loc>'));
       assert.ok(body.includes('<lastmod>2023-01-03T00:00:00.000Z</lastmod>'));

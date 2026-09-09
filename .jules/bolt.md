@@ -1,3 +1,11 @@
-## 2024-09-08 - Added DOM rendering optimization for hero slider
-**Learning:** The attempt to optimize `renderHeroSlide` by updating DOM attributes instead of using `.innerHTML` was rejected because hero slide transitions are a "cold path" (occurring every few seconds), making this a micro-optimization with no measurable impact that significantly sacrificed code readability. Additionally, it introduced a bug: directly assigning HTML-escaped strings to DOM properties (like `.src` and `.alt`) double-escapes them (e.g., `&` becomes `&amp;`), breaking complex image URLs.
-**Action:** Avoid micro-optimizations on infrequent events. When prioritizing optimizations, look for network bottlenecks like sequential data fetching (e.g., fetching categories and articles independently) and parallelize them with `Promise.all`.
+## Performance Insights: DOM insertion inside loops
+
+**Observation**: Repeatedly calling `insertAdjacentHTML` inside a loop (such as dynamically building a dropdown for Months and Years in `category.html`) incurs a performance penalty compared to batched operations. While the JavaScript string overhead alone isn't large, the real cost lies in the browser having to parse HTML and update the DOM tree incrementally on each loop iteration.
+
+**Optimization approach**:
+1. Batched string concatenation (`mh += '<option>...'`)
+Followed by a single `innerHTML` assignment.
+
+**Result**: String concatenation was observed to be faster than array join and significantly faster than multiple `insertAdjacentHTML` calls when properly evaluated. The `category.html` implementation has been updated to reflect this optimization safely.
+
+**Security Consideration**: Using `innerHTML` requires ensuring that the inserted data is strictly safe from XSS. In the dropdown case, casting integers to strings (`String(i)`) guarantees safety.

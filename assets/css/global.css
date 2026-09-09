@@ -1,1 +1,38 @@
 @media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
+
+.article .content {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  overflow-wrap: anywhere !important;
+}
+
+.article .content table {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  table-layout: fixed !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  white-space: normal !important;
+}
+
+.article .content table th,
+.article .content table td {
+  max-width: 0 !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  white-space: normal !important;
+}
+
+@media (max-width:650px) {
+  .article .content table {
+    font-size:13px !important;
+  }
+
+  .article .content table th,
+  .article .content table td {
+    padding:7px 8px !important;
+  }
+}

@@ -1466,9 +1466,12 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
   async function boot(){
     const s=await getSettings();
     applySettings(s);
-    await loadNotices();
-    await loadAds();
-    await track();
+    // ⚡ Bolt: Execute independent tasks concurrently to improve initialization speed
+    await Promise.all([
+      loadNotices(),
+      loadAds(),
+      track()
+    ]);
   }
 
   function start(){

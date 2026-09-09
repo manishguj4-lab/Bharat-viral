@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/manishguj4-lab/Bharat-viral/issues"
   },
-  "homepage": "https://github.com/manishguj4-lab/Bharat-viral#readme"
+  "homepage": "https://github.com/manishguj4-lab/Bharat-viral#readme",
+  "devDependencies": {
+    "jsonwebtoken": "^9.0.3"
+  }
 }

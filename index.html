@@ -494,20 +494,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
 
 <!-- Supabase client: required for live admin settings, notices and ads -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-(function(){
-  const url="https://ocarsylhsyxjqpzidndb.supabase.co";
-  const key="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
-  function init(){
-    if(window.supabase && !window.supabaseClient){
-      window.supabaseClient=window.supabase.createClient(url,key);
-      window.sb=window.supabaseClient;
-      window.dispatchEvent(new Event("supabaseReady"));
-    }
-  }
-  if(window.supabase) init(); else setTimeout(init,50);
-})();
-</script>
+<script src="/supabase-client.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.4.15/purify.min.js"></script>
 </head>
 

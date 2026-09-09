@@ -183,37 +183,65 @@ export async function onRequest(context) {
       .on('meta[name^="twitter:"]', { element(el) { if (el.getAttribute('name') !== 'twitter:card') el.remove(); } })
       .on('script#articleSchema', {
         element(element) {
-          const newsArticle = {
+          const authorType = String(author) !== "Bharat Viral" && String(author) ? "Person" : "Organization";
+          const graphSchema = {
             "@context": "https://schema.org",
-            "@type": "NewsArticle",
-            headline: String(title),
-            description: String(description).slice(0, 160),
-            url: canonical,
-            mainEntityOfPage: {
-              "@type": "WebPage",
-              "@id": canonical
-            },
-            image: [{
-              "@type": "ImageObject",
-              url: String(image)
-            }],
-            datePublished: published,
-            dateModified: modified,
-            articleSection: String(category),
-            keywords: keywords,
-            author: {
-              "@type": String(author) !== "Bharat Viral" && String(author) ? "Person" : "Organization",
-              name: String(author)
-            },
-            publisher: {
-              "@type": "Organization",
-              name: "Bharat Viral",
-              url: `${SITE}/`,
-              logo: {
-                "@type": "ImageObject",
-                url: `${SITE}/icon-512.png`
+            "@graph": [
+              {
+                "@type": "Organization",
+                "@id": `${SITE}/#organization`,
+                "name": "Bharat Viral",
+                "url": `${SITE}/`,
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": `${SITE}/icon-512.png`
+                }
+              },
+              {
+                "@type": "WebSite",
+                "@id": `${SITE}/#website`,
+                "url": `${SITE}/`,
+                "name": "Bharat Viral",
+                "publisher": {
+                  "@id": `${SITE}/#organization`
+                }
+              },
+              {
+                "@type": "WebPage",
+                "@id": `${canonical}#webpage`,
+                "url": canonical,
+                "name": String(title),
+                "isPartOf": {
+                  "@id": `${SITE}/#website`
+                }
+              },
+              {
+                "@type": "NewsArticle",
+                "@id": `${canonical}#article`,
+                "headline": String(title),
+                "description": String(description).slice(0, 160),
+                "url": canonical,
+                "mainEntityOfPage": {
+                  "@id": `${canonical}#webpage`
+                },
+                "image": [{
+                  "@type": "ImageObject",
+                  "url": String(image)
+                }],
+                "datePublished": published,
+                "dateModified": modified,
+                "articleSection": String(category),
+                "keywords": keywords,
+                "author": {
+                  "@type": authorType,
+                  "@id": `${SITE}/#/schema/${authorType.toLowerCase()}/${encodeURIComponent(String(author))}`,
+                  "name": String(author)
+                },
+                "publisher": {
+                  "@id": `${SITE}/#organization`
+                }
               }
-            }
+            ]
           };
 
           const breadcrumb = {
@@ -242,7 +270,7 @@ export async function onRequest(context) {
           };
 
           const schemas = `
-            <script type="application/ld+json" id="articleSchema">${jsonLd(newsArticle)}</script>
+            <script type="application/ld+json" id="articleSchema">${jsonLd(graphSchema)}</script>
             <script type="application/ld+json">${jsonLd(breadcrumb)}</script>
           `;
           element.replace(schemas, { html: true });

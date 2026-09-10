@@ -3,8 +3,6 @@ import { onRequest as sitemapRequest } from "./functions/sitemap.xml.js";
 import { onRequest as newsSitemapRequest } from "./functions/news-sitemap.xml.js";
 import { onRequest as telegramPublishRequest } from "./functions/api/telegram-publish.js";
 
-const LEGACY_SITE = "https://bharat-viral.pages.dev";
-
 function workerContext(request, env, params = {}) {
   return {
     request,
@@ -14,34 +12,6 @@ function workerContext(request, env, params = {}) {
     next: async () => env.ASSETS.fetch(request),
     functionPath: new URL(request.url).pathname
   };
-}
-
-async function rewriteLegacyProductionUrls(response, origin) {
-  if (!response || response.status === 204) return response;
-
-  const contentType = response.headers.get("content-type") || "";
-
-  if (!/(text\/html|application\/xml|text\/xml)/i.test(contentType)) {
-    return response;
-  }
-
-  const body = await response.text();
-
-  if (!body.includes(LEGACY_SITE)) {
-    return response;
-  }
-
-  const headers = new Headers(response.headers);
-  headers.delete("content-length");
-
-  return new Response(
-    body.split(LEGACY_SITE).join(origin),
-    {
-      status: response.status,
-      statusText: response.statusText,
-      headers
-    }
-  );
 }
 
 function notFound(message = "Not Found") {
@@ -91,7 +61,10 @@ export default {
           workerContext(request, env, { slug })
         );
 
-        return rewriteLegacyProductionUrls(response, url.origin);
+        // IMPORTANT:
+        // Do not read/clone/buffer the response body here.
+        // Preserve HTMLRewriter streaming.
+        return response;
       }
 
       // Sitemap
@@ -100,7 +73,7 @@ export default {
           workerContext(request, env)
         );
 
-        return rewriteLegacyProductionUrls(response, url.origin);
+        return response;
       }
 
       // Google News sitemap
@@ -109,7 +82,7 @@ export default {
           workerContext(request, env)
         );
 
-        return rewriteLegacyProductionUrls(response, url.origin);
+        return response;
       }
 
       // Existing Telegram API

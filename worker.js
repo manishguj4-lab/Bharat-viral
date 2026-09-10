@@ -1,7 +1,7 @@
-import { onRequest as articleRequest } from "./functions/article/[slug].js";
-import { onRequest as sitemapRequest } from "./functions/sitemap.xml.js";
-import { onRequest as newsSitemapRequest } from "./functions/news-sitemap.xml.js";
-import { onRequest as telegramPublishRequest } from "./functions/api/telegram-publish.js";
+import { onRequest as articleRequest } from "./Functions/article/[slug].js";
+import { onRequest as sitemapRequest } from "./Functions/sitemap.xml.js";
+import { onRequest as newsSitemapRequest } from "./Functions/news-sitemap.xml.js";
+import { onRequest as telegramPublishRequest } from "./Functions/api/telegram-publish.js";
 
 function workerContext(request, env, params = {}) {
   return {
@@ -30,7 +30,9 @@ export default {
     const pathname = url.pathname;
 
     try {
-      // Dynamic article route
+      // ==========================================
+      // ARTICLE ROUTES
+      // ==========================================
       if (pathname === "/article" || pathname.startsWith("/article/")) {
         if (request.method !== "GET" && request.method !== "HEAD") {
           return new Response("Method Not Allowed", {
@@ -61,44 +63,49 @@ export default {
           workerContext(request, env, { slug })
         );
 
-        // IMPORTANT:
-        // Do not read/clone/buffer the response body here.
+        // Do NOT read, clone or buffer the response.
         // Preserve HTMLRewriter streaming.
         return response;
       }
 
-      // Sitemap
+      // ==========================================
+      // XML SITEMAP
+      // ==========================================
       if (pathname === "/sitemap.xml") {
-        const response = await sitemapRequest(
+        return await sitemapRequest(
           workerContext(request, env)
         );
-
-        return response;
       }
 
-      // Google News sitemap
+      // ==========================================
+      // GOOGLE NEWS SITEMAP
+      // ==========================================
       if (pathname === "/news-sitemap.xml") {
-        const response = await newsSitemapRequest(
+        return await newsSitemapRequest(
           workerContext(request, env)
         );
-
-        return response;
       }
 
-      // Existing Telegram API
+      // ==========================================
+      // TELEGRAM PUBLISH API
+      // ==========================================
       if (pathname === "/api/telegram-publish") {
-        return telegramPublishRequest(
+        return await telegramPublishRequest(
           workerContext(request, env)
         );
       }
 
-      // Unknown API routes
+      // ==========================================
+      // UNKNOWN API ROUTES
+      // ==========================================
       if (pathname.startsWith("/api/")) {
         return notFound("API endpoint not found");
       }
 
-      // Normal static website
-      return env.ASSETS.fetch(request);
+      // ==========================================
+      // STATIC WEBSITE
+      // ==========================================
+      return await env.ASSETS.fetch(request);
 
     } catch (error) {
       console.error("Worker request error:", error);

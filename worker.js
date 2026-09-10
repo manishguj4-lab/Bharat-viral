@@ -1,7 +1,7 @@
-import { onRequest as articleRequest } from "./Functions/article/[slug].js";
-import { onRequest as sitemapRequest } from "./Functions/sitemap.xml.js";
-import { onRequest as newsSitemapRequest } from "./Functions/news-sitemap.xml.js";
-import { onRequest as telegramPublishRequest } from "./Functions/api/telegram-publish.js";
+import { onRequest as articleRequest } from "./functions/article/[slug].js";
+import { onRequest as sitemapRequest } from "./functions/sitemap.xml.js";
+import { onRequest as newsSitemapRequest } from "./functions/news-sitemap.xml.js";
+import { onRequest as telegramPublishRequest } from "./functions/api/telegram-publish.js";
 
 function workerContext(request, env, params = {}) {
   return {

@@ -2,7 +2,7 @@ export async function onRequest(context) {
   try {
     const SUPABASE_URL = context.env.SUPABASE_URL;
     const SUPABASE_KEY = context.env.SUPABASE_KEY;
-    const SITE = "https://bharat-viral.pages.dev";
+    const SITE = new URL(context.request.url).origin;
     const NEWS_PUBLICATION = "Bharat Viral";
     const LANGUAGE = "hi";
     const NEWS_WINDOW_HOURS = 48;

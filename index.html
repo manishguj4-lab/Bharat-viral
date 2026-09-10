@@ -1039,9 +1039,8 @@ function timeAgo(value){
 }
 
 function stripHtml(value){
-  const d=document.createElement("div");
-  d.innerHTML=window.DOMPurify ? window.DOMPurify.sanitize(String(value||"")) : String(value||"").replace(/<[^>]*>?/gm, '');
-  return d.textContent||d.innerText||"";
+  const doc = new DOMParser().parseFromString(String(value||""), 'text/html');
+  return doc.body.textContent || "";
 }
 
 loadPublishedArticles();

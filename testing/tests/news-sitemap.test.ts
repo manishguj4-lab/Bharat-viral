@@ -27,6 +27,7 @@ describe('news-sitemap handler', () => {
     };
 
     const context = {
+      request: new Request('https://bharat-viral.bharatviralnews.workers.dev/news-sitemap.xml'),
       env: {
         SUPABASE_URL: 'http://localhost',
         SUPABASE_KEY: 'test-key'
@@ -40,7 +41,7 @@ describe('news-sitemap handler', () => {
       assert.strictEqual(response.headers.get('Content-Type'), 'application/xml; charset=UTF-8');
 
       const body = await response.text();
-      assert.ok(body.includes('<loc>https://bharat-viral.pages.dev/article/recent-article</loc>'));
+      assert.ok(body.includes('<loc>https://bharat-viral.bharatviralnews.workers.dev/article/recent-article</loc>'));
       assert.ok(body.includes('<news:title>Recent Article</news:title>'));
     } finally {
       global.fetch = originalFetch;
@@ -66,7 +67,8 @@ describe('news-sitemap handler', () => {
       ]
     });
 
-    const context = { env: { SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' } };
+    const context = { request: new Request('https://bharat-viral.bharatviralnews.workers.dev/news-sitemap.xml'),
+      env: { SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' } };
 
     try {
       const response = await onRequest(context);
@@ -88,7 +90,8 @@ describe('news-sitemap handler', () => {
     let consoleErrorCalled = false;
     console.error = () => { consoleErrorCalled = true; };
 
-    const context = { env: { SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' } };
+    const context = { request: new Request('https://bharat-viral.bharatviralnews.workers.dev/news-sitemap.xml'),
+      env: { SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' } };
 
     try {
       const response = await onRequest(context);

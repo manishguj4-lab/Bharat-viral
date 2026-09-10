@@ -34,7 +34,7 @@ describe('article-seo handler', () => {
           fetch: async () => new Response("Template content")
         }
       },
-      request: new Request('https://bharat-viral.pages.dev/article/test-article')
+      request: new Request('https://bharat-viral.bharatviralnews.workers.dev/article/test-article')
     };
 
     const response = await onRequest(context);

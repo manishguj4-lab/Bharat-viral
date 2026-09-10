@@ -3,8 +3,6 @@ import { onRequest as sitemapRequest } from "./functions/sitemap.xml.js";
 import { onRequest as newsSitemapRequest } from "./functions/news-sitemap.xml.js";
 import { onRequest as telegramPublishRequest } from "./functions/api/telegram-publish.js";
 
-const LEGACY_SITE = "https://bharat-viral.pages.dev";
-
 function workerContext(request, env, params = {}) {
   return {
     request,
@@ -14,34 +12,6 @@ function workerContext(request, env, params = {}) {
     next: async () => env.ASSETS.fetch(request),
     functionPath: new URL(request.url).pathname
   };
-}
-
-async function rewriteLegacyProductionUrls(response, origin) {
-  if (!response || response.status === 204) return response;
-
-  const contentType = response.headers.get("content-type") || "";
-
-  if (!/(text\/html|application\/xml|text\/xml)/i.test(contentType)) {
-    return response;
-  }
-
-  const body = await response.text();
-
-  if (!body.includes(LEGACY_SITE)) {
-    return response;
-  }
-
-  const headers = new Headers(response.headers);
-  headers.delete("content-length");
-
-  return new Response(
-    body.split(LEGACY_SITE).join(origin),
-    {
-      status: response.status,
-      statusText: response.statusText,
-      headers
-    }
-  );
 }
 
 function notFound(message = "Not Found") {
@@ -87,36 +57,22 @@ export default {
           return notFound("Article not found");
         }
 
-        const response = await articleRequest(
-          workerContext(request, env, { slug })
-        );
-
-        return rewriteLegacyProductionUrls(response, url.origin);
+        return await articleRequest(workerContext(request, env, { slug }));
       }
 
       // Sitemap
       if (pathname === "/sitemap.xml") {
-        const response = await sitemapRequest(
-          workerContext(request, env)
-        );
-
-        return rewriteLegacyProductionUrls(response, url.origin);
+        return await sitemapRequest(workerContext(request, env));
       }
 
       // Google News sitemap
       if (pathname === "/news-sitemap.xml") {
-        const response = await newsSitemapRequest(
-          workerContext(request, env)
-        );
-
-        return rewriteLegacyProductionUrls(response, url.origin);
+        return await newsSitemapRequest(workerContext(request, env));
       }
 
       // Existing Telegram API
       if (pathname === "/api/telegram-publish") {
-        return telegramPublishRequest(
-          workerContext(request, env)
-        );
+        return telegramPublishRequest(workerContext(request, env));
       }
 
       // Unknown API routes

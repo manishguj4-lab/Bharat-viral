@@ -2,7 +2,7 @@ export async function onRequest(context) {
   try {
     const SUPABASE_URL = context.env.SUPABASE_URL;
     const SUPABASE_KEY = context.env.SUPABASE_KEY;
-    const SITE = "https://bharat-viral.pages.dev";
+    const SITE = new URL(context.request.url).origin;
 
     function xmlEscape(value) {
       return String(value ?? "")
@@ -98,7 +98,7 @@ export async function onRequest(context) {
 
   } catch (error) {
     console.error("Sitemap error:", error);
-    const SITE = "https://bharat-viral.pages.dev";
+    const SITE = new URL(context.request.url).origin;
 
     function xmlEscape(value) {
       return String(value ?? "")

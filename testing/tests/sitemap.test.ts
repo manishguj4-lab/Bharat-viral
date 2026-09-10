@@ -54,6 +54,7 @@ describe('sitemap handler', () => {
     };
 
     const context = {
+      request: new Request('https://bharat-viral.bharatviralnews.workers.dev/sitemap.xml'),
       env: {
         SUPABASE_URL: 'http://localhost',
         SUPABASE_KEY: 'test-key'
@@ -71,14 +72,14 @@ describe('sitemap handler', () => {
       assert.ok(body.includes('<?xml version="1.0" encoding="UTF-8"?>'));
       assert.ok(body.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'));
 
-      assert.ok(body.includes('<loc>https://bharat-viral.pages.dev/</loc>'));
-      assert.ok(body.includes('<loc>https://bharat-viral.pages.dev/category.html?category=news</loc>'));
-      assert.ok(!body.includes('<loc>https://bharat-viral.pages.dev/category.html?category=trending</loc>'));
+      assert.ok(body.includes('<loc>https://bharat-viral.bharatviralnews.workers.dev/</loc>'));
+      assert.ok(body.includes('<loc>https://bharat-viral.bharatviralnews.workers.dev/category.html?category=news</loc>'));
+      assert.ok(!body.includes('<loc>https://bharat-viral.bharatviralnews.workers.dev/category.html?category=trending</loc>'));
 
-      assert.ok(body.includes('<loc>https://bharat-viral.pages.dev/article/test-article-1</loc>'));
+      assert.ok(body.includes('<loc>https://bharat-viral.bharatviralnews.workers.dev/article/test-article-1</loc>'));
       assert.ok(body.includes('<lastmod>2023-01-03T00:00:00.000Z</lastmod>'));
 
-      assert.ok(body.includes('<loc>https://bharat-viral.pages.dev/article/test-article-2</loc>'));
+      assert.ok(body.includes('<loc>https://bharat-viral.bharatviralnews.workers.dev/article/test-article-2</loc>'));
       assert.ok(body.includes('<lastmod>2023-01-05T00:00:00.000Z</lastmod>'));
     } finally {
       global.fetch = originalFetch;
@@ -96,6 +97,7 @@ describe('sitemap handler', () => {
     console.error = () => { consoleErrorCalled = true; };
 
     const context = {
+      request: new Request('https://bharat-viral.bharatviralnews.workers.dev/sitemap.xml'),
       env: {
         SUPABASE_URL: 'http://localhost',
         SUPABASE_KEY: 'test-key'
@@ -111,7 +113,7 @@ describe('sitemap handler', () => {
 
       const body = await response.text();
       assert.ok(body.includes('<?xml version="1.0" encoding="UTF-8"?>'));
-      assert.ok(body.includes('<loc>https://bharat-viral.pages.dev/</loc>'));
+      assert.ok(body.includes('<loc>https://bharat-viral.bharatviralnews.workers.dev/</loc>'));
       assert.ok(!body.includes('/article/test-article')); // no articles
 
       assert.ok(consoleErrorCalled);

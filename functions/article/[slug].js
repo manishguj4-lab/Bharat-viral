@@ -1,7 +1,7 @@
 export async function onRequest(context) {
   const SUPABASE_URL = context.env.SUPABASE_URL;
   const SUPABASE_KEY = context.env.SUPABASE_KEY;
-  const SITE = "https://bharat-viral.pages.dev";
+  const SITE = new URL(context.request.url).origin;
 
   function jsonLd(value) {
     return JSON.stringify(value)

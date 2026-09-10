@@ -1248,6 +1248,15 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
     return {articles,cats,tags};
   }
 
+  // ⚡ Bolt: Added debounce utility to prevent unnecessary processing on every keystroke
+  function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
   function buildKeywords(){
     const {articles,cats,tags}=getData();
     const words=[];
@@ -1300,7 +1309,10 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
 
   }
 
-  input.addEventListener('input',()=>showSuggestions(input.value));
+  // ⚡ Bolt: Debouncing the search input to delay filtering and DOM updates by 250ms
+  // Impact: Reduces CPU usage and unnecessary re-renders when typing fast, leading to a smoother UX
+  const debouncedShowSuggestions = debounce(() => showSuggestions(input.value), 250);
+  input.addEventListener('input', debouncedShowSuggestions);
 
   // Rebuild when Supabase articles have loaded.
   window.addEventListener('bvArticlesLoaded',buildKeywords);

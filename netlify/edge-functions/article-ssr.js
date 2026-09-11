@@ -57,7 +57,7 @@ export default async (request, context) => {
 
   const title = article.title || "Bharat Viral";
   const description = article.excerpt || article.description || `${title} — Bharat Viral पर पूरी खबर पढ़ें।`;
-  const image = article.image_url || article.image || `${site}/favicon.ico`;
+  const image = article.image_url || article.image || `${site}/icon-512.png`;
   const canonical = `${site}/article/${encodeURIComponent(article.slug || slug)}`;
   const published = article.published_at || article.created_at || new Date().toISOString();
   const modified = article.updated_at || article.modified_at || published;
@@ -96,10 +96,10 @@ export default async (request, context) => {
     publisher: {
       "@type": "Organization",
       name: "Bharat Viral",
-      url: site,
+      url: `${site}/`,
       logo: {
         "@type": "ImageObject",
-        url: `${site}/favicon.ico`
+        url: `${site}/icon-512.png`
       }
     },
     mainEntityOfPage: {

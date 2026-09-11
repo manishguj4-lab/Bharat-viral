@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "node --import tsx --test tests/**/*.ts",
+    "test": "node --import tsx --test tests/*.ts",
     "build": "echo \"No build needed\""
   },
   "repository": {

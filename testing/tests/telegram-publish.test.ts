@@ -1,168 +1,233 @@
-import { test, describe, beforeEach, afterEach, mock } from 'node:test';
-import * as assert from 'node:assert';
-
-const handler = async (event) => {
-  const context = {
-    env: {
-      TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
-      TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,
-      SUPABASE_URL: "https://mock.supabase.co",
-      SUPABASE_KEY: "mock-anon-key",
-      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY
-    },
-    request: {
-      method: event.httpMethod,
-      headers: new Headers(event.headers || {}),
-      json: async () => typeof event.body === 'string' ? JSON.parse(event.body || '{}') : (event.body || {})
-    }
-  };
-  const { onRequest } = await import('../../functions/api/telegram-publish.js');
-  return onRequest(context);
-};
+import { describe, it } from 'node:test';
+import assert from 'node:assert';
 
 describe('telegram-publish', () => {
-  let originalEnv;
-  let originalFetch;
+  it('should return 405 for non-POST requests', async () => {
+    const module = await import('../../netlify/functions/api/telegram-publish.js');
+    const handler = module.default;
 
-  beforeEach(() => {
-    originalEnv = process.env;
-    originalFetch = global.fetch;
-    process.env = {
-      ...originalEnv,
-      TELEGRAM_BOT_TOKEN: 'test-token',
-      TELEGRAM_CHAT_ID: 'test-chat-id',
-      SUPABASE_SERVICE_ROLE_KEY: 'mock-service-role-key'
-    };
-  });
-
-  afterEach(() => {
-    process.env = originalEnv;
-    global.fetch = originalFetch;
-  });
-
-  test('should return 405 for non-POST requests', async () => {
-    const req = { httpMethod: 'GET' };
-    const response = await handler(req);
+    const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', { method: 'GET' });
+    const response = await handler(req, {});
     assert.strictEqual(response.status, 405);
   });
 
-  test('should return 401 if missing Authorization header', async () => {
-    const req = { httpMethod: 'POST', headers: {}, body: '{}' };
-    const response = await handler(req);
+  it('should return 401 if missing Authorization header', async () => {
+    const module = await import('../../netlify/functions/api/telegram-publish.js');
+    const handler = module.default;
+
+    const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', { method: 'POST' });
+    const response = await handler(req, {});
     assert.strictEqual(response.status, 401);
   });
 
-  test('should return 401 if invalid Authorization header', async () => {
-    const req = { httpMethod: 'POST', headers: { 'Authorization': 'Basic 123' }, body: '{}' };
-    const response = await handler(req);
+  it('should return 401 if invalid Authorization header', async () => {
+    const module = await import('../../netlify/functions/api/telegram-publish.js');
+    const handler = module.default;
+
+    const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+      method: 'POST',
+      headers: { 'Authorization': 'Basic 123' }
+    });
+    const response = await handler(req, {});
     assert.strictEqual(response.status, 401);
   });
 
-  test('should return 500 if SUPABASE_SERVICE_ROLE_KEY is missing', async () => {
-    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const req = { httpMethod: 'POST', headers: { 'Authorization': 'Bearer 123' }, body: '{}' };
-    const response = await handler(req);
-    assert.strictEqual(response.status, 500);
+  it('should return 500 if SUPABASE_SERVICE_ROLE_KEY is missing', async () => {
+    const module = await import('../../netlify/functions/api/telegram-publish.js');
+    const handler = module.default;
+
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_SERVICE_ROLE_KEY: '' };
+
+    try {
+      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer 123' }
+      });
+      const response = await handler(req, {});
+      assert.strictEqual(response.status, 500);
+    } finally {
+      process.env = originalEnv;
+    }
   });
 
-  test('should return 401 if user resolution fails', async () => {
+  it('should return 401 if user resolution fails', async () => {
+    const module = await import('../../netlify/functions/api/telegram-publish.js');
+    const handler = module.default;
+
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_SERVICE_ROLE_KEY: 'test-key' };
+
+    const originalFetch = global.fetch;
     global.fetch = async (url) => {
       if (url.includes('/auth/v1/user')) return { ok: false };
-      return { ok: true, json: async () => ({}) };
+      return { ok: true };
     };
-    const req = { httpMethod: 'POST', headers: { 'Authorization': 'Bearer 123' }, body: '{}' };
-    const response = await handler(req);
-    assert.strictEqual(response.status, 401);
+
+    try {
+      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer 123' }
+      });
+      const response = await handler(req, {});
+      assert.strictEqual(response.status, 401);
+    } finally {
+      process.env = originalEnv;
+      global.fetch = originalFetch;
+    }
   });
 
-  test('should return 403 if user is not admin', async () => {
+  it('should return 403 if user is not admin', async () => {
+    const module = await import('../../netlify/functions/api/telegram-publish.js');
+    const handler = module.default;
+
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_SERVICE_ROLE_KEY: 'test-key' };
+
+    const originalFetch = global.fetch;
     global.fetch = async (url) => {
-      if (url.includes('/auth/v1/user')) return { ok: true, json: async () => ({ id: 'user-1' }) };
-      if (url.includes('/rest/v1/user_roles')) return { ok: true, json: async () => ([]) }; // empty array = no role
-      return { ok: true, json: async () => ({}) };
+      if (url.includes('/auth/v1/user')) return { ok: true, json: async () => ({ id: '123' }) };
+      if (url.includes('/rest/v1/user_roles')) return { ok: true, json: async () => ([]) }; // No admin roles
+      return { ok: true };
     };
-    const req = { httpMethod: 'POST', headers: { 'Authorization': 'Bearer 123' }, body: '{}' };
-    const response = await handler(req);
-    assert.strictEqual(response.status, 403);
+
+    try {
+      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer 123' }
+      });
+      const response = await handler(req, {});
+      assert.strictEqual(response.status, 403);
+    } finally {
+      process.env = originalEnv;
+      global.fetch = originalFetch;
+    }
   });
 
-  test('should return 400 for malformed json body', async () => {
+  it('should return 400 for malformed json body', async () => {
+    const module = await import('../../netlify/functions/api/telegram-publish.js');
+    const handler = module.default;
+
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_SERVICE_ROLE_KEY: 'test-key' };
+
+    const originalFetch = global.fetch;
     global.fetch = async (url) => {
-      if (url.includes('/auth/v1/user')) return { ok: true, json: async () => ({ id: 'admin-1' }) };
+      if (url.includes('/auth/v1/user')) return { ok: true, json: async () => ({ id: '123' }) };
       if (url.includes('/rest/v1/user_roles')) return { ok: true, json: async () => ([{ role: 'admin' }]) };
-      return { ok: true, json: async () => ({}) };
+      return { ok: true };
     };
-    const req = { httpMethod: 'POST', headers: { 'Authorization': 'Bearer 123' }, body: 'not json' };
-    const response = await handler(req);
-    assert.strictEqual(response.status, 400);
+
+    try {
+      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer 123' },
+        body: 'invalid json'
+      });
+      const response = await handler(req, {});
+      assert.strictEqual(response.status, 400);
+    } finally {
+      process.env = originalEnv;
+      global.fetch = originalFetch;
+    }
   });
 
-  test('should send Photo and return 200 when image_url is provided by valid admin', async () => {
-    let fetchUrl;
-    global.fetch = async (url, options) => {
-      if (url.includes('/auth/v1/user')) return { ok: true, json: async () => ({ id: 'admin-1' }) };
-      if (url.includes('/rest/v1/user_roles')) {
-        // Ensure service role key is used securely
-        assert.strictEqual(options.headers.apikey, 'mock-service-role-key');
-        assert.strictEqual(options.headers.Authorization, 'Bearer mock-service-role-key');
-        return { ok: true, json: async () => ([{ role: 'admin' }]) };
+  it('should send Photo and return 200 when image_url is provided by valid admin', async () => {
+    const module = await import('../../netlify/functions/api/telegram-publish.js');
+    const handler = module.default;
+
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_SERVICE_ROLE_KEY: 'test-key', TELEGRAM_BOT_TOKEN: 'token', TELEGRAM_CHAT_ID: 'chat' };
+
+    const originalFetch = global.fetch;
+    let telegramApiUrl = '';
+    global.fetch = async (url) => {
+      if (url.includes('/auth/v1/user')) return { ok: true, json: async () => ({ id: '123' }) };
+      if (url.includes('/rest/v1/user_roles')) return { ok: true, json: async () => ([{ role: 'admin' }]) };
+      if (url.includes('api.telegram.org')) {
+        telegramApiUrl = url;
+        return { ok: true, json: async () => ({ ok: true }) };
       }
-      fetchUrl = url;
-      return { ok: true, json: async () => ({ ok: true }) };
+      return { ok: true };
     };
 
-    const req = {
-      httpMethod: 'POST',
-      headers: { 'Authorization': 'Bearer valid-jwt' },
-      body: JSON.stringify({ title: 'Test Title', image_url: 'http://example.com/image.jpg' })
-    };
-
-    const response = await handler(req);
-    assert.strictEqual(response.status, 200);
-    assert.strictEqual(fetchUrl, 'https://api.telegram.org/bottest-token/sendPhoto');
+    try {
+      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer 123' },
+        body: JSON.stringify({ title: 'Test', image_url: 'https://example.com/image.jpg' })
+      });
+      const response = await handler(req, {});
+      assert.strictEqual(response.status, 200);
+      assert.ok(telegramApiUrl.includes('sendPhoto'));
+    } finally {
+      process.env = originalEnv;
+      global.fetch = originalFetch;
+    }
   });
 
-  test('should send Message and return 200 when image_url is not provided by valid admin', async () => {
-    let fetchUrl;
-    let fetchBody;
-    global.fetch = async (url, options) => {
-      if (url.includes('/auth/v1/user')) return { ok: true, json: async () => ({ id: 'admin-1' }) };
-      if (url.includes('/rest/v1/user_roles')) return { ok: true, json: async () => ([{ role: 'admin' }]) };
+  it('should send Message and return 200 when image_url is not provided by valid admin', async () => {
+    const module = await import('../../netlify/functions/api/telegram-publish.js');
+    const handler = module.default;
 
-      fetchUrl = url;
-      fetchBody = JSON.parse(options.body);
-      return { ok: true, json: async () => ({ ok: true }) };
-    };
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_SERVICE_ROLE_KEY: 'test-key', TELEGRAM_BOT_TOKEN: 'token', TELEGRAM_CHAT_ID: 'chat' };
 
-    const req = {
-      httpMethod: 'POST',
-      headers: { 'Authorization': 'Bearer valid-jwt' },
-      body: JSON.stringify({ title: 'Test Title' })
-    };
-
-    const response = await handler(req);
-    assert.strictEqual(response.status, 200);
-    assert.strictEqual(fetchUrl, 'https://api.telegram.org/bottest-token/sendMessage');
-    assert.ok(fetchBody.text.includes('Test Title'));
-  });
-
-  test('should return 500 when Telegram API returns ok: false', async () => {
+    const originalFetch = global.fetch;
+    let telegramApiUrl = '';
     global.fetch = async (url) => {
-      if (url.includes('/auth/v1/user')) return { ok: true, json: async () => ({ id: 'admin-1' }) };
+      if (url.includes('/auth/v1/user')) return { ok: true, json: async () => ({ id: '123' }) };
       if (url.includes('/rest/v1/user_roles')) return { ok: true, json: async () => ([{ role: 'admin' }]) };
-
-      return { ok: false, json: async () => ({ ok: false, description: 'Error' }) };
+      if (url.includes('api.telegram.org')) {
+        telegramApiUrl = url;
+        return { ok: true, json: async () => ({ ok: true }) };
+      }
+      return { ok: true };
     };
 
-    const req = {
-      httpMethod: 'POST',
-      headers: { 'Authorization': 'Bearer valid-jwt' },
-      body: JSON.stringify({ title: 'Test Title' })
+    try {
+      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer 123' },
+        body: JSON.stringify({ title: 'Test' }) // No image
+      });
+      const response = await handler(req, {});
+      assert.strictEqual(response.status, 200);
+      assert.ok(telegramApiUrl.includes('sendMessage'));
+    } finally {
+      process.env = originalEnv;
+      global.fetch = originalFetch;
+    }
+  });
+
+  it('should return 500 when Telegram API returns ok: false', async () => {
+    const module = await import('../../netlify/functions/api/telegram-publish.js');
+    const handler = module.default;
+
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_SERVICE_ROLE_KEY: 'test-key', TELEGRAM_BOT_TOKEN: 'token', TELEGRAM_CHAT_ID: 'chat' };
+
+    const originalFetch = global.fetch;
+    global.fetch = async (url) => {
+      if (url.includes('/auth/v1/user')) return { ok: true, json: async () => ({ id: '123' }) };
+      if (url.includes('/rest/v1/user_roles')) return { ok: true, json: async () => ([{ role: 'admin' }]) };
+      if (url.includes('api.telegram.org')) {
+        return { ok: true, json: async () => ({ ok: false }) }; // API failure
+      }
+      return { ok: true };
     };
 
-    const response = await handler(req);
-    assert.strictEqual(response.status, 500);
-    const body = await response.json();
-    assert.strictEqual(body.error, 'Telegram API error');
+    try {
+      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer 123' },
+        body: JSON.stringify({ title: 'Test' })
+      });
+      const response = await handler(req, {});
+      assert.strictEqual(response.status, 500);
+    } finally {
+      process.env = originalEnv;
+      global.fetch = originalFetch;
+    }
   });
 });

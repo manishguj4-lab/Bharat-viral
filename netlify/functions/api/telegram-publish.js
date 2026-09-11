@@ -1,10 +1,10 @@
-export async function onRequest(context) {
-  if (context.request.method !== "POST") {
+export default async (req, context) => {
+  if (req.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
   try {
-    const authHeader = context.request.headers.get("Authorization");
+    const authHeader = req.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Missing or malformed Authorization header" }), {
         status: 401,
@@ -12,9 +12,9 @@ export async function onRequest(context) {
       });
     }
 
-    const supabaseUrl = context.env.SUPABASE_URL || "https://ocarsylhsyxjqpzidndb.supabase.co";
-    const anonKey = context.env.SUPABASE_KEY;
-    const serviceRoleKey = context.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseUrl = process.env.SUPABASE_URL || "https://ocarsylhsyxjqpzidndb.supabase.co";
+    const anonKey = process.env.SUPABASE_KEY;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!serviceRoleKey) {
       return new Response(JSON.stringify({ error: "Server configuration error" }), {
@@ -23,7 +23,6 @@ export async function onRequest(context) {
       });
     }
 
-    // 1. Verify the Supabase access token server-side and resolve the authenticated user
     const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
       method: "GET",
       headers: {
@@ -48,7 +47,6 @@ export async function onRequest(context) {
       });
     }
 
-    // 2. Query user_roles server-side using service_role credential to check for admin role
     const rolesRes = await fetch(`${supabaseUrl}/rest/v1/user_roles?user_id=eq.${userId}&role=eq.admin`, {
       method: "GET",
       headers: {
@@ -73,10 +71,9 @@ export async function onRequest(context) {
       });
     }
 
-    // 3. Validate Request Body
     let article;
     try {
-      article = await context.request.json();
+      article = await req.json();
       if (!article || typeof article !== "object") throw new Error("Invalid body");
     } catch (err) {
       return new Response(JSON.stringify({ error: "Malformed JSON body" }), {
@@ -85,8 +82,8 @@ export async function onRequest(context) {
       });
     }
 
-    const token = context.env.TELEGRAM_BOT_TOKEN;
-    const chatId = context.env.TELEGRAM_CHAT_ID;
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
 
     if (!token || !chatId) {
       return new Response(JSON.stringify({ error: "Telegram environment variables missing" }), {

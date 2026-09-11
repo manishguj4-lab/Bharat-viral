@@ -2,11 +2,10 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert';
 
 describe('article-seo handler', () => {
-  it('returns 404 when the mock fetch returns an empty array', async () => {
-    // Dynamic import to bypass the syntax error
-    const { onRequest } = await import('../../functions/article/[slug].js');
+  it('returns next when the mock fetch returns an empty array', async () => {
+    const module = await import('../../netlify/edge-functions/article-ssr.js');
+    const handler = module.default;
 
-    // Mock the global fetch
     const originalFetch = global.fetch;
     global.fetch = async () => ({
       ok: true,
@@ -14,44 +13,33 @@ describe('article-seo handler', () => {
       text: async () => '[]'
     });
 
-    // Mock HTMLRewriter since it is a Cloudflare global, not present in Node
-    class MockHTMLRewriter {
-      on() {
-        return this; // Chainable mock
-      }
-      transform(response) {
-        return response; // Just return original response for testing purposes
-      }
-    }
-    global.HTMLRewriter = MockHTMLRewriter;
-
-    const context = {
-      params: { slug: 'test-article' },
+    const originalDeno = global.Deno;
+    global.Deno = {
       env: {
-        SUPABASE_URL: 'http://localhost',
-        SUPABASE_KEY: 'test-key',
-        ASSETS: {
-          fetch: async () => new Response("Template content")
+        get: (key) => {
+          if (key === 'SUPABASE_URL') return 'http://localhost';
+          if (key === 'SUPABASE_KEY' || key === 'SUPABASE_ANON_KEY') return 'test-key';
+          return undefined;
         }
-      },
-      request: new Request('https://bharat-viral.pages.dev/article/test-article')
+      }
     };
 
-    const response = await onRequest(context);
+    let nextCalled = false;
+    const req = {
+      next: () => {
+        nextCalled = true;
+        return new Response('Next Called');
+      }
+    };
 
-    // Check status
-    assert.strictEqual(response.status, 404);
+    const request = new Request('https://bharat-viral.netlify.app/article/test-article');
 
-    // Check response body
-    const text = await response.text();
-    assert.strictEqual(text, 'Article not found');
-
-    // Check headers
-    assert.strictEqual(response.headers.get('Content-Type'), 'text/plain; charset=UTF-8');
-    assert.strictEqual(response.headers.get('X-Robots-Tag'), 'noindex');
-
-    // Clean up
-    global.fetch = originalFetch;
-    delete global.HTMLRewriter;
+    try {
+      await handler(request, req);
+      assert.strictEqual(nextCalled, true, "context.next() should have been called");
+    } finally {
+      global.fetch = originalFetch;
+      global.Deno = originalDeno;
+    }
   });
 });

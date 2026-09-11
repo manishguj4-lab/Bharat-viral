@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test --prefix testing"
   },
   "repository": {
     "type": "git",
@@ -16,12 +16,16 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/manishguj4-lab/Bharat-viral/issues"
   },
   "homepage": "https://github.com/manishguj4-lab/Bharat-viral#readme",
   "devDependencies": {
     "jsonwebtoken": "^9.0.3"
+  },
+  "dependencies": {
+    "acorn": "^8.18.0",
+    "xss": "^1.0.15"
   }
 }

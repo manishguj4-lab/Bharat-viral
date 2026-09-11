@@ -31,14 +31,14 @@ describe('news-sitemap handler', () => {
     process.env = { ...originalEnv, SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' };
 
     try {
-      const req = new Request('https://bharat-viral.netlify.app/news-sitemap.xml');
+      const req = new Request('https://bharatviralnews.netlify.app/news-sitemap.xml');
       const response = await handler(req, {});
 
       assert.strictEqual(response.status, 200);
       assert.strictEqual(response.headers.get('Content-Type'), 'application/xml; charset=UTF-8');
 
       const body = await response.text();
-      assert.ok(body.includes('<loc>https://bharat-viral.netlify.app/article/recent-article</loc>'));
+      assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/article/recent-article</loc>'));
       assert.ok(body.includes('<news:title>Recent Article</news:title>'));
     } finally {
       global.fetch = originalFetch;
@@ -70,7 +70,7 @@ describe('news-sitemap handler', () => {
     process.env = { ...originalEnv, SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' };
 
     try {
-      const req = new Request('https://bharat-viral.netlify.app/news-sitemap.xml');
+      const req = new Request('https://bharatviralnews.netlify.app/news-sitemap.xml');
       const response = await handler(req, {});
       assert.strictEqual(response.status, 200);
       const body = await response.text();
@@ -96,7 +96,7 @@ describe('news-sitemap handler', () => {
     process.env = { ...originalEnv, SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' };
 
     try {
-      const req = new Request('https://bharat-viral.netlify.app/news-sitemap.xml');
+      const req = new Request('https://bharatviralnews.netlify.app/news-sitemap.xml');
       const response = await handler(req, {});
       assert.strictEqual(consoleErrorCalled, true, 'console.error should have been called');
       assert.strictEqual(response.status, 200);
@@ -145,13 +145,13 @@ describe('news-sitemap handler', () => {
     };
 
     try {
-      const req = new Request('https://bharat-viral.netlify.app/news-sitemap.xml');
+      const req = new Request('https://bharatviralnews.netlify.app/news-sitemap.xml');
       const response = await handler(req, {});
       assert.strictEqual(response.status, 200);
       const body = await response.text();
-      assert.ok(body.includes('<loc>https://bharat-viral.netlify.app/article/article-0</loc>'));
-      assert.ok(body.includes('<loc>https://bharat-viral.netlify.app/article/article-999</loc>'));
-      assert.ok(body.includes('<loc>https://bharat-viral.netlify.app/article/article-1049</loc>'));
+      assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/article/article-0</loc>'));
+      assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/article/article-999</loc>'));
+      assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/article/article-1049</loc>'));
     } finally {
       process.env = originalEnv;
       global.fetch = originalFetch;

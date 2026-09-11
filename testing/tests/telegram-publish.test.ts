@@ -6,7 +6,7 @@ describe('telegram-publish', () => {
     const module = await import('../../netlify/functions/api/telegram-publish.js');
     const handler = module.default;
 
-    const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', { method: 'GET' });
+    const req = new Request('https://bharatviralnews.netlify.app/api/telegram-publish', { method: 'GET' });
     const response = await handler(req, {});
     assert.strictEqual(response.status, 405);
   });
@@ -15,7 +15,7 @@ describe('telegram-publish', () => {
     const module = await import('../../netlify/functions/api/telegram-publish.js');
     const handler = module.default;
 
-    const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', { method: 'POST' });
+    const req = new Request('https://bharatviralnews.netlify.app/api/telegram-publish', { method: 'POST' });
     const response = await handler(req, {});
     assert.strictEqual(response.status, 401);
   });
@@ -24,7 +24,7 @@ describe('telegram-publish', () => {
     const module = await import('../../netlify/functions/api/telegram-publish.js');
     const handler = module.default;
 
-    const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+    const req = new Request('https://bharatviralnews.netlify.app/api/telegram-publish', {
       method: 'POST',
       headers: { 'Authorization': 'Basic 123' }
     });
@@ -40,7 +40,7 @@ describe('telegram-publish', () => {
     process.env = { ...originalEnv, SUPABASE_SERVICE_ROLE_KEY: '' };
 
     try {
-      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+      const req = new Request('https://bharatviralnews.netlify.app/api/telegram-publish', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer 123' }
       });
@@ -65,7 +65,7 @@ describe('telegram-publish', () => {
     };
 
     try {
-      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+      const req = new Request('https://bharatviralnews.netlify.app/api/telegram-publish', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer 123' }
       });
@@ -92,7 +92,7 @@ describe('telegram-publish', () => {
     };
 
     try {
-      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+      const req = new Request('https://bharatviralnews.netlify.app/api/telegram-publish', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer 123' }
       });
@@ -119,7 +119,7 @@ describe('telegram-publish', () => {
     };
 
     try {
-      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+      const req = new Request('https://bharatviralnews.netlify.app/api/telegram-publish', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer 123' },
         body: 'invalid json'
@@ -152,7 +152,7 @@ describe('telegram-publish', () => {
     };
 
     try {
-      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+      const req = new Request('https://bharatviralnews.netlify.app/api/telegram-publish', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer 123' },
         body: JSON.stringify({ title: 'Test', image_url: 'https://example.com/image.jpg' })
@@ -186,7 +186,7 @@ describe('telegram-publish', () => {
     };
 
     try {
-      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+      const req = new Request('https://bharatviralnews.netlify.app/api/telegram-publish', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer 123' },
         body: JSON.stringify({ title: 'Test' }) // No image
@@ -218,7 +218,7 @@ describe('telegram-publish', () => {
     };
 
     try {
-      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+      const req = new Request('https://bharatviralnews.netlify.app/api/telegram-publish', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer 123' },
         body: JSON.stringify({ title: 'Test' })
@@ -242,7 +242,7 @@ describe('telegram-publish', () => {
       return { ok: true };
     };
     try {
-      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+      const req = new Request('https://bharatviralnews.netlify.app/api/telegram-publish', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer 123' },
         body: JSON.stringify({ title: 'Test', url: 'javascript:alert(1)' })
@@ -267,7 +267,7 @@ describe('telegram-publish', () => {
       return { ok: true };
     };
     try {
-      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+      const req = new Request('https://bharatviralnews.netlify.app/api/telegram-publish', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer 123' },
         body: JSON.stringify({ title: 'Test', image_url: 'data:image/png;base64,123' })

@@ -4,5 +4,5 @@ Disallow: /admin.html
 Disallow: /admin-sw.js
 Disallow: /admin-manifest.json
 
-Sitemap: https://bharat-viral.netlify.app/sitemap.xml
-Sitemap: https://bharat-viral.netlify.app/news-sitemap.xml
+Sitemap: https://bharatviralnews.netlify.app/sitemap.xml
+Sitemap: https://bharatviralnews.netlify.app/news-sitemap.xml

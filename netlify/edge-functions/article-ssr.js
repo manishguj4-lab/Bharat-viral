@@ -6,7 +6,7 @@ export default async (request, context) => {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || Deno.env.get("VITE_SUPABASE_URL");
   const SUPABASE_KEY = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_KEY") || Deno.env.get("VITE_SUPABASE_ANON_KEY");
 
-  const site = "https://bharat-viral.netlify.app";
+  const site = "https://bharatviralnews.netlify.app";
 
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     return context.next();

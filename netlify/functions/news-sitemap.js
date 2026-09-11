@@ -22,24 +22,47 @@ export default async (req, context) => {
       return Number.isNaN(d.getTime()) ? null : d;
     }
 
-    const endpoint = SUPABASE_URL +
-      "/rest/v1/articles" +
-      "?select=id,slug,title,published_at,updated_at,created_at,status" +
-      "&status=eq.published&slug=not.is.null&title=not.is.null" +
-      "&order=published_at.desc&limit=100";
+        let allArticles = [];
+    let start = 0;
+    const limit = 1000;
+    let hasMore = true;
 
-    const response = await fetch(endpoint, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: "Bearer " + SUPABASE_KEY
+    while (hasMore) {
+      const endpoint = SUPABASE_URL +
+        "/rest/v1/articles" +
+        "?select=id,slug,title,published_at,updated_at,created_at,status" +
+        "&status=eq.published&slug=not.is.null&title=not.is.null" +
+        `&order=published_at.desc&limit=${limit}&offset=${start}`;
+
+      const response = await fetch(endpoint, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: "Bearer " + SUPABASE_KEY
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Supabase returned HTTP " + response.status);
       }
-    });
 
-    if (!response.ok) {
-      throw new Error("Supabase returned HTTP " + response.status);
+      const articles = await response.json();
+      allArticles = allArticles.concat(articles);
+
+      if (articles.length < limit) {
+        hasMore = false;
+      } else {
+        const lastArticle = articles[articles.length - 1];
+        const lastDate = validDate(lastArticle.published_at) || validDate(lastArticle.created_at);
+        if (lastDate) {
+          const ageHours = (Date.now() - lastDate.getTime()) / (1000 * 60 * 60);
+          if (ageHours > NEWS_WINDOW_HOURS) {
+            hasMore = false;
+          }
+        }
+        start += limit;
+      }
     }
-
-    const articles = await response.json();
+    const articles = allArticles;
     const now = Date.now();
 
     const newsArticles = articles.filter(article => {

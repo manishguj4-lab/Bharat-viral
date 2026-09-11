@@ -230,4 +230,53 @@ describe('telegram-publish', () => {
       global.fetch = originalFetch;
     }
   });
+  it('should return 400 for invalid article URL protocol', async () => {
+    const module = await import('../../netlify/functions/api/telegram-publish.js');
+    const handler = module.default;
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_SERVICE_ROLE_KEY: 'test-key', TELEGRAM_BOT_TOKEN: 'token', TELEGRAM_CHAT_ID: 'chat' };
+    const originalFetch = global.fetch;
+    global.fetch = async (url) => {
+      if (url.includes('/auth/v1/user')) return { ok: true, json: async () => ({ id: '123' }) };
+      if (url.includes('/rest/v1/user_roles')) return { ok: true, json: async () => ([{ role: 'admin' }]) };
+      return { ok: true };
+    };
+    try {
+      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer 123' },
+        body: JSON.stringify({ title: 'Test', url: 'javascript:alert(1)' })
+      });
+      const response = await handler(req, {});
+      assert.strictEqual(response.status, 400);
+    } finally {
+      process.env = originalEnv;
+      global.fetch = originalFetch;
+    }
+  });
+
+  it('should return 400 for invalid image URL protocol', async () => {
+    const module = await import('../../netlify/functions/api/telegram-publish.js');
+    const handler = module.default;
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_SERVICE_ROLE_KEY: 'test-key', TELEGRAM_BOT_TOKEN: 'token', TELEGRAM_CHAT_ID: 'chat' };
+    const originalFetch = global.fetch;
+    global.fetch = async (url) => {
+      if (url.includes('/auth/v1/user')) return { ok: true, json: async () => ({ id: '123' }) };
+      if (url.includes('/rest/v1/user_roles')) return { ok: true, json: async () => ([{ role: 'admin' }]) };
+      return { ok: true };
+    };
+    try {
+      const req = new Request('https://bharat-viral.netlify.app/api/telegram-publish', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer 123' },
+        body: JSON.stringify({ title: 'Test', image_url: 'data:image/png;base64,123' })
+      });
+      const response = await handler(req, {});
+      assert.strictEqual(response.status, 400);
+    } finally {
+      process.env = originalEnv;
+      global.fetch = originalFetch;
+    }
+  });
 });

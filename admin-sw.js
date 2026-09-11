@@ -1,4 +1,4 @@
-const CACHE_NAME="bharat-viral-admin-v2";
+const CACHE_NAME="bharat-viral-admin-v3";
 const SHELL=["/admin.html","/admin-manifest.json","/admin-icon-192.png","/admin-icon-512.png"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",e=>e.waitUntil(

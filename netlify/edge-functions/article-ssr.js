@@ -29,18 +29,18 @@ export default async (request, context) => {
       },
     });
 
-    if (!response.ok) {
-      return context.next();
-    }
+    if (!response.ok) { return context.next(); }
 
     const rows = await response.json();
     article = rows?.[0];
-  } catch {
-    return context.next();
-  }
+  } catch { return context.next(); }
 
   if (!article) {
-    return context.next();
+    const fallbackRes = await context.next();
+    return new Response(fallbackRes.body, {
+      status: 404,
+      headers: fallbackRes.headers
+    });
   }
 
   const esc = (value = "") =>
@@ -69,7 +69,9 @@ export default async (request, context) => {
       a: ['href', 'target', 'rel'], br: [], blockquote: [],
       table: [], thead: [], tbody: [], tr: [], th: [], td: [],
       img: ['src', 'alt', 'width', 'height', 'loading'], figure: [], figcaption: [],
-      iframe: ['src', 'width', 'height', 'allowfullscreen', 'frameborder', 'allow']
+      iframe: ['src', 'width', 'height', 'allowfullscreen', 'frameborder', 'allow'],
+      video: ['src', 'controls', 'width', 'height', 'poster', 'autoplay', 'muted', 'loop'],
+      source: ['src', 'type']
     },
     stripIgnoreTag: true,
     stripIgnoreTagBody: ['script']

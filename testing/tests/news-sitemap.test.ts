@@ -109,4 +109,52 @@ describe('news-sitemap handler', () => {
       process.env = originalEnv;
     }
   });
+  it('paginates over 100 articles', async () => {
+    const module = await import('../../netlify/functions/news-sitemap.js');
+    const handler = module.default;
+
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' };
+
+    let callCount = 0;
+    const originalFetch = global.fetch;
+    global.fetch = async (url) => {
+      callCount++;
+      if (callCount === 1) {
+        // Return 1000 items on first call
+        return {
+          ok: true,
+          json: async () => Array.from({ length: 1000 }).map((_, i) => ({
+            id: i,
+            slug: `article-${i}`,
+            title: `Article ${i}`,
+            published_at: new Date().toISOString()
+          }))
+        };
+      }
+      // Return 50 items on second call
+      return {
+        ok: true,
+        json: async () => Array.from({ length: 50 }).map((_, i) => ({
+          id: 1000 + i,
+          slug: `article-${1000 + i}`,
+          title: `Article ${1000 + i}`,
+          published_at: new Date().toISOString()
+        }))
+      };
+    };
+
+    try {
+      const req = new Request('https://bharat-viral.netlify.app/news-sitemap.xml');
+      const response = await handler(req, {});
+      assert.strictEqual(response.status, 200);
+      const body = await response.text();
+      assert.ok(body.includes('<loc>https://bharat-viral.netlify.app/article/article-0</loc>'));
+      assert.ok(body.includes('<loc>https://bharat-viral.netlify.app/article/article-999</loc>'));
+      assert.ok(body.includes('<loc>https://bharat-viral.netlify.app/article/article-1049</loc>'));
+    } finally {
+      process.env = originalEnv;
+      global.fetch = originalFetch;
+    }
+  });
 });

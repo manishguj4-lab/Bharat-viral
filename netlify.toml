@@ -8,3 +8,21 @@
 [[edge_functions]]
   path = "/article.html"
   function = "article-ssr"
+
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
+  status = 200
+
+[[redirects]]
+  from = "/news-sitemap.xml"
+  to = "/.netlify/functions/news-sitemap"
+  status = 200
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200

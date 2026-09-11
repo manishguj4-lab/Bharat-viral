@@ -3,7 +3,8 @@ import assert from 'node:assert';
 
 describe('news-sitemap handler', () => {
   it('returns valid XML with recent articles', async () => {
-    const { onRequest } = await import('../../functions/news-sitemap.xml.js');
+    const module = await import('../../netlify/functions/news-sitemap.js');
+    const handler = module.default;
     const originalFetch = global.fetch;
 
     const now = Date.now();
@@ -26,29 +27,28 @@ describe('news-sitemap handler', () => {
       };
     };
 
-    const context = {
-      env: {
-        SUPABASE_URL: 'http://localhost',
-        SUPABASE_KEY: 'test-key'
-      }
-    };
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' };
 
     try {
-      const response = await onRequest(context);
+      const req = new Request('https://bharat-viral.netlify.app/news-sitemap.xml');
+      const response = await handler(req, {});
 
       assert.strictEqual(response.status, 200);
       assert.strictEqual(response.headers.get('Content-Type'), 'application/xml; charset=UTF-8');
 
       const body = await response.text();
-      assert.ok(body.includes('<loc>https://bharat-viral.pages.dev/article/recent-article</loc>'));
+      assert.ok(body.includes('<loc>https://bharat-viral.netlify.app/article/recent-article</loc>'));
       assert.ok(body.includes('<news:title>Recent Article</news:title>'));
     } finally {
       global.fetch = originalFetch;
+      process.env = originalEnv;
     }
   });
 
   it('filters out articles older than 48 hours', async () => {
-    const { onRequest } = await import('../../functions/news-sitemap.xml.js');
+    const module = await import('../../netlify/functions/news-sitemap.js');
+    const handler = module.default;
     const originalFetch = global.fetch;
 
     const now = Date.now();
@@ -66,20 +66,24 @@ describe('news-sitemap handler', () => {
       ]
     });
 
-    const context = { env: { SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' } };
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' };
 
     try {
-      const response = await onRequest(context);
+      const req = new Request('https://bharat-viral.netlify.app/news-sitemap.xml');
+      const response = await handler(req, {});
       assert.strictEqual(response.status, 200);
       const body = await response.text();
       assert.ok(!body.includes('old-article'), 'Body should not contain old article');
     } finally {
       global.fetch = originalFetch;
+      process.env = originalEnv;
     }
   });
 
   it('handles fetch errors gracefully and returns empty sitemap', async () => {
-    const { onRequest } = await import('../../functions/news-sitemap.xml.js');
+    const module = await import('../../netlify/functions/news-sitemap.js');
+    const handler = module.default;
     const originalFetch = global.fetch;
     const originalConsoleError = console.error;
 
@@ -88,10 +92,12 @@ describe('news-sitemap handler', () => {
     let consoleErrorCalled = false;
     console.error = () => { consoleErrorCalled = true; };
 
-    const context = { env: { SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' } };
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' };
 
     try {
-      const response = await onRequest(context);
+      const req = new Request('https://bharat-viral.netlify.app/news-sitemap.xml');
+      const response = await handler(req, {});
       assert.strictEqual(consoleErrorCalled, true, 'console.error should have been called');
       assert.strictEqual(response.status, 200);
       const body = await response.text();
@@ -100,6 +106,7 @@ describe('news-sitemap handler', () => {
     } finally {
       global.fetch = originalFetch;
       console.error = originalConsoleError;
+      process.env = originalEnv;
     }
   });
 });

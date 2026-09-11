@@ -1,7 +1,7 @@
-export async function onRequest(context) {
+export default async (req, context) => {
   try {
-    const SUPABASE_URL = context.env.SUPABASE_URL;
-    const SUPABASE_KEY = context.env.SUPABASE_KEY;
+    const SUPABASE_URL = process.env.SUPABASE_URL || "https://ocarsylhsyxjqpzidndb.supabase.co";
+    const SUPABASE_KEY = process.env.SUPABASE_KEY;
     const SITE = "https://bharat-viral.netlify.app";
 
     function xmlEscape(value) {
@@ -98,7 +98,7 @@ export async function onRequest(context) {
 
   } catch (error) {
     console.error("Sitemap error:", error);
-    const SITE = "https://bharat-viral.pages.dev";
+    const SITE = "https://bharat-viral.netlify.app";
 
     function xmlEscape(value) {
       return String(value ?? "")

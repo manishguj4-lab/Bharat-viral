@@ -87,7 +87,7 @@ describe('sitemap handler', () => {
     }
   });
 
-  it('returns fallback XML with max-age=60 when fetch fails', async () => {
+  it('returns fallback XML with 503 status when fetch fails', async () => {
     const module = await import('../../netlify/functions/sitemap.js');
     const handler = module.default;
     const originalFetch = global.fetch;
@@ -106,9 +106,9 @@ describe('sitemap handler', () => {
       const response = await handler(req, {});
 
       assert.strictEqual(consoleErrorCalled, true, 'console.error should have been called');
-      assert.strictEqual(response.status, 200);
+      assert.strictEqual(response.status, 503);
       assert.strictEqual(response.headers.get('Content-Type'), 'application/xml; charset=UTF-8');
-      assert.strictEqual(response.headers.get('Cache-Control'), 'public, max-age=60, s-maxage=60');
+      assert.strictEqual(response.headers.get('Cache-Control'), 'no-cache, no-store, must-revalidate');
 
       const body = await response.text();
       assert.ok(body.includes('<urlset'), 'Body should contain urlset');

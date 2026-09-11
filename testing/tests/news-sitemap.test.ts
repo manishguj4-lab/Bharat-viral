@@ -81,7 +81,7 @@ describe('news-sitemap handler', () => {
     }
   });
 
-  it('handles fetch errors gracefully and returns empty sitemap', async () => {
+  it('handles fetch errors gracefully and returns empty sitemap with 503 status', async () => {
     const module = await import('../../netlify/functions/news-sitemap.js');
     const handler = module.default;
     const originalFetch = global.fetch;
@@ -99,7 +99,7 @@ describe('news-sitemap handler', () => {
       const req = new Request('https://bharatviralnews.netlify.app/news-sitemap.xml');
       const response = await handler(req, {});
       assert.strictEqual(consoleErrorCalled, true, 'console.error should have been called');
-      assert.strictEqual(response.status, 200);
+      assert.strictEqual(response.status, 503);
       const body = await response.text();
       assert.ok(body.includes('<urlset'), 'Body should contain urlset');
       assert.ok(!body.includes('<url>'), 'Body should not contain any urls');

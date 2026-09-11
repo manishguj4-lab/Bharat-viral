@@ -45,7 +45,7 @@ describe('article-seo handler', () => {
       global.Deno = originalDeno;
     }
   });
-  it('returns fallback 200 response via context.next() when fetch fails', async () => {
+  it('returns 503 response when fetch fails', async () => {
     const module = await import('../../netlify/edge-functions/article-ssr.js');
     const handler = module.default;
 
@@ -65,10 +65,8 @@ describe('article-seo handler', () => {
       }
     };
 
-    let nextCalled = false;
     const req = {
       next: async () => {
-        nextCalled = true;
         return new Response('Next Called', { headers: { 'Content-Type': 'text/html' } });
       }
     };
@@ -76,15 +74,14 @@ describe('article-seo handler', () => {
 
     try {
       const response = await handler(request, req);
-      assert.strictEqual(nextCalled, true, "context.next() should be called on fetch failure");
-      assert.strictEqual(response.status, 200, "Should return 200 (fallback) on fetch failure");
+      assert.strictEqual(response.status, 503, "Should return 503 on fetch failure");
     } finally {
       global.fetch = originalFetch;
       global.Deno = originalDeno;
     }
   });
 
-  it('returns fallback 200 response via context.next() on exception during fetch', async () => {
+  it('returns 503 response on exception during fetch', async () => {
     const module = await import('../../netlify/edge-functions/article-ssr.js');
     const handler = module.default;
 
@@ -104,10 +101,8 @@ describe('article-seo handler', () => {
       }
     };
 
-    let nextCalled = false;
     const req = {
       next: async () => {
-        nextCalled = true;
         return new Response('Next Called', { headers: { 'Content-Type': 'text/html' } });
       }
     };
@@ -115,8 +110,7 @@ describe('article-seo handler', () => {
 
     try {
       const response = await handler(request, req);
-      assert.strictEqual(nextCalled, true, "context.next() should be called on exception");
-      assert.strictEqual(response.status, 200, "Should return 200 (fallback) on exception");
+      assert.strictEqual(response.status, 503, "Should return 503 on exception");
     } finally {
       global.fetch = originalFetch;
       global.Deno = originalDeno;

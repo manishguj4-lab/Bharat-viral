@@ -117,10 +117,10 @@ export default async (req, context) => {
     ].join("\n");
 
     return new Response(body, {
-      status: 200,
+      status: 503,
       headers: {
         "Content-Type": "application/xml; charset=UTF-8",
-        "Cache-Control": "public, max-age=60"
+        "Cache-Control": "no-cache, no-store, must-revalidate"
       }
     });
   }

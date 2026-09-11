@@ -346,13 +346,13 @@ export default async function sitemap() {
     return new Response(
       fallbackXml,
       {
-        status: 200,
+        status: 503,
         headers: {
           "Content-Type":
             "application/xml; charset=UTF-8",
 
           "Cache-Control":
-            "public, max-age=60, s-maxage=60"
+            "no-cache, no-store, must-revalidate"
         }
       }
     );

@@ -29,17 +29,20 @@ export default async (request, context) => {
       },
     });
 
-    if (!response.ok) { return context.next(); }
+    if (!response.ok) {
+      return new Response("Service Unavailable", { status: 503, headers: { "Retry-After": "30" } });
+    }
 
     const rows = await response.json();
     article = rows?.[0];
-  } catch { return context.next(); }
+  } catch {
+    return new Response("Internal Server Error", { status: 500, headers: { "Retry-After": "30" } });
+  }
 
   if (!article) {
-    const fallbackRes = await context.next();
-    return new Response(fallbackRes.body, {
+    return new Response("Article Not Found", {
       status: 404,
-      headers: fallbackRes.headers
+      headers: { "content-type": "text/html; charset=UTF-8" }
     });
   }
 
@@ -53,12 +56,14 @@ export default async (request, context) => {
 
   const title = article.title || "Bharat Viral";
   const description = article.excerpt || article.description || `${title} — Bharat Viral पर पूरी खबर पढ़ें।`;
-  const image = article.image_url || article.image || `${site}/favicon.ico`;
+  const image = article.image_url || article.image || `${site}/icon-192.png`;
   const canonical = `${site}/article/${encodeURIComponent(article.slug || slug)}`;
   const published = article.published_at || article.created_at || new Date().toISOString();
   const modified = article.updated_at || article.modified_at || published;
-  const category = article.category || article.category_name || "News";
-  const author = article.author || article.author_name || "Bharat Viral";
+  const rawCat = (Array.isArray(article.categories) && article.categories[0]) || article.category || article.category_name || article.article_type || "News";
+  const category = String(rawCat).replace(/-/g, ' ').replace(/_/g, ' ');
+  const categorySlug = String(article.category_slug || (Array.isArray(article.categories) && article.categories[0]) || article.article_type || "news").toLowerCase().trim();
+  const author = article.author_name || article.author || "Bharat Viral";
   const rawContent = article.content || article.body || article.article_content || "";
 
   // Sanitize the content server-side
@@ -77,7 +82,7 @@ export default async (request, context) => {
     stripIgnoreTagBody: ['script']
   });
 
-  const schema = {
+  const newsSchema = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: title,
@@ -95,7 +100,7 @@ export default async (request, context) => {
       url: site,
       logo: {
         "@type": "ImageObject",
-        url: `${site}/favicon.ico`
+        url: `${site}/icon-192.png`
       }
     },
     mainEntityOfPage: {
@@ -106,8 +111,37 @@ export default async (request, context) => {
     inLanguage: "hi-IN"
   };
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: site
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: category,
+        item: `${site}/category.html?category=${encodeURIComponent(categorySlug)}`
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: title,
+        item: canonical
+      }
+    ]
+  };
+
   // Safe JSON-LD serialization avoiding breakout sequences
-  const safeJsonLd = JSON.stringify(schema)
+  const safeNewsJsonLd = JSON.stringify(newsSchema)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e');
+
+  const safeBreadcrumbJsonLd = JSON.stringify(breadcrumbSchema)
     .replace(/</g, '\\u003c')
     .replace(/>/g, '\\u003e');
 
@@ -115,27 +149,35 @@ export default async (request, context) => {
   const templateResponse = await fetch(new URL("/article.html", request.url));
   let templateHtml = await templateResponse.text();
 
-  // Very basic string replacements since HTMLRewriter is hard to implement with xss library seamlessly in this mock structure.
-  // Real Netlify Edge Functions support HTMLRewriter but we'll use a Regex replacement approach for reliability across environments.
+  // Strip static schema to avoid duplicate JSON-LD schemas
+  templateHtml = templateHtml.replace(/<script\s+type="application\/ld\+json"\s+id="articleSchema">.*?<\/script>/is, "");
 
   // Update Meta Tags
   templateHtml = templateHtml.replace(/<title>.*?<\/title>/i, `<title>${esc(title)} | Bharat Viral</title>`);
-  templateHtml = templateHtml.replace(/<meta\s+name="description"\s+content="[^"]*"/i, `<meta name="description" content="${esc(description)}"`);
+  templateHtml = templateHtml.replace(/<meta\s+name="description"\s+id="metaDescription"\s+content="[^"]*"/i, `<meta name="description" id="metaDescription" content="${esc(description)}"`);
+  templateHtml = templateHtml.replace(/<meta\s+name="robots"\s+content="[^"]*"/i, `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"`);
   templateHtml = templateHtml.replace(/<link\s+rel="canonical"\s+id="canonicalUrl"\s+href="[^"]*"/i, `<link rel="canonical" id="canonicalUrl" href="${esc(canonical)}"`);
 
   // Update OG Tags
-  templateHtml = templateHtml.replace(/<meta\s+property="og:title"\s+content="[^"]*"/i, `<meta property="og:title" content="${esc(title)}"`);
-  templateHtml = templateHtml.replace(/<meta\s+property="og:description"\s+content="[^"]*"/i, `<meta property="og:description" content="${esc(description)}"`);
+  templateHtml = templateHtml.replace(/<meta\s+property="og:title"\s+id="ogTitle"\s+content="[^"]*"/i, `<meta property="og:title" id="ogTitle" content="${esc(title)}"`);
+  templateHtml = templateHtml.replace(/<meta\s+property="og:description"\s+id="ogDescription"\s+content="[^"]*"/i, `<meta property="og:description" id="ogDescription" content="${esc(description)}"`);
   templateHtml = templateHtml.replace(/<meta\s+property="og:url"\s+id="ogUrl"\s+content="[^"]*"/i, `<meta property="og:url" id="ogUrl" content="${esc(canonical)}"`);
   templateHtml = templateHtml.replace(/<meta\s+property="og:image"\s+id="ogImage"\s+content="[^"]*"/i, `<meta property="og:image" id="ogImage" content="${esc(image)}"`);
+  templateHtml = templateHtml.replace(/<meta\s+property="article:published_time"\s+id="ogPublishedTime"\s+content="[^"]*"/i, `<meta property="article:published_time" id="ogPublishedTime" content="${esc(published)}"`);
+  templateHtml = templateHtml.replace(/<meta\s+property="article:modified_time"\s+id="ogModifiedTime"\s+content="[^"]*"/i, `<meta property="article:modified_time" id="ogModifiedTime" content="${esc(modified)}"`);
+
+  // Inject article:section meta tag if missing
+  if (!templateHtml.includes('property="article:section"')) {
+    templateHtml = templateHtml.replace(/<\/head>/i, `<meta property="article:section" content="${esc(category)}"></head>`);
+  }
 
   // Update Twitter Tags
-  templateHtml = templateHtml.replace(/<meta\s+name="twitter:title"\s+content="[^"]*"/i, `<meta name="twitter:title" content="${esc(title)}"`);
-  templateHtml = templateHtml.replace(/<meta\s+name="twitter:description"\s+content="[^"]*"/i, `<meta name="twitter:description" content="${esc(description)}"`);
+  templateHtml = templateHtml.replace(/<meta\s+name="twitter:title"\s+id="twitterTitle"\s+content="[^"]*"/i, `<meta name="twitter:title" id="twitterTitle" content="${esc(title)}"`);
+  templateHtml = templateHtml.replace(/<meta\s+name="twitter:description"\s+id="twitterDescription"\s+content="[^"]*"/i, `<meta name="twitter:description" id="twitterDescription" content="${esc(description)}"`);
   templateHtml = templateHtml.replace(/<meta\s+name="twitter:image"\s+id="twitterImage"\s+content="[^"]*"/i, `<meta name="twitter:image" id="twitterImage" content="${esc(image)}"`);
 
-  // Inject JSON-LD Schema before </head>
-  templateHtml = templateHtml.replace(/<\/head>/i, `<script type="application/ld+json">${safeJsonLd}</script></head>`);
+  // Inject JSON-LD Schemas before </head>
+  templateHtml = templateHtml.replace(/<\/head>/i, `<script type="application/ld+json">${safeNewsJsonLd}</script><script type="application/ld+json">${safeBreadcrumbJsonLd}</script></head>`);
 
   // Render the article content inside <article id="articleBox">
   const articleBoxHtml = `

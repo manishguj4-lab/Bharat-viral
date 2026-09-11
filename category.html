@@ -91,10 +91,11 @@ async function loadCatalog(){
 
  document.title=c.name+' | Bharat Viral';
  if(meta)meta.content=c.description||c.name;
- if(canonical)canonical.href='https://bharatviralnews.netlify.app/category.html?category='+encodeURIComponent(wanted);
+ const canonicalUrl='https://bharatviralnews.netlify.app/category.html?category='+encodeURIComponent(wanted)+(page>1?'&page='+page:'');
+ if(canonical)canonical.href=canonicalUrl;
  document.getElementById('ogTitle')?.setAttribute('content', c.name+' | Bharat Viral');
  document.getElementById('ogDescription')?.setAttribute('content', c.description||c.name);
- document.getElementById('ogUrl')?.setAttribute('content', 'https://bharatviralnews.netlify.app/category.html?category='+encodeURIComponent(wanted));
+ document.getElementById('ogUrl')?.setAttribute('content', canonicalUrl);
  document.getElementById('twitterTitle')?.setAttribute('content', c.name+' | Bharat Viral');
  document.getElementById('twitterDescription')?.setAttribute('content', c.description||c.name);
 

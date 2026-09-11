@@ -5,7 +5,8 @@ export const config = {
 };
 
 const SITE = "https://bharatviralnews.netlify.app";
-const DEFAULT_SUPABASE_URL = "https://ocarsylhsyxjqpzidndb.supabase.co";
+const DEFAULT_SUPABASE_URL =
+  "https://ocarsylhsyxjqpzidndb.supabase.co";
 
 function xmlEscape(value) {
   return String(value ?? "")
@@ -17,20 +18,22 @@ function xmlEscape(value) {
 }
 
 function isoDate(value) {
-  if (!value) {
-    return new Date().toISOString();
-  }
+  if (!value) return null;
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return new Date().toISOString();
+    return null;
   }
 
   return date.toISOString();
 }
 
-async function fetchWithTimeout(url, options = {}, timeout = 8000) {
+async function fetchWithTimeout(
+  url,
+  options = {},
+  timeout = 10000
+) {
   const controller = new AbortController();
 
   const timer = setTimeout(() => {
@@ -49,18 +52,20 @@ async function fetchWithTimeout(url, options = {}, timeout = 8000) {
 
 function createXml(urls) {
   const urlElements = urls.map((item) => {
-    const lastmod = item.lastmod
-      ? `    <lastmod>${xmlEscape(item.lastmod)}</lastmod>`
-      : "";
-
-    return [
+    const lines = [
       "  <url>",
-      `    <loc>${xmlEscape(item.loc)}</loc>`,
-      lastmod,
-      "  </url>"
-    ]
-      .filter(Boolean)
-      .join("\n");
+      `    <loc>${xmlEscape(item.loc)}</loc>`
+    ];
+
+    if (item.lastmod) {
+      lines.push(
+        `    <lastmod>${xmlEscape(item.lastmod)}</lastmod>`
+      );
+    }
+
+    lines.push("  </url>");
+
+    return lines.join("\n");
   });
 
   return [
@@ -72,19 +77,40 @@ function createXml(urls) {
 }
 
 export default async function sitemap() {
+  const urls = [];
+  const seenUrls = new Set();
+
+  function addUrl(loc, lastmod = null) {
+    if (!loc || seenUrls.has(loc)) {
+      return;
+    }
+
+    seenUrls.add(loc);
+
+    urls.push({
+      loc,
+      lastmod: isoDate(lastmod)
+    });
+  }
+
   try {
     /*
-     * Netlify environment variables
+     * ==========================================
+     * NETLIFY ENVIRONMENT VARIABLES
+     * ==========================================
      */
+
     const SUPABASE_URL =
-      Netlify.env.get("SUPABASE_URL") ||
+      process.env.SUPABASE_URL ||
       DEFAULT_SUPABASE_URL;
 
     const SUPABASE_KEY =
-      Netlify.env.get("SUPABASE_KEY");
+      process.env.SUPABASE_KEY;
 
     if (!SUPABASE_KEY) {
-      throw new Error("SUPABASE_KEY is missing");
+      throw new Error(
+        "SUPABASE_KEY environment variable is missing"
+      );
     }
 
     const headers = {
@@ -92,6 +118,17 @@ export default async function sitemap() {
       Authorization: `Bearer ${SUPABASE_KEY}`,
       Accept: "application/json"
     };
+
+    /*
+     * ==========================================
+     * HOMEPAGE
+     * ==========================================
+     */
+
+    addUrl(
+      `${SITE}/`,
+      new Date().toISOString()
+    );
 
     /*
      * ==========================================
@@ -105,11 +142,12 @@ export default async function sitemap() {
       `&is_active=eq.true` +
       `&order=sort_order.asc,created_at.asc`;
 
-    const categoriesResponse = await fetchWithTimeout(
-      categoriesUrl,
-      { headers },
-      8000
-    );
+    const categoriesResponse =
+      await fetchWithTimeout(
+        categoriesUrl,
+        { headers },
+        10000
+      );
 
     if (!categoriesResponse.ok) {
       throw new Error(
@@ -117,108 +155,14 @@ export default async function sitemap() {
       );
     }
 
-    const categories = await categoriesResponse.json();
+    const categories =
+      await categoriesResponse.json();
 
     if (!Array.isArray(categories)) {
-      throw new Error("Invalid categories response");
-    }
-
-    /*
-     * ==========================================
-     * GET PUBLISHED ARTICLES
-     * ==========================================
-     */
-
-    const articles = [];
-
-    const limit = 1000;
-    let offset = 0;
-
-    while (true) {
-      const articlesUrl =
-        `${SUPABASE_URL}/rest/v1/articles` +
-        `?select=id,slug,created_at,published_at,updated_at` +
-        `&status=eq.published` +
-        `&slug=not.is.null` +
-        `&order=published_at.desc` +
-        `&limit=${limit}` +
-        `&offset=${offset}`;
-
-      const articlesResponse = await fetchWithTimeout(
-        articlesUrl,
-        { headers },
-        8000
+      throw new Error(
+        "Invalid categories response"
       );
-
-      if (!articlesResponse.ok) {
-        throw new Error(
-          `Articles request failed: HTTP ${articlesResponse.status}`
-        );
-      }
-
-      const batch = await articlesResponse.json();
-
-      if (!Array.isArray(batch)) {
-        throw new Error("Invalid articles response");
-      }
-
-      if (batch.length === 0) {
-        break;
-      }
-
-      articles.push(...batch);
-
-      /*
-       * Last page reached
-       */
-      if (batch.length < limit) {
-        break;
-      }
-
-      offset += limit;
-
-      /*
-       * Safety protection against an accidental
-       * infinite pagination loop.
-       */
-      if (offset > 100000) {
-        break;
-      }
     }
-
-    /*
-     * ==========================================
-     * BUILD SITEMAP URL LIST
-     * ==========================================
-     */
-
-    const urls = [];
-    const seenUrls = new Set();
-
-    function addUrl(loc, lastmod = null) {
-      if (!loc) return;
-
-      if (seenUrls.has(loc)) {
-        return;
-      }
-
-      seenUrls.add(loc);
-
-      urls.push({
-        loc,
-        lastmod: lastmod
-          ? isoDate(lastmod)
-          : null
-      });
-    }
-
-    /*
-     * Homepage
-     */
-    addUrl(
-      `${SITE}/`,
-      new Date().toISOString()
-    );
 
     /*
      * ==========================================
@@ -227,22 +171,24 @@ export default async function sitemap() {
      */
 
     for (const category of categories) {
-      if (!category || !category.slug) {
+      if (!category?.slug) {
         continue;
       }
 
-      const slug = String(category.slug).trim();
+      const slug =
+        String(category.slug).trim();
 
       if (!slug) {
         continue;
       }
 
-      const lowerSlug = slug.toLowerCase();
+      const lowerSlug =
+        slug.toLowerCase();
 
       /*
-       * These categories should not be included
-       * in the sitemap.
+       * Do not include these categories.
        */
+
       if (
         lowerSlug === "trending" ||
         lowerSlug === "notice"
@@ -262,66 +208,122 @@ export default async function sitemap() {
 
     /*
      * ==========================================
-     * ARTICLE URLS
+     * GET PUBLISHED ARTICLES
      * ==========================================
      */
 
-    for (const article of articles) {
-      if (!article || !article.slug) {
-        continue;
+    const limit = 1000;
+    let offset = 0;
+
+    while (true) {
+      const articlesUrl =
+        `${SUPABASE_URL}/rest/v1/articles` +
+        `?select=slug,created_at,published_at,updated_at` +
+        `&status=eq.published` +
+        `&slug=not.is.null` +
+        `&order=published_at.desc` +
+        `&limit=${limit}` +
+        `&offset=${offset}`;
+
+      const articlesResponse =
+        await fetchWithTimeout(
+          articlesUrl,
+          { headers },
+          10000
+        );
+
+      if (!articlesResponse.ok) {
+        throw new Error(
+          `Articles request failed: HTTP ${articlesResponse.status}`
+        );
       }
 
-      const slug = String(article.slug).trim();
+      const batch =
+        await articlesResponse.json();
 
-      if (!slug) {
-        continue;
+      if (!Array.isArray(batch)) {
+        throw new Error(
+          "Invalid articles response"
+        );
       }
 
-      const articleUrl =
-        `${SITE}/article/` +
-        encodeURIComponent(slug);
+      if (batch.length === 0) {
+        break;
+      }
 
-      addUrl(
-        articleUrl,
-        article.updated_at ||
-        article.published_at ||
-        article.created_at
-      );
+      /*
+       * ========================================
+       * ARTICLE URLS
+       * ========================================
+       */
+
+      for (const article of batch) {
+        if (!article?.slug) {
+          continue;
+        }
+
+        const slug =
+          String(article.slug).trim();
+
+        if (!slug) {
+          continue;
+        }
+
+        const articleUrl =
+          `${SITE}/article/` +
+          encodeURIComponent(slug);
+
+        addUrl(
+          articleUrl,
+          article.updated_at ||
+          article.published_at ||
+          article.created_at
+        );
+      }
+
+      /*
+       * Last page
+       */
+
+      if (batch.length < limit) {
+        break;
+      }
+
+      offset += limit;
+
+      /*
+       * Safety limit
+       */
+
+      if (offset >= 100000) {
+        break;
+      }
     }
 
     /*
      * ==========================================
-     * GENERATE XML
+     * GENERATE FINAL XML
      * ==========================================
      */
 
     const body = createXml(urls);
 
-    /*
-     * ==========================================
-     * SUCCESS RESPONSE
-     * ==========================================
-     */
-
     return new Response(body, {
       status: 200,
       headers: {
-        "Content-Type": "application/xml; charset=UTF-8",
+        "Content-Type":
+          "application/xml; charset=UTF-8",
+
         "Cache-Control":
-          "public, max-age=300, s-maxage=300",
-        "X-Robots-Tag":
-          "noindex"
+          "public, max-age=300, s-maxage=300"
       }
     });
 
   } catch (error) {
     /*
      * ==========================================
-     * FALLBACK
+     * FALLBACK SITEMAP
      * ==========================================
-     *
-     * Even if Supabase fails, always return
-     * valid XML instead of an HTML error page.
      */
 
     console.error(
@@ -329,27 +331,30 @@ export default async function sitemap() {
       error
     );
 
-    const fallbackUrls = [
+    /*
+     * Always return valid XML.
+     */
+
+    const fallbackXml =
+      createXml([
+        {
+          loc: `${SITE}/`,
+          lastmod: new Date().toISOString()
+        }
+      ]);
+
+    return new Response(
+      fallbackXml,
       {
-        loc: `${SITE}/`,
-        lastmod: null
-      }
-    ];
+        status: 200,
+        headers: {
+          "Content-Type":
+            "application/xml; charset=UTF-8",
 
-    const fallbackXml = createXml(
-      fallbackUrls
+          "Cache-Control":
+            "public, max-age=60, s-maxage=60"
+        }
+      }
     );
-
-    return new Response(fallbackXml, {
-      status: 200,
-      headers: {
-        "Content-Type":
-          "application/xml; charset=UTF-8",
-        "Cache-Control":
-          "public, max-age=60, s-maxage=60",
-        "X-Robots-Tag":
-          "noindex"
-      }
-    });
   }
 }

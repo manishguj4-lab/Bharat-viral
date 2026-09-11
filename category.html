@@ -6,7 +6,7 @@
 <title id="pageTitle">Bharat Viral - Category</title>
 <link rel="stylesheet" href="/assets/css/global.css">
 <meta id="metaDescription" name="description" content="Bharat Viral की प्रकाशित खबरें देखें।">
-<link id="canonical" rel="canonical" href="https://bharatviralnews.netlify.app/category.html?category=news">
+<link id="canonical" rel="canonical" href="">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Bharat Viral">
@@ -51,13 +51,17 @@ table { max-width: 100% !important; }
 <script>
 'use strict';
 
+const params=new URLSearchParams(location.search);
+let wanted=(params.get('category')||'news').toLowerCase().trim();
+const canonical=document.getElementById('canonical');
+if(canonical) canonical.href='https://bharatviralnews.netlify.app/category.html?category='+encodeURIComponent(wanted);
+
+
 const SUPABASE_URL="https://ocarsylhsyxjqpzidndb.supabase.co";
 const SUPABASE_KEY="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
-const params=new URLSearchParams(location.search);
 const PAGE_SIZE=7;
 let page=Math.max(1,parseInt(params.get('page')||'1',10)||1);
 let catalog=[];
-let wanted=(params.get('category')||'news').toLowerCase().trim();
 
 const heading=document.getElementById('heading');
 const sub=document.getElementById('sub');

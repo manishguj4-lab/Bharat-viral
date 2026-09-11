@@ -29,11 +29,15 @@ export default async (request, context) => {
       },
     });
 
-    if (!response.ok) { return context.next(); }
+    if (!response.ok) {
+      return new Response("Service Unavailable", { status: 503 });
+    }
 
     const rows = await response.json();
     article = rows?.[0];
-  } catch { return context.next(); }
+  } catch {
+    return new Response("Service Unavailable", { status: 503 });
+  }
 
   if (!article) {
     const fallbackRes = await context.next();
@@ -121,6 +125,7 @@ export default async (request, context) => {
   // Update Meta Tags
   templateHtml = templateHtml.replace(/<title>.*?<\/title>/i, `<title>${esc(title)} | Bharat Viral</title>`);
   templateHtml = templateHtml.replace(/<meta\s+name="description"\s+content="[^"]*"/i, `<meta name="description" content="${esc(description)}"`);
+  templateHtml = templateHtml.replace(/<meta\s+name="robots"\s+content="[^"]*"/i, `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"`);
   templateHtml = templateHtml.replace(/<link\s+rel="canonical"\s+id="canonicalUrl"\s+href="[^"]*"/i, `<link rel="canonical" id="canonicalUrl" href="${esc(canonical)}"`);
 
   // Update OG Tags

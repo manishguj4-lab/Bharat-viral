@@ -1,6 +1,10 @@
 [build]
   publish = "."
 
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_KEY,SUPABASE_URL"
+  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0,https://ocarsylhsyxjqpzidndb.supabase.co"
+
 [[edge_functions]]
   path = "/article/*"
   function = "article-ssr"

@@ -108,7 +108,7 @@ describe('sitemap handler', () => {
       assert.strictEqual(consoleErrorCalled, true, 'console.error should have been called');
       assert.strictEqual(response.status, 200);
       assert.strictEqual(response.headers.get('Content-Type'), 'application/xml; charset=UTF-8');
-      assert.strictEqual(response.headers.get('Cache-Control'), 'public, max-age=60');
+      assert.strictEqual(response.headers.get('Cache-Control'), 'public, max-age=60, s-maxage=60');
 
       const body = await response.text();
       assert.ok(body.includes('<urlset'), 'Body should contain urlset');

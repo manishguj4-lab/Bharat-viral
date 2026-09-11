@@ -11,7 +11,13 @@ describe('sitemap handler', () => {
       assert.ok('apikey' in options.headers, 'apikey header should be present');
       assert.ok('Authorization' in options.headers, 'Authorization header should be present');
 
-      if (url.includes('/rest/v1/articles')) {
+      if (url.includes('/rest/v1/articles?status=eq.published&slug=not.is.null')) {
+          return {
+             ok: true,
+             headers: new Headers({ "Content-Range": "0-0/1005" }),
+             json: async () => []
+          };
+      } else if (url.includes('/rest/v1/articles')) {
         const offsetMatch = url.match(/offset=(\d+)/);
         const offset = offsetMatch ? parseInt(offsetMatch[1], 10) : 0;
 
@@ -64,8 +70,10 @@ describe('sitemap handler', () => {
 
       const body = await response.text();
 
-      // Check static URLs
+      // Check static URLs (ensure no fake lastmod for homepage)
       assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/</loc>'));
+      const locMatch = body.match(/<loc>https:\/\/bharatviralnews\.netlify\.app\/<\/loc>\s*<lastmod>/);
+      assert.ok(!locMatch, 'Homepage should not have a fake lastmod');
 
       // Check category URLs
       assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/category.html?category=news</loc>'));
@@ -116,6 +124,40 @@ describe('sitemap handler', () => {
     } finally {
       global.fetch = originalFetch;
       console.error = originalConsoleError;
+      process.env = originalEnv;
+    }
+  });
+  it('returns sitemapindex when article count exceeds max limit', async () => {
+    const module = await import('../../netlify/functions/sitemap.js');
+    const handler = module.default;
+    const originalFetch = global.fetch;
+
+    global.fetch = async (url) => {
+      if (url.includes('Prefer=count%3Dexact') || url.includes('count=exact') || url.includes('/rest/v1/articles?status=eq.published&slug=not.is.null')) {
+        return {
+          ok: true,
+          headers: new Headers({ "Content-Range": "0-0/45000" }),
+          json: async () => []
+        };
+      }
+      return { ok: true, json: async () => [] };
+    };
+
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' };
+
+    try {
+      const req = new Request('https://bharatviralnews.netlify.app/sitemap.xml');
+      const response = await handler(req, {});
+
+      assert.strictEqual(response.status, 200);
+
+      const body = await response.text();
+      assert.ok(body.includes('<sitemapindex'), 'Body should be a sitemap index');
+      assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/sitemap.xml?page=1</loc>'));
+      assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/sitemap.xml?page=2</loc>'));
+    } finally {
+      global.fetch = originalFetch;
       process.env = originalEnv;
     }
   });

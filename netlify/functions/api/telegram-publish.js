@@ -98,7 +98,11 @@ export default async (req, context) => {
     let articleUrl = "";
     if (article.url && typeof article.url === "string") {
       try {
-        articleUrl = new URL(article.url).href;
+        const urlObj = new URL(article.url);
+        if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
+          throw new Error("Invalid protocol");
+        }
+        articleUrl = urlObj.href;
       } catch (e) {
         return new Response(JSON.stringify({ error: "Invalid article URL format" }), {
           status: 400,
@@ -110,7 +114,11 @@ export default async (req, context) => {
     let imageUrl = "";
     if (article.image_url && typeof article.image_url === "string") {
       try {
-        imageUrl = new URL(article.image_url).href;
+        const imgUrlObj = new URL(article.image_url);
+        if (imgUrlObj.protocol !== "http:" && imgUrlObj.protocol !== "https:") {
+          throw new Error("Invalid protocol");
+        }
+        imageUrl = imgUrlObj.href;
       } catch (e) {
         return new Response(JSON.stringify({ error: "Invalid image URL format" }), {
           status: 400,
@@ -148,7 +156,8 @@ export default async (req, context) => {
       headers: { "Content-Type": "application/json" }
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("Internal Server Error:", error.message);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
     });

@@ -1,4 +1,5 @@
-## 2024-09-10 - Fix DOM XSS via innerHTML fallback
-**Vulnerability:** XSS via unsafe innerHTML assignment in `stripHtml` function (`index.html`) when DOMPurify fails to load.
-**Learning:** Using `div.innerHTML` to extract text can trigger external resource fetching (like `<img src="...">`) and execute inline event handlers (like `onerror`) even on disconnected elements.
-**Prevention:** Use `DOMParser().parseFromString(value, 'text/html')` to safely parse HTML into an inactive DOM tree without executing scripts or fetching resources.
+- SSR edge functions must return a proper 404 response for missing articles to prevent indexing of nonexistent pages as 200 OK.
+- APIs that receive URLs (like the Telegram publisher) must explicitly validate the URL protocol to restrict them to `http:` and `https:` to prevent SSRF and injection via `javascript:` or `data:`.
+- Internal error messages must be sanitized in public API responses, returning generic 500 statuses.
+- Use a `Permissions-Policy` HTTP header to strictly control access to sensitive client features like camera and geolocation.
+- Include `video` and `source` tags with appropriate attributes in the `xss` whitelist for robust server-side sanitization without breaking rich content.

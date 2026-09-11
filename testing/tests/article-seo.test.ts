@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert';
 
 describe('article-seo handler', () => {
-  it('returns next when the mock fetch returns an empty array', async () => {
+  it('returns 404 response when the mock fetch returns an empty array', async () => {
     const module = await import('../../netlify/edge-functions/article-ssr.js');
     const handler = module.default;
 
@@ -26,17 +26,97 @@ describe('article-seo handler', () => {
 
     let nextCalled = false;
     const req = {
-      next: () => {
+      next: async () => {
         nextCalled = true;
-        return new Response('Next Called');
+        return new Response('Next Called', { headers: { 'Content-Type': 'text/html' } });
       }
     };
 
     const request = new Request('https://bharat-viral.netlify.app/article/test-article');
 
     try {
-      await handler(request, req);
-      assert.strictEqual(nextCalled, true, "context.next() should have been called");
+      const response = await handler(request, req);
+      assert.strictEqual(response.status, 404, "Should return 404 for missing article");
+      // context.next() is no longer called for missing articles, instead it returns a 404 response
+      // But the test is named "returns next when the mock fetch returns an empty array", let's update that
+      // Actually we are testing the response status.
+    } finally {
+      global.fetch = originalFetch;
+      global.Deno = originalDeno;
+    }
+  });
+  it('returns fallback 200 response via context.next() when fetch fails', async () => {
+    const module = await import('../../netlify/edge-functions/article-ssr.js');
+    const handler = module.default;
+
+    const originalFetch = global.fetch;
+    global.fetch = async () => ({
+      ok: false
+    });
+
+    const originalDeno = global.Deno;
+    global.Deno = {
+      env: {
+        get: (key) => {
+          if (key === 'SUPABASE_URL') return 'http://localhost';
+          if (key === 'SUPABASE_KEY' || key === 'SUPABASE_ANON_KEY') return 'test-key';
+          return undefined;
+        }
+      }
+    };
+
+    let nextCalled = false;
+    const req = {
+      next: async () => {
+        nextCalled = true;
+        return new Response('Next Called', { headers: { 'Content-Type': 'text/html' } });
+      }
+    };
+    const request = new Request('https://bharat-viral.netlify.app/article/test-article');
+
+    try {
+      const response = await handler(request, req);
+      assert.strictEqual(nextCalled, true, "context.next() should be called on fetch failure");
+      assert.strictEqual(response.status, 200, "Should return 200 (fallback) on fetch failure");
+    } finally {
+      global.fetch = originalFetch;
+      global.Deno = originalDeno;
+    }
+  });
+
+  it('returns fallback 200 response via context.next() on exception during fetch', async () => {
+    const module = await import('../../netlify/edge-functions/article-ssr.js');
+    const handler = module.default;
+
+    const originalFetch = global.fetch;
+    global.fetch = async () => {
+      throw new Error("Network error");
+    };
+
+    const originalDeno = global.Deno;
+    global.Deno = {
+      env: {
+        get: (key) => {
+          if (key === 'SUPABASE_URL') return 'http://localhost';
+          if (key === 'SUPABASE_KEY' || key === 'SUPABASE_ANON_KEY') return 'test-key';
+          return undefined;
+        }
+      }
+    };
+
+    let nextCalled = false;
+    const req = {
+      next: async () => {
+        nextCalled = true;
+        return new Response('Next Called', { headers: { 'Content-Type': 'text/html' } });
+      }
+    };
+    const request = new Request('https://bharat-viral.netlify.app/article/test-article');
+
+    try {
+      const response = await handler(request, req);
+      assert.strictEqual(nextCalled, true, "context.next() should be called on exception");
+      assert.strictEqual(response.status, 200, "Should return 200 (fallback) on exception");
     } finally {
       global.fetch = originalFetch;
       global.Deno = originalDeno;

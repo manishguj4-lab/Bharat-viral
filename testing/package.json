@@ -20,7 +20,7 @@
   "homepage": "https://github.com/manishguj4-lab/Bharat-viral#readme",
   "devDependencies": {
     "@types/node": "^26.4.1",
-    "typescript": "^5.0.0",
-    "tsx": "^4.23.13"
+    "tsx": "^4.23.13",
+    "typescript": "^5.0.0"
   }
 }

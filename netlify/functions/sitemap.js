@@ -2,7 +2,7 @@ export default async (req, context) => {
   try {
     const SUPABASE_URL = process.env.SUPABASE_URL || "https://ocarsylhsyxjqpzidndb.supabase.co";
     const SUPABASE_KEY = process.env.SUPABASE_KEY;
-    const SITE = "https://bharat-viral.netlify.app";
+    const SITE = "https://bharatviralnews.netlify.app";
 
     function xmlEscape(value) {
       return String(value ?? "")
@@ -19,37 +19,53 @@ export default async (req, context) => {
       return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
     }
 
-    const endpoint = SUPABASE_URL +
-      "/rest/v1/articles?select=id,slug,created_at,published_at,updated_at" +
-      "&status=eq.published&slug=not.is.null&order=published_at.desc";
-
     const categoriesEndpoint = SUPABASE_URL +
       "/rest/v1/categories?select=*&is_active=eq.true&order=sort_order.asc,created_at.asc";
 
-    const [articlesRes, categoriesRes] = await Promise.all([
-      fetch(endpoint, {
+    const categoriesRes = await fetch(categoriesEndpoint, {
         headers: {
           apikey: SUPABASE_KEY,
           Authorization: "Bearer " + SUPABASE_KEY
         }
-      }),
-      fetch(categoriesEndpoint, {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: "Bearer " + SUPABASE_KEY
-        }
-      })
-    ]);
+    });
 
-    if (!articlesRes.ok) {
-      throw new Error("Supabase articles returned HTTP " + articlesRes.status);
-    }
     if (!categoriesRes.ok) {
       throw new Error("Supabase categories returned HTTP " + categoriesRes.status);
     }
-
-    const articles = await articlesRes.json();
     const categories = await categoriesRes.json();
+
+    let allArticles = [];
+    let start = 0;
+    const limit = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const endpoint = SUPABASE_URL +
+        "/rest/v1/articles?select=id,slug,created_at,published_at,updated_at" +
+        "&status=eq.published&slug=not.is.null&order=published_at.desc" +
+        `&limit=${limit}&offset=${start}`;
+
+      const response = await fetch(endpoint, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: "Bearer " + SUPABASE_KEY
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Supabase articles returned HTTP " + response.status);
+      }
+
+      const articlesBatch = await response.json();
+      allArticles = allArticles.concat(articlesBatch);
+
+      if (articlesBatch.length < limit) {
+        hasMore = false;
+      } else {
+        start += limit;
+      }
+    }
+    const articles = allArticles;
 
     const urls = [
       { loc: `${SITE}/`, lastmod: new Date().toISOString() }
@@ -98,7 +114,7 @@ export default async (req, context) => {
 
   } catch (error) {
     console.error("Sitemap error:", error);
-    const SITE = "https://bharat-viral.netlify.app";
+    const SITE = "https://bharatviralnews.netlify.app";
 
     function xmlEscape(value) {
       return String(value ?? "")

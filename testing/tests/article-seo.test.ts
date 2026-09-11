@@ -32,7 +32,7 @@ describe('article-seo handler', () => {
       }
     };
 
-    const request = new Request('https://bharat-viral.netlify.app/article/test-article');
+    const request = new Request('https://bharatviralnews.netlify.app/article/test-article');
 
     try {
       const response = await handler(request, req);
@@ -72,7 +72,7 @@ describe('article-seo handler', () => {
         return new Response('Next Called', { headers: { 'Content-Type': 'text/html' } });
       }
     };
-    const request = new Request('https://bharat-viral.netlify.app/article/test-article');
+    const request = new Request('https://bharatviralnews.netlify.app/article/test-article');
 
     try {
       const response = await handler(request, req);
@@ -111,7 +111,7 @@ describe('article-seo handler', () => {
         return new Response('Next Called', { headers: { 'Content-Type': 'text/html' } });
       }
     };
-    const request = new Request('https://bharat-viral.netlify.app/article/test-article');
+    const request = new Request('https://bharatviralnews.netlify.app/article/test-article');
 
     try {
       const response = await handler(request, req);

@@ -2,7 +2,7 @@ export default async (req, context) => {
   try {
     const SUPABASE_URL = process.env.SUPABASE_URL || "https://ocarsylhsyxjqpzidndb.supabase.co";
     const SUPABASE_KEY = process.env.SUPABASE_KEY;
-    const SITE = "https://bharat-viral.netlify.app";
+    const SITE = "https://bharatviralnews.netlify.app";
     const NEWS_PUBLICATION = "Bharat Viral";
     const LANGUAGE = "hi";
     const NEWS_WINDOW_HOURS = 48;

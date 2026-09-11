@@ -2,7 +2,7 @@ export async function onRequest(context) {
   try {
     const SUPABASE_URL = context.env.SUPABASE_URL;
     const SUPABASE_KEY = context.env.SUPABASE_KEY;
-    const SITE = "https://bharat-viral.pages.dev";
+    const SITE = "https://bharat-viral.netlify.app";
 
     function xmlEscape(value) {
       return String(value ?? "")

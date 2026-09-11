@@ -1,0 +1,10 @@
+[build]
+  publish = "."
+
+[[edge_functions]]
+  path = "/article/*"
+  function = "article-ssr"
+
+[[edge_functions]]
+  path = "/article.html"
+  function = "article-ssr"

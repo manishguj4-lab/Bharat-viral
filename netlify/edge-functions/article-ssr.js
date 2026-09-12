@@ -172,55 +172,46 @@ export default async (request, context) => {
 
   // Fetch the actual article.html file to act as the template
   const templateResponse = await fetch(new URL("/article.html", request.url));
-  let templateHtml = await templateResponse.text();
 
-  // Very basic string replacements since HTMLRewriter is hard to implement with xss library seamlessly in this mock structure.
-  // Real Netlify Edge Functions support HTMLRewriter but we'll use a Regex replacement approach for reliability across environments.
-
-  // Update Meta Tags
-  templateHtml = templateHtml.replace(/<title>.*?<\/title>/i, `<title>${esc(title)} | Bharat Viral</title>`);
-  templateHtml = templateHtml.replace(/<meta\s+name="description"\s+content="[^"]*"/i, `<meta name="description" content="${esc(description)}"`);
-  templateHtml = templateHtml.replace(/<meta\s+name="robots"\s+content="[^"]*"/i, `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"`);
-  templateHtml = templateHtml.replace(/<link\s+rel="canonical"\s+id="canonicalUrl"\s+href="[^"]*"/i, `<link rel="canonical" id="canonicalUrl" href="${esc(canonical)}"`);
-
-  // Update OG/Twitter Image dynamically (fallback for meta tags if needed but strictly don't fallback structured data image)
   const metaImage = image || `${site}/icon-512.png`;
-
-  // Update OG Tags
-  templateHtml = templateHtml.replace(/<meta\s+property="og:title"\s+content="[^"]*"/i, `<meta property="og:title" content="${esc(title)}"`);
-  templateHtml = templateHtml.replace(/<meta\s+property="og:description"\s+content="[^"]*"/i, `<meta property="og:description" content="${esc(description)}"`);
-  templateHtml = templateHtml.replace(/<meta\s+property="og:url"\s+id="ogUrl"\s+content="[^"]*"/i, `<meta property="og:url" id="ogUrl" content="${esc(canonical)}"`);
-  templateHtml = templateHtml.replace(/<meta\s+property="og:image"\s+id="ogImage"\s+content="[^"]*"/i, `<meta property="og:image" id="ogImage" content="${esc(metaImage)}"`);
-
-  // Update Twitter Tags
-  templateHtml = templateHtml.replace(/<meta\s+name="twitter:title"\s+content="[^"]*"/i, `<meta name="twitter:title" content="${esc(title)}"`);
-  templateHtml = templateHtml.replace(/<meta\s+name="twitter:description"\s+content="[^"]*"/i, `<meta name="twitter:description" content="${esc(description)}"`);
-  templateHtml = templateHtml.replace(/<meta\s+name="twitter:image"\s+id="twitterImage"\s+content="[^"]*"/i, `<meta name="twitter:image" id="twitterImage" content="${esc(metaImage)}"`);
-
-  // Inject JSON-LD Schema before </head>
-  templateHtml = templateHtml.replace(/<\/head>/i, `<script type="application/ld+json">${safeSchema}</script></head>`);
-
-  // Render the article content inside <article id="articleBox">
   const articleBoxHtml = `
-    ${image ? `<img class="hero" src="${esc(image)}" alt="${esc(title)}" itemprop="image" loading="eager">` : ""}
-    <div class="body">
-      <a class="back" href="/">← वापस Homepage पर</a>
-      <div class="cat">${esc(category)}</div>
-      <h1 class="title" itemprop="headline">${esc(title)}</h1>
-      <div class="meta">${esc(author)}${published ? ` · <time datetime="${esc(published)}" itemprop="datePublished">${esc(published)}</time>` : ''}</div>
-      <div class="excerpt" itemprop="description">${esc(description)}</div>
-      <div class="content" itemprop="articleBody">${sanitizedContent}</div>
+    ${image ? `<img class="art-hero" src="${esc(image)}" alt="${esc(title)}" itemprop="image" loading="eager">` : ""}
+    <div class="art-body">
+      <a class="art-back" href="/">← वापस Homepage पर</a>
+      <div class="art-cat">${esc(category)}</div>
+      <h1 class="art-title" itemprop="headline">${esc(title)}</h1>
+      <div class="art-meta">${esc(author)}${published ? ` · <time datetime="${esc(published)}" itemprop="datePublished">${esc(published)}</time>` : ''}</div>
+      <div class="art-excerpt" itemprop="description">${esc(description)}</div>
+      <div class="art-content" itemprop="articleBody">${sanitizedContent}</div>
     </div>
   `;
 
-  // Replace the loading state with actual content
-  templateHtml = templateHtml.replace(/<article\s+class="article"\s+id="articleBox">.*?<\/article>/is, `<article class="article" id="articleBox" itemscope itemtype="https://schema.org/NewsArticle">${articleBoxHtml}</article>`);
+  const rewriter = new HTMLRewriter()
+    .on('title', { element(el) { el.setInnerContent(`${esc(title)} | Bharat Viral`); } })
+    .on('meta[name="description"]', { element(el) { el.setAttribute('content', esc(description)); } })
+    .on('meta[name="robots"]', { element(el) { el.setAttribute('content', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'); } })
+    .on('link[id="canonicalUrl"]', { element(el) { el.setAttribute('href', esc(canonical)); } })
+    .on('meta[property="og:title"]', { element(el) { el.setAttribute('content', esc(title)); } })
+    .on('meta[property="og:description"]', { element(el) { el.setAttribute('content', esc(description)); } })
+    .on('meta[property="og:url"]', { element(el) { el.setAttribute('content', esc(canonical)); } })
+    .on('meta[property="og:image"]', { element(el) { el.setAttribute('content', esc(metaImage)); } })
+    .on('meta[name="twitter:title"]', { element(el) { el.setAttribute('content', esc(title)); } })
+    .on('meta[name="twitter:description"]', { element(el) { el.setAttribute('content', esc(description)); } })
+    .on('meta[name="twitter:image"]', { element(el) { el.setAttribute('content', esc(metaImage)); } })
+    .on('head', { element(el) { el.append(`<script type="application/ld+json">${safeSchema}</script>`, { html: true }); } })
+    .on('article#articleBox', {
+      element(el) {
+        el.setAttribute('itemscope', '');
+        el.setAttribute('itemtype', 'https://schema.org/NewsArticle');
+        el.setInnerContent(articleBoxHtml, { html: true });
+      }
+    });
 
-  return new Response(templateHtml, {
-    status: 200,
-    headers: {
-      "content-type": "text/html; charset=UTF-8",
-      "cache-control": "public, max-age=60, s-maxage=300"
-    }
-  });
+  const modifiedResponse = rewriter.transform(templateResponse);
+  const finalResponse = new Response(modifiedResponse.body, modifiedResponse);
+
+  finalResponse.headers.set('content-type', 'text/html; charset=UTF-8');
+  finalResponse.headers.set('cache-control', 'public, max-age=60, s-maxage=300');
+
+  return finalResponse;
 };

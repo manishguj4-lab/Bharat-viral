@@ -809,7 +809,7 @@ document.getElementById("heroPrev").addEventListener("click",(e)=>{e.stopPropaga
 
 async function loadPublishedArticles(){
   const U="https://ocarsylhsyxjqpzidndb.supabase.co";
-  const K="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+  const K=window.SUPABASE_KEY;
   const H={apikey:K,Authorization:"Bearer "+K};
 
   const norm=v=>String(v??"").toLowerCase().trim().replace(/[\s_-]+/g,"-");
@@ -1175,7 +1175,7 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
 <script id="bv-final-breaking-js">
 (function(){
   const U="https://ocarsylhsyxjqpzidndb.supabase.co";
-  const K="sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
+  const K=window.SUPABASE_KEY;
   const H={apikey:K,Authorization:"Bearer "+K};
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
   async function loadBreakingNews(){

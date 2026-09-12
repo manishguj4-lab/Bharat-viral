@@ -227,11 +227,16 @@ function renderArticleContent(raw){
 
 function time(v){if(!v)return '';const d=new Date(v),m=Math.max(1,Math.floor((Date.now()-d)/60000));if(m<60)return m+' मिनट पहले';const h=Math.floor(m/60);if(h<24)return h+' घंटे पहले';return Math.floor(h/24)+' दिन पहले';}
 function setupSEO(a){
+ const validArticleImage =
+  /^https?:\/\//i.test(String(a.image_url || a.image || ""));
  const title=a.seo_title||a.seoTitle||a.title||'Bharat Viral';
  const description=a.seo_description||a.seoDescription||a.meta_description||a.metaDescription||a.excerpt||a.title||'Bharat Viral पर ताजा खबरें और वायरल समाचार पढ़ें।';
  const slug=String(a.slug||slugify(a.title)||'').trim();
  const url=slug ? new URL('/article/'+encodeURIComponent(slug),location.origin).href : location.href;
- const image=a.image_url||new URL('/icon-192.png',location.origin).href;
+ const image =
+  a.image_url ||
+  a.image ||
+  new URL('/icon-512.png', location.origin).href;
  const published=a.published_at||a.created_at||new Date().toISOString();
  const modified=a.updated_at||a.updatedAt||a.published_at||a.created_at||published;
  const mainKeyword=a.main_keyword||a.mainKeyword||a.focus_keyword||a.focusKeyword||a.focus_keyphrase||a.focusKeyphrase||'';

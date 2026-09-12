@@ -165,13 +165,13 @@ describe('article-seo handler', () => {
     }
   });
 
-      it('returns 200 response with correct structured data for valid article', async () => {
+  it('returns 200 response with correct structured data for valid article', async () => {
     const module = await import('../../netlify/edge-functions/article-ssr.js');
     const handler = module.default;
 
     const originalFetch = global.fetch;
     global.fetch = async (url) => {
-      if (url.toString().includes('article-template.html') || url.toString().includes('article.html')) {
+      if (url.toString().includes('article.html')) {
         return new Response('<html><head><title>Test</title><script type="application/ld+json">[{"@type":"NewsArticle","headline":"Real Title","author":{"@type":"Organization","name":"Editorial Team"},"image":["https://example.com/image.jpg"],"datePublished":"2024-01-01T00:00:00Z"},{"@type":"BreadcrumbList"}]</script></head><body><article id="articleBox"></article></body></html>', { status: 200, headers: { 'Content-Type': 'text/html' } });
       }
       return {
@@ -201,8 +201,9 @@ describe('article-seo handler', () => {
     const request = new Request('https://bharatviralnews.netlify.app/article/test-article');
 
     try {
-      const response = await handler(request, {});
+const response = await handler(request, {});
       assert.strictEqual(response.status, 200, "Should return 200");
+
     } finally {
       global.fetch = originalFetch;
       global.Deno = originalDeno;

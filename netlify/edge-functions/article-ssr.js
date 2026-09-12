@@ -199,25 +199,98 @@ const metaImage =
   `;
 
   const rewriter = new HTMLRewriter()
-    .on('title', { element(el) { el.setInnerContent(`${esc(title)} | Bharat Viral`); } })
-    .on('meta[name="description"]', { element(el) { el.setAttribute('content', esc(description)); } })
-    .on('meta[name="robots"]', { element(el) { el.setAttribute('content', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'); } })
-    .on('link[id="canonicalUrl"]', { element(el) { el.setAttribute('href', esc(canonical)); } })
-    .on('meta[property="og:title"]', { element(el) { el.setAttribute('content', esc(title)); } })
-    .on('meta[property="og:description"]', { element(el) { el.setAttribute('content', esc(description)); } })
-    .on('meta[property="og:url"]', { element(el) { el.setAttribute('content', esc(canonical)); } })
-    .on('meta[property="og:image"]', { element(el) { el.setAttribute('content', esc(metaImage)); } })
-    .on('meta[name="twitter:title"]', { element(el) { el.setAttribute('content', esc(title)); } })
-    .on('meta[name="twitter:description"]', { element(el) { el.setAttribute('content', esc(description)); } })
-    .on('meta[name="twitter:image"]', { element(el) { el.setAttribute('content', esc(metaImage)); } })
-    .on('head', { element(el) { el.append(`<script type="application/ld+json">${safeSchema}</script>`, { html: true }); } })
-    .on('article#articleBox', {
-      element(el) {
-        el.setAttribute('itemscope', '');
-        el.setAttribute('itemtype', 'https://schema.org/NewsArticle');
-        el.setInnerContent(articleBoxHtml, { html: true });
-      }
-    });
+  .on('title', {
+    element(el) {
+      el.setInnerContent(`${title} | Bharat Viral`);
+    }
+  })
+
+  .on('meta[name="description"]', {
+    element(el) {
+      el.setAttribute('content', description);
+    }
+  })
+
+  .on('meta[name="robots"]', {
+    element(el) {
+      el.setAttribute(
+        'content',
+        'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+      );
+    }
+  })
+
+  .on('link[id="canonicalUrl"]', {
+    element(el) {
+      el.setAttribute('href', canonical);
+    }
+  })
+
+  .on('meta[property="og:title"]', {
+    element(el) {
+      el.setAttribute('content', title);
+    }
+  })
+
+  .on('meta[property="og:description"]', {
+    element(el) {
+      el.setAttribute('content', description);
+    }
+  })
+
+  .on('meta[property="og:url"]', {
+    element(el) {
+      el.setAttribute('content', canonical);
+    }
+  })
+
+  .on('meta[property="og:image"]', {
+    element(el) {
+      el.setAttribute('content', metaImage);
+    }
+  })
+
+  .on('meta[name="twitter:title"]', {
+    element(el) {
+      el.setAttribute('content', title);
+    }
+  })
+
+  .on('meta[name="twitter:description"]', {
+    element(el) {
+      el.setAttribute('content', description);
+    }
+  })
+
+  .on('meta[name="twitter:image"]', {
+    element(el) {
+      el.setAttribute('content', metaImage);
+    }
+  })
+
+  .on('head', {
+    element(el) {
+      el.append(
+        `<script type="application/ld+json">${safeSchema}</script>`,
+        { html: true }
+      );
+    }
+  })
+
+  .on('article#articleBox', {
+    element(el) {
+      el.setAttribute('itemscope', '');
+      el.setAttribute(
+        'itemtype',
+        'https://schema.org/NewsArticle'
+      );
+
+      el.setInnerContent(
+        articleBoxHtml,
+        { html: true }
+      );
+    }
+  });
 
   const modifiedResponse = rewriter.transform(templateResponse);
   const finalResponse = new Response(modifiedResponse.body, modifiedResponse);

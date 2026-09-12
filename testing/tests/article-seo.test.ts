@@ -1,33 +1,7 @@
-import { describe, it, before, after } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert';
 
 describe('article-seo handler', () => {
-  before(() => {
-    global.HTMLRewriter = class HTMLRewriter {
-      constructor() { this.handlers = []; }
-      on(selector, handler) { this.handlers.push({ selector, handler }); return this; }
-      transform(response) {
-        let appendedHead = '';
-        this.handlers.forEach(h => {
-          if (h.selector === 'head' && h.handler.element) {
-            h.handler.element({
-               append: (content) => { appendedHead += content; }
-            });
-          }
-        });
-        return new Response(
-           response.text().then(text => {
-             // Ensure that we only append once and avoid string replacement issues
-             return text.replace('</head>', appendedHead + '</head>');
-           }),
-           response
-        );
-      }
-    };
-  });
-
-  after(() => { delete global.HTMLRewriter; });
-
   it('returns 503 response when missing required credentials', async () => {
     const module = await import('../../netlify/edge-functions/article-ssr.js');
     const handler = module.default;
@@ -85,12 +59,14 @@ describe('article-seo handler', () => {
     try {
       const response = await handler(request, req);
       assert.strictEqual(response.status, 404, "Should return 404 for missing article");
+      // context.next() is no longer called for missing articles, instead it returns a 404 response
+      // But the test is named "returns next when the mock fetch returns an empty array", let's update that
+      // Actually we are testing the response status.
     } finally {
       global.fetch = originalFetch;
       global.Deno = originalDeno;
     }
   });
-
   it('returns 503 response when fetch fails', async () => {
     const module = await import('../../netlify/edge-functions/article-ssr.js');
     const handler = module.default;
@@ -164,7 +140,6 @@ describe('article-seo handler', () => {
       global.Deno = originalDeno;
     }
   });
-
   it('returns 200 response with correct structured data for valid article', async () => {
     const module = await import('../../netlify/edge-functions/article-ssr.js');
     const handler = module.default;
@@ -172,7 +147,10 @@ describe('article-seo handler', () => {
     const originalFetch = global.fetch;
     global.fetch = async (url) => {
       if (url.toString().includes('article.html')) {
-        return new Response('<html><head><title>Test</title><script type="application/ld+json">[{"@type":"NewsArticle","headline":"Real Title","author":{"@type":"Organization","name":"Editorial Team"},"image":["https://example.com/image.jpg"],"datePublished":"2024-01-01T00:00:00Z"},{"@type":"BreadcrumbList"}]</script></head><body><article id="articleBox"></article></body></html>', { status: 200, headers: { 'Content-Type': 'text/html' } });
+        return {
+          ok: true,
+          text: async () => `<html><head><title>Test</title></head><body><article id="articleBox"></article></body></html>`
+        };
       }
       return {
         ok: true,
@@ -201,8 +179,26 @@ describe('article-seo handler', () => {
     const request = new Request('https://bharatviralnews.netlify.app/article/test-article');
 
     try {
-const response = await handler(request, {});
+      const response = await handler(request, {});
       assert.strictEqual(response.status, 200, "Should return 200");
+
+      const text = await response.text();
+
+      // Extract structured data JSON
+      const jsonMatch = text.match(/<script type="application\/ld\+json">(.*?)<\/script>/);
+      assert.ok(jsonMatch, "Should have JSON-LD script tag");
+
+      const schemas = JSON.parse(jsonMatch[1]);
+      const newsArticle = schemas.find(s => s["@type"] === "NewsArticle");
+      const breadcrumb = schemas.find(s => s["@type"] === "BreadcrumbList");
+
+      assert.ok(newsArticle, "NewsArticle schema should exist");
+      assert.ok(breadcrumb, "BreadcrumbList schema should exist");
+
+      assert.strictEqual(newsArticle.headline, "Real Title");
+      assert.strictEqual(newsArticle.author["@type"], "Organization", "Editorial Team should map to Organization");
+      assert.deepStrictEqual(newsArticle.image, ["https://example.com/image.jpg"]);
+      assert.strictEqual(newsArticle.datePublished, "2024-01-01T00:00:00Z");
 
     } finally {
       global.fetch = originalFetch;

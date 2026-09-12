@@ -144,13 +144,56 @@ export default async function sitemap(req) {
       Accept: "application/json"
     };
 
+
+
+    /*
+     * ==========================================
+     * FETCH ACTIVE CATEGORIES (Need exact count)
+     * ==========================================
+     */
+
+    const categoriesUrl =
+      `${SUPABASE_URL}/rest/v1/categories` +
+      `?select=slug,created_at` +
+      `&is_active=eq.true` +
+      `&order=sort_order.asc,created_at.asc`;
+
+    const categoriesResponse =
+      await fetchWithTimeout(
+        categoriesUrl,
+        { headers },
+        10000
+      );
+
+    if (!categoriesResponse.ok) {
+      throw new Error(
+        `Categories request failed: HTTP ${categoriesResponse.status}`
+      );
+    }
+
+    const rawCategories =
+      await categoriesResponse.json();
+
+    if (!Array.isArray(rawCategories)) {
+      throw new Error(
+        "Invalid categories response"
+      );
+    }
+
+    const categories = rawCategories.filter(category => {
+      const slug = String(category.slug || "").trim().toLowerCase();
+      return slug && slug !== "trending" && slug !== "notice";
+    });
+
+    const numCategories = categories.length;
+
     /*
      * ==========================================
      * GET PUBLISHED ARTICLES COUNT FOR SITEMAP INDEX
      * ==========================================
      */
 
-    let totalArticles = 0;
+    let totalArticles = -1;
     const countUrl = `${SUPABASE_URL}/rest/v1/articles?status=eq.published&slug=not.is.null`;
 
     const countResponse = await fetchWithTimeout(
@@ -160,7 +203,13 @@ export default async function sitemap(req) {
     );
 
     if (countResponse.ok) {
-        const contentRange = countResponse.headers.get("Content-Range");
+        let contentRange;
+        if (countResponse.headers && typeof countResponse.headers.get === 'function') {
+            contentRange = countResponse.headers.get("Content-Range") || countResponse.headers.get("content-range");
+        }
+        if (contentRange === undefined && countResponse.headers && countResponse.headers["Content-Range"]) {
+            contentRange = countResponse.headers["Content-Range"];
+        }
         if (contentRange) {
            const match = contentRange.match(/\/(\d+)$/);
            if (match) {
@@ -169,13 +218,27 @@ export default async function sitemap(req) {
         }
     }
 
-    // Rough estimate of static and category URLs.
-    const nonArticleUrlCount = 100;
-    const totalUrls = totalArticles + nonArticleUrlCount;
+    if (totalArticles === -1) {
+      throw new Error("Failed to count articles correctly.");
+    }
+
+    // Exact count of total URLs: homepage + categories + articles
+    const totalUrls = 1 + numCategories + totalArticles;
+    const totalPages = Math.ceil(totalUrls / MAX_URLS_PER_SITEMAP) || 1;
+
+    // Handle invalid page explicitly
+    if (targetPage > totalPages || isNaN(targetPage) || targetPage < 1) {
+      return new Response(createXml([]), {
+         status: 404,
+         headers: {
+           "Content-Type": "application/xml; charset=UTF-8",
+           "Cache-Control": "public, max-age=300, s-maxage=300"
+         }
+      });
+    }
 
     if (isSitemapIndexRequest && totalUrls > MAX_URLS_PER_SITEMAP) {
-       const pages = Math.ceil(totalUrls / MAX_URLS_PER_SITEMAP);
-       return new Response(createSitemapIndex(pages), {
+       return new Response(createSitemapIndex(totalPages), {
          status: 200,
          headers: {
            "Content-Type": "application/xml; charset=UTF-8",
@@ -201,66 +264,8 @@ export default async function sitemap(req) {
      */
 
     if (targetPage === 1) {
-      const categoriesUrl =
-        `${SUPABASE_URL}/rest/v1/categories` +
-        `?select=slug,created_at` +
-        `&is_active=eq.true` +
-        `&order=sort_order.asc,created_at.asc`;
-
-      const categoriesResponse =
-        await fetchWithTimeout(
-          categoriesUrl,
-          { headers },
-          10000
-        );
-
-      if (!categoriesResponse.ok) {
-        throw new Error(
-          `Categories request failed: HTTP ${categoriesResponse.status}`
-        );
-      }
-
-      const categories =
-        await categoriesResponse.json();
-
-      if (!Array.isArray(categories)) {
-        throw new Error(
-          "Invalid categories response"
-        );
-      }
-
-      /*
-       * ==========================================
-       * CATEGORY URLS
-       * ==========================================
-       */
-
       for (const category of categories) {
-        if (!category?.slug) {
-          continue;
-        }
-
-        const slug =
-          String(category.slug).trim();
-
-        if (!slug) {
-          continue;
-        }
-
-        const lowerSlug =
-          slug.toLowerCase();
-
-        /*
-         * Do not include these categories.
-         */
-
-        if (
-          lowerSlug === "trending" ||
-          lowerSlug === "notice"
-        ) {
-          continue;
-        }
-
+        const slug = String(category.slug).trim();
         const categoryUrl =
           `${SITE}/category.html?category=` +
           encodeURIComponent(slug);
@@ -277,18 +282,36 @@ export default async function sitemap(req) {
      * ==========================================
      */
 
-    const limit = 1000;
-    let offset = (targetPage - 1) * MAX_URLS_PER_SITEMAP;
-    const maxOffsetForPage = targetPage * MAX_URLS_PER_SITEMAP;
+    const articlesOnPage1 = MAX_URLS_PER_SITEMAP - 1 - numCategories;
 
-    while (offset < maxOffsetForPage) {
+    let offset;
+    let maxArticlesToFetch;
+
+    if (targetPage === 1) {
+      offset = 0;
+      maxArticlesToFetch = articlesOnPage1;
+    } else {
+      offset = articlesOnPage1 + (targetPage - 2) * MAX_URLS_PER_SITEMAP;
+      maxArticlesToFetch = MAX_URLS_PER_SITEMAP;
+    }
+
+    // Prevent fetching more than exist
+    if (offset + maxArticlesToFetch > totalArticles) {
+        maxArticlesToFetch = totalArticles - offset;
+    }
+
+    const limit = 1000;
+    let fetchedArticlesCount = 0;
+
+    while (fetchedArticlesCount < maxArticlesToFetch) {
+      const fetchLimit = Math.min(limit, maxArticlesToFetch - fetchedArticlesCount);
       const articlesUrl =
         `${SUPABASE_URL}/rest/v1/articles` +
         `?select=slug,created_at,published_at,updated_at` +
         `&status=eq.published` +
         `&slug=not.is.null` +
         `&order=published_at.desc` +
-        `&limit=${limit}` +
+        `&limit=${fetchLimit}` +
         `&offset=${offset}`;
 
       const articlesResponse =
@@ -347,15 +370,16 @@ export default async function sitemap(req) {
         );
       }
 
+      fetchedArticlesCount += batch.length;
+      offset += batch.length;
+
       /*
        * Last page
        */
 
-      if (batch.length < limit) {
+      if (batch.length < fetchLimit) {
         break;
       }
-
-      offset += limit;
 
       if (urls.length >= MAX_URLS_PER_SITEMAP) {
         break;

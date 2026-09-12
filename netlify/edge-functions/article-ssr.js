@@ -7,6 +7,7 @@ export default async (request, context) => {
   const SUPABASE_KEY = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_KEY") || Deno.env.get("VITE_SUPABASE_ANON_KEY");
 
   const site = "https://bharatviralnews.netlify.app";
+  const DEFAULT_ARTICLE_IMAGE = `${site}/icon-512.png`;
 
   const createErrorResponse = (status, title, message) => {
     return new Response(
@@ -67,11 +68,20 @@ export default async (request, context) => {
   const title = article.title || "Bharat Viral";
   const description = article.excerpt || article.description || `${title} — Bharat Viral पर पूरी खबर पढ़ें।`;
 
-  let image = article.image_url || article.image || "";
-  // Ensure valid HTTP protocol
-  if (image && !/^https?:\/\//i.test(image)) {
-    image = "";
-  }
+  const originalImage =
+  article.image_url ||
+  article.image ||
+  "";
+
+const hasArticleImage =
+  /^https?:\/\//i.test(String(originalImage));
+
+const image = hasArticleImage
+  ? String(originalImage)
+  : "";
+
+const metaImage =
+  image || DEFAULT_ARTICLE_IMAGE;
 
   const canonical = `${site}/article/${encodeURIComponent(article.slug || slug)}`;
   const published = article.published_at || article.created_at || null;
@@ -173,9 +183,11 @@ export default async (request, context) => {
   // Fetch the actual article.html file to act as the template
   const templateResponse = await fetch(new URL("/article.html", request.url));
 
-  const metaImage = image || `${site}/icon-512.png`;
   const articleBoxHtml = `
-    ${image ? `<img class="art-hero" src="${esc(image)}" alt="${esc(title)}" itemprop="image" loading="eager">` : ""}
+    ${hasArticleImage
+  ? `<img class="art-hero" src="${esc(image)}" alt="${esc(title)}" itemprop="image" loading="eager">`
+  : ""
+}
     <div class="art-body">
       <a class="art-back" href="/">← वापस Homepage पर</a>
       <div class="art-cat">${esc(category)}</div>

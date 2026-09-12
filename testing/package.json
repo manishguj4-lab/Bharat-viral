@@ -22,5 +22,8 @@
     "@types/node": "^26.4.1",
     "tsx": "^4.23.13",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "html-rewriter-wasm": "^0.4.1"
   }
 }

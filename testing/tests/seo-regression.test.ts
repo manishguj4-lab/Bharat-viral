@@ -44,3 +44,31 @@ test("static HTML files contain standard favicon tags", () => {
     }
   }
 });
+
+test("Sitemaps handle fetch failures cleanly with 503 HTTP status", async () => {
+    // Assert 503 is returned if backend fetch fails
+    const module = await import("../../netlify/functions/sitemap.js");
+    const sitemapHandler = module.default;
+    const req = new Request("https://bharatviralnews.netlify.app/sitemap.xml");
+    const originalFetch = global.fetch;
+
+    global.fetch = async () => ({ ok: false, status: 500 });
+    const res = await sitemapHandler(req, {});
+    assert.equal(res.status, 503, "sitemap.js should return 503 upon fetch error");
+
+    global.fetch = originalFetch;
+});
+
+test("News Sitemaps handle fetch failures cleanly with 503 HTTP status", async () => {
+    // Assert 503 is returned if backend fetch fails
+    const module = await import("../../netlify/functions/news-sitemap.js");
+    const newsSitemapHandler = module.default;
+    const req = new Request("https://bharatviralnews.netlify.app/news-sitemap.xml");
+    const originalFetch = global.fetch;
+
+    global.fetch = async () => ({ ok: false, status: 500 });
+    const res = await newsSitemapHandler(req, {});
+    assert.equal(res.status, 503, "news-sitemap.js should return 503 upon fetch error");
+
+    global.fetch = originalFetch;
+});

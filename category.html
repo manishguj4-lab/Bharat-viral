@@ -2,109 +2,62 @@
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <title id="pageTitle">Bharat Viral - Category</title>
 
-  <meta
-    name="google-adsense-account"
-    content="ca-pub-5768457082251884"
-  >
-
-  <title id="pageTitle">
-    Bharat Viral - Category
-  </title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="stylesheet" href="/assets/css/global.css">
 
   <meta
     id="metaDescription"
     name="description"
-    content="Bharat Viral की प्रकाशित खबरें पढ़ें।"
+    content="Bharat Viral की प्रकाशित खबरें देखें।"
+  >
+
+  <link
+    id="canonical"
+    rel="canonical"
+    href="https://bharatviralnews.netlify.app/category.html"
   >
 
   <meta
     name="robots"
-    content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"
+    content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
   >
 
-  <meta name="author" content="Bharat Viral">
-
-  <meta
-    name="theme-color"
-    content="#df111b"
-  >
-
-  <link
-    rel="canonical"
-    id="canonical"
-    href="https://bharatviralnews.netlify.app/category.html?category=news"
-  >
-
-  <link rel="icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" href="/icon-192.png">
-  <link rel="apple-touch-icon" href="/icon-192.png">
-
-  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Bharat Viral">
-
-  <meta
-    property="og:title"
-    id="ogTitle"
-    content="Bharat Viral - Category"
-  >
-
+  <meta property="og:title" id="ogTitle" content="Bharat Viral - Category">
   <meta
     property="og:description"
     id="ogDescription"
-    content="Bharat Viral की प्रकाशित खबरें पढ़ें।"
+    content="Bharat Viral की प्रकाशित खबरें देखें।"
   >
-
   <meta
     property="og:url"
     id="ogUrl"
     content="https://bharatviralnews.netlify.app/category.html?category=news"
   >
-
   <meta
     property="og:image"
     id="ogImage"
     content="https://bharatviralnews.netlify.app/icon-512.png"
   >
 
-  <meta
-    property="og:locale"
-    content="hi_IN"
-  >
-
-  <!-- Twitter -->
-  <meta
-    name="twitter:card"
-    content="summary_large_image"
-  >
-
-  <meta
-    name="twitter:title"
-    id="twitterTitle"
-    content="Bharat Viral - Category"
-  >
-
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" id="twitterTitle" content="Bharat Viral - Category">
   <meta
     name="twitter:description"
     id="twitterDescription"
-    content="Bharat Viral की प्रकाशित खबरें पढ़ें।"
+    content="Bharat Viral की प्रकाशित खबरें देखें।"
   >
-
   <meta
     name="twitter:image"
     id="twitterImage"
     content="https://bharatviralnews.netlify.app/icon-512.png"
-  >
-
-  <link
-    rel="stylesheet"
-    href="/assets/css/global.css"
   >
 
   <script
@@ -114,14 +67,8 @@
   ></script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script src="/supabase-client.js"></script>
-
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.4.15/purify.min.js"
-    integrity=""
-    crossorigin="anonymous"
-  ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.4.15/purify.min.js"></script>
 </head>
 
 <body>
@@ -132,126 +79,688 @@
 
   <header class="cat-head">
     <div class="cat-headin">
-
       <div class="cat-brand">
         <h1>BHARAT VIRAL</h1>
         <p>जो वायरल है, उसकी सच्ची जानकारी</p>
       </div>
 
-      <button
-        class="cat-home"
-        id="homeButton"
-        type="button"
-        aria-label="Bharat Viral होम पेज पर जाएँ"
-      >
+      <button class="cat-home" onclick="location.href='/'">
         🏠 HOME
       </button>
-
     </div>
   </header>
 
   <main class="cat-wrap">
 
-    <nav
-      aria-label="Breadcrumb"
-      id="breadcrumb"
-      style="margin-bottom:15px;font-size:14px;"
-    >
-      <a href="/">Home</a>
-      <span aria-hidden="true"> › </span>
-      <span id="breadcrumbCurrent">News</span>
-    </nav>
-
-    <button
-      class="cat-back"
-      id="backButton"
-      type="button"
-    >
+    <button class="cat-back" onclick="history.back()">
       ← वापस
     </button>
 
-    <section
-      class="cat-title"
-      aria-labelledby="heading"
-    >
+    <div class="cat-title">
       <h2 id="heading">News</h2>
       <p id="sub">इस category की प्रकाशित खबरें</p>
-    </section>
+    </div>
 
-    <!-- Rashifal Date Picker -->
-    <section
+    <div
       id="rashifalPicker"
       style="display:none;background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:15px"
-      aria-label="राशिफल की तारीख चुनें"
     >
-
-      <label
-        for="rDay"
-        style="font-weight:700;font-size:13px"
-      >
+      <label style="font-weight:700;font-size:13px">
         राशिफल की तारीख चुनें
       </label>
 
       <div
         style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"
       >
-
         <select
           id="rDay"
-          aria-label="दिन"
           style="padding:9px;border:1px solid #ccc;border-radius:6px"
         ></select>
 
         <select
           id="rMonth"
-          aria-label="महीना"
           style="padding:9px;border:1px solid #ccc;border-radius:6px"
         ></select>
 
         <select
           id="rYear"
-          aria-label="वर्ष"
           style="padding:9px;border:1px solid #ccc;border-radius:6px"
         ></select>
 
-        <button
-          id="rGo"
-          class="cat-read"
-          type="button"
-        >
+        <button id="rGo" class="cat-read" type="button">
           देखें
         </button>
-
       </div>
-    </section>
+    </div>
 
-    <!-- Articles -->
-    <section
-      id="grid"
-      class="cat-grid"
-      aria-live="polite"
-      aria-busy="true"
-    >
-      <div
-        class="cat-loading"
-        role="status"
-      >
-        खबरें लोड हो रही हैं…
-      </div>
-    </section>
+    <div id="grid" class="cat-grid"></div>
 
-    <nav
+    <div
       id="pagination"
       class="cat-pagination"
       aria-label="Pagination"
-    ></nav>
+    ></div>
 
   </main>
+
+  <script>
+    'use strict';
+
+    const params = new URLSearchParams(location.search);
+
+    let wanted = (params.get('category') || 'news')
+      .toLowerCase()
+      .trim();
+
+    const PAGE_SIZE = 7;
+
+    let page = Math.max(
+      1,
+      parseInt(params.get('page') || '1', 10) || 1
+    );
+
+    let catalog = [];
+
+    const heading = document.getElementById('heading');
+    const sub = document.getElementById('sub');
+    const grid = document.getElementById('grid');
+    const pagination = document.getElementById('pagination');
+    const picker = document.getElementById('rashifalPicker');
+    const canonical = document.getElementById('canonical');
+    const meta = document.getElementById('metaDescription');
+
+    function getCategoryCanonicalUrl() {
+      return (
+        'https://bharatviralnews.netlify.app/category.html?category=' +
+        encodeURIComponent(wanted) +
+        (page > 1 ? '&page=' + page : '')
+      );
+    }
+
+    if (canonical) {
+      canonical.href = getCategoryCanonicalUrl();
+    }
+
+    function esc(v) {
+      return String(v ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      }[c]));
+    }
+
+    function loading(t) {
+      grid.innerHTML =
+        '<div class="cat-loading" role="status">' +
+        esc(t) +
+        '</div>';
+
+      pagination.innerHTML = '';
+    }
+
+    function failed(t) {
+      grid.innerHTML =
+        '<div class="cat-empty" role="alert">' +
+        esc(t) +
+        '</div>';
+
+      pagination.innerHTML = '';
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          apikey: window.SUPABASE_KEY,
+          Authorization: 'Bearer ' + window.SUPABASE_KEY,
+          ...(options.headers || {})
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('HTTP ' + response.status);
+      }
+
+      return response.json();
+    }
+
+    /*
+      Category names, icons and descriptions now come from Supabase.
+    */
+
+    async function loadCatalog() {
+      const rows = await fetchJson(
+        window.SUPABASE_URL +
+        '/rest/v1/rpc/get_active_categories',
+        {
+          cache: 'default'
+        }
+      );
+
+      catalog = Array.isArray(rows) ? rows : [];
+
+      if (!catalog.some(c => c.slug === wanted)) {
+        wanted = 'news';
+      }
+
+      const c =
+        catalog.find(x => x.slug === wanted) ||
+        catalog[0];
+
+      if (!c) {
+        throw new Error('No active categories configured');
+      }
+
+      heading.textContent =
+        (c.icon || '📰') + ' ' + c.name;
+
+      sub.textContent = c.description || '';
+
+      document.title = c.name + ' | Bharat Viral';
+
+      if (meta) {
+        meta.content = c.description || c.name;
+      }
+
+      const categoryUrl = getCategoryCanonicalUrl();
+
+      if (canonical) {
+        canonical.href = categoryUrl;
+      }
+
+      document
+        .getElementById('ogTitle')
+        ?.setAttribute(
+          'content',
+          c.name + ' | Bharat Viral'
+        );
+
+      document
+        .getElementById('ogDescription')
+        ?.setAttribute(
+          'content',
+          c.description || c.name
+        );
+
+      document
+        .getElementById('ogUrl')
+        ?.setAttribute(
+          'content',
+          categoryUrl
+        );
+
+      document
+        .getElementById('twitterTitle')
+        ?.setAttribute(
+          'content',
+          c.name + ' | Bharat Viral'
+        );
+
+      document
+        .getElementById('twitterDescription')
+        ?.setAttribute(
+          'content',
+          c.description || c.name
+        );
+
+      return c;
+    }
+
+    function imageMarkup(a) {
+      const url = a.image_url || '';
+      const title = esc(a.title || 'बड़ी खबर');
+
+      if (!url) {
+        return '';
+      }
+
+      return (
+        '<div class="cat-img">' +
+        '<img src="' + esc(url) + '"' +
+        ' alt="' + title + '"' +
+        ' loading="lazy"' +
+        ' decoding="async"' +
+        ' referrerpolicy="no-referrer"' +
+        ' onerror="this.onerror=null;' +
+        'this.closest(\\'.cat-img\\')?.classList.add(\\'img-error\\');' +
+        'this.remove();">' +
+        '</div>'
+      );
+    }
+
+    function card(a) {
+      const c = catalog.find(
+        x => x.slug === a.category_slug
+      );
+
+      const label = esc(
+        c
+          ? (c.icon || '') + ' ' + c.name
+          : a.category_slug || 'NEWS'
+      );
+
+      const title = esc(a.title || 'बड़ी खबर');
+
+      const articleUrl = a.slug
+        ? '/article/' + encodeURIComponent(a.slug)
+        : 'article.html?id=' + encodeURIComponent(a.id);
+
+      return (
+        '<article class="cat-card">' +
+        '<a class="cat-card-link" href="' +
+        articleUrl +
+        '" aria-label="' +
+        title +
+        '">' +
+
+        imageMarkup(a) +
+
+        '<div class="cat-body">' +
+        '<span class="cat-cat">' +
+        label +
+        '</span>' +
+
+        '<h3>' +
+        title +
+        '</h3>' +
+
+        '<p>' +
+        esc(a.excerpt || 'पूरी खबर पढ़ें') +
+        '</p>' +
+
+        '<span class="cat-read">पूरी खबर पढ़ें</span>' +
+
+        '</div>' +
+        '</a>' +
+        '</article>'
+      );
+    }
+
+    async function loadArticles() {
+      loading('खबरें लोड हो रही हैं…');
+
+      const rows = await fetchJson(
+        window.SUPABASE_URL +
+        '/rest/v1/rpc/get_category_articles',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            p_category: wanted,
+            p_limit: PAGE_SIZE,
+            p_offset: (page - 1) * PAGE_SIZE
+          }),
+          cache: 'no-store'
+        }
+      );
+
+      const list = Array.isArray(rows) ? rows : [];
+
+      const total = list.length
+        ? Number(list[0].total_count) || list.length
+        : 0;
+
+      grid.innerHTML =
+        list.map(card).join('') ||
+        '<div class="cat-empty">' +
+        'इस category में अभी कोई प्रकाशित खबर उपलब्ध नहीं है।' +
+        '</div>';
+
+      renderPagination(total);
+    }
+
+    function renderPagination(total) {
+      if (!total || total <= PAGE_SIZE) {
+        pagination.innerHTML = '';
+        return;
+      }
+
+      const pages = Math.ceil(total / PAGE_SIZE);
+
+      if (page > pages) {
+        location.replace(
+          'category.html?category=' +
+          encodeURIComponent(wanted) +
+          '&page=1'
+        );
+
+        return;
+      }
+
+      let from = Math.max(1, page - 2);
+      let to = Math.min(pages, from + 4);
+
+      if (to - from + 1 < 5) {
+        from = Math.max(1, to - 4);
+      }
+
+      const make = (p, label, c = '') =>
+        '<a class="' +
+        c +
+        '" href="category.html?category=' +
+        encodeURIComponent(wanted) +
+        '&page=' +
+        p +
+        '">' +
+        label +
+        '</a>';
+
+      let html =
+        page > 1
+          ? make(page - 1, '‹ पिछला', 'next')
+          : '';
+
+      if (from > 1) {
+        html += make(1, '1');
+      }
+
+      if (from > 2) {
+        html += '<span aria-hidden="true">…</span>';
+      }
+
+      for (let p = from; p <= to; p++) {
+        html +=
+          p === page
+            ? '<span class="active" aria-current="page">' +
+              p +
+              '</span>'
+            : make(p, p);
+      }
+
+      if (to < pages - 1) {
+        html += '<span aria-hidden="true">…</span>';
+      }
+
+      if (to < pages) {
+        html += make(pages, pages);
+      }
+
+      if (page < pages) {
+        html += make(page + 1, 'अगला ›', 'next');
+      }
+
+      html +=
+        '<div class="cat-page-note" style="flex-basis:100%">' +
+        'पेज ' +
+        page +
+        ' / ' +
+        pages +
+        '</div>';
+
+      pagination.innerHTML = html;
+    }
+
+    /*
+      Rashifal is also served through a Supabase RPC.
+    */
+
+    let rashifalController = null;
+
+    function populateDays() {
+      const d = document.getElementById('rDay');
+      const m = document.getElementById('rMonth');
+      const y = document.getElementById('rYear');
+
+      const old = Number(d.value) || new Date().getDate();
+
+      const max = new Date(
+        Number(y.value),
+        Number(m.value),
+        0
+      ).getDate();
+
+      let html = '';
+
+      for (let i = 1; i <= max; i++) {
+        html +=
+          '<option value="' +
+          String(i).padStart(2, '0') +
+          '">' +
+          i +
+          '</option>';
+      }
+
+      d.innerHTML = html;
+
+      d.value = String(
+        Math.min(old, max)
+      ).padStart(2, '0');
+    }
+
+    function setupRashifal() {
+      picker.style.display = 'block';
+
+      const now = new Date();
+
+      const d = document.getElementById('rDay');
+      const m = document.getElementById('rMonth');
+      const y = document.getElementById('rYear');
+
+      let monthHtml = '';
+      let yearHtml = '';
+
+      for (let i = 1; i <= 12; i++) {
+        monthHtml +=
+          '<option value="' +
+          String(i).padStart(2, '0') +
+          '">' +
+          i +
+          '</option>';
+      }
+
+      for (
+        let i = now.getFullYear();
+        i >= now.getFullYear() - 10;
+        i--
+      ) {
+        yearHtml +=
+          '<option value="' +
+          i +
+          '">' +
+          i +
+          '</option>';
+      }
+
+      m.innerHTML = monthHtml;
+      y.innerHTML = yearHtml;
+
+      m.value = String(
+        now.getMonth() + 1
+      ).padStart(2, '0');
+
+      y.value = String(
+        now.getFullYear()
+      );
+
+      populateDays();
+
+      d.value = String(
+        now.getDate()
+      ).padStart(2, '0');
+
+      m.addEventListener('change', populateDays);
+      y.addEventListener('change', populateDays);
+
+      document
+        .getElementById('rGo')
+        .addEventListener('click', loadRashifal);
+    }
+
+    function safeRichText(v) {
+      let raw = String(v ?? '')
+        .trim()
+        .replace(
+          /^\s\x60\x60\x60(?:html|HTML)?\s*/,
+          ''
+        )
+        .replace(
+          /\s*\x60\x60\x60$/,
+          ''
+        )
+        .trim();
+
+      if (
+        /<\/?(?:h[3-5]|p|strong|b|em|i|ul|ol|li|br|blockquote)\b/i.test(raw)
+      ) {
+        const textarea = document.createElement('textarea');
+
+        textarea.innerHTML = raw;
+        raw = textarea.value;
+      }
+
+      if (window.DOMPurify) {
+        return window.DOMPurify.sanitize(raw, {
+          ALLOWED_TAGS: [
+            'h3',
+            'h4',
+            'h5',
+            'p',
+            'br',
+            'strong',
+            'b',
+            'em',
+            'i',
+            'ul',
+            'ol',
+            'li',
+            'blockquote'
+          ]
+        });
+      }
+
+      return String(raw ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      }[c]));
+    }
+
+    async function loadRashifal() {
+      if (rashifalController) {
+        rashifalController.abort();
+      }
+
+      rashifalController = new AbortController();
+
+      const y = Number(
+        document.getElementById('rYear').value
+      );
+
+      const m = Number(
+        document.getElementById('rMonth').value
+      );
+
+      const d = Number(
+        document.getElementById('rDay').value
+      );
+
+      const date =
+        y +
+        '-' +
+        String(m).padStart(2, '0') +
+        '-' +
+        String(d).padStart(2, '0');
+
+      loading('राशिफल लोड हो रहा है…');
+
+      try {
+        const rows = await fetchJson(
+          window.SUPABASE_URL +
+          '/rest/v1/rpc/get_daily_rashifal',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              p_date: date
+            }),
+            cache: 'default',
+            signal: rashifalController.signal
+          }
+        );
+
+        grid.innerHTML =
+          (Array.isArray(rows) ? rows : [])
+            .map(a =>
+              '<article class="cat-card">' +
+              '<div class="cat-body">' +
+
+              '<span class="cat-cat">🌙 राशिफल</span>' +
+
+              '<h3>' +
+              esc(a.title || a.rashi || 'राशिफल') +
+              '</h3>' +
+
+              '<div class="cat-rashifal-content">' +
+              safeRichText(a.content) +
+              '</div>' +
+
+              (
+                a.source_name
+                  ? '<p style="font-size:11px;color:#777;min-height:0">' +
+                    'स्रोत: ' +
+                    esc(a.source_name) +
+                    '</p>'
+                  : ''
+              ) +
+
+              '</div>' +
+              '</article>'
+            )
+            .join('') ||
+
+          '<div class="cat-empty">' +
+          'इस तारीख का राशिफल उपलब्ध नहीं है।' +
+          '</div>';
+
+        pagination.innerHTML = '';
+
+      } catch (e) {
+        if (e.name !== 'AbortError') {
+          console.error(e);
+
+          failed(
+            'राशिफल लोड नहीं हो पाया। कृपया थोड़ी देर बाद फिर प्रयास करें।'
+          );
+        }
+      }
+    }
+
+    async function init() {
+      loading('लोड हो रहा है…');
+
+      try {
+        const c = await loadCatalog();
+
+        if (c.slug === 'rashifal') {
+          setupRashifal();
+          await loadRashifal();
+        } else {
+          await loadArticles();
+        }
+
+      } catch (e) {
+        console.error(e);
+
+        failed(
+          'डेटा लोड नहीं हो पाया। कृपया थोड़ी देर बाद फिर प्रयास करें।'
+        );
+      }
+    }
+
+    init();
+  </script>
 
   <footer
     style="margin-top:40px;background:#f8f9fa;padding:30px 20px;border-top:1px solid #eaeaea;text-align:center;"
   >
-
     <div style="max-width:900px;margin:auto;">
 
       <h3
@@ -270,1233 +779,108 @@
       <div
         style="display:flex;flex-wrap:wrap;justify-content:center;gap:15px;margin-bottom:20px;"
       >
-
         <a href="/" style="color:#00AEEF;font-weight:bold;text-decoration:none;">
           Home
         </a>
 
-        <a href="/category.html?category=news" style="color:#00AEEF;font-weight:bold;text-decoration:none;">
+        <a
+          href="/category.html?category=news"
+          style="color:#00AEEF;font-weight:bold;text-decoration:none;"
+        >
           News
         </a>
 
-        <a href="/category.html?category=fact-check" style="color:#00AEEF;font-weight:bold;text-decoration:none;">
+        <a
+          href="/category.html?category=fact-check"
+          style="color:#00AEEF;font-weight:bold;text-decoration:none;"
+        >
           Fact Check
         </a>
 
-        <a href="/category.html?category=tech-education" style="color:#00AEEF;font-weight:bold;text-decoration:none;">
-          Tech & Education
+        <a
+          href="/category.html?category=tech-education"
+          style="color:#00AEEF;font-weight:bold;text-decoration:none;"
+        >
+          Tech &amp; Education
         </a>
-
       </div>
 
       <div
         style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;font-size:12px;"
       >
+        <a href="/about.html" style="color:#777;text-decoration:none;">
+          About Us
+        </a>
 
-        <a href="/about.html" style="color:#777;text-decoration:none;">About Us</a>
-        <span>|</span>
+        |
 
-        <a href="/contact.html" style="color:#777;text-decoration:none;">Contact Us</a>
-        <span>|</span>
+        <a href="/contact.html" style="color:#777;text-decoration:none;">
+          Contact Us
+        </a>
 
-        <a href="/privacy-policy.html" style="color:#777;text-decoration:none;">Privacy Policy</a>
-        <span>|</span>
+        |
 
-        <a href="/disclaimer.html" style="color:#777;text-decoration:none;">Disclaimer</a>
-        <span>|</span>
+        <a
+          href="/privacy-policy.html"
+          style="color:#777;text-decoration:none;"
+        >
+          Privacy Policy
+        </a>
 
-        <a href="/terms.html" style="color:#777;text-decoration:none;">Terms & Conditions</a>
-        <span>|</span>
+        |
 
-        <a href="/editorial-policy.html" style="color:#777;text-decoration:none;">Editorial Policy</a>
-        <span>|</span>
+        <a
+          href="/disclaimer.html"
+          style="color:#777;text-decoration:none;"
+        >
+          Disclaimer
+        </a>
 
-        <a href="/fact-check-policy.html" style="color:#777;text-decoration:none;">Fact Check Policy</a>
-        <span>|</span>
+        |
 
-        <a href="/corrections-policy.html" style="color:#777;text-decoration:none;">Corrections Policy</a>
-        <span>|</span>
+        <a href="/terms.html" style="color:#777;text-decoration:none;">
+          Terms &amp; Conditions
+        </a>
 
-        <a href="/grievance-policy.html" style="color:#777;text-decoration:none;">Grievance Policy</a>
+        |
 
+        <a
+          href="/editorial-policy.html"
+          style="color:#777;text-decoration:none;"
+        >
+          Editorial Policy
+        </a>
+
+        |
+
+        <a
+          href="/fact-check-policy.html"
+          style="color:#777;text-decoration:none;"
+        >
+          Fact Check Policy
+        </a>
+
+        |
+
+        <a
+          href="/corrections-policy.html"
+          style="color:#777;text-decoration:none;"
+        >
+          Corrections Policy
+        </a>
+
+        |
+
+        <a
+          href="/grievance-policy.html"
+          style="color:#777;text-decoration:none;"
+        >
+          Grievance Policy
+        </a>
       </div>
 
     </div>
-
   </footer>
-
-  <!-- Structured Data -->
-  <script
-    type="application/ld+json"
-    id="structuredData"
-  >
-  {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "Bharat Viral",
-    "url": "https://bharatviralnews.netlify.app/category.html?category=news",
-    "inLanguage": "hi-IN",
-    "isPartOf": {
-      "@type": "WebSite",
-      "name": "Bharat Viral",
-      "url": "https://bharatviralnews.netlify.app/"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Bharat Viral",
-      "url": "https://bharatviralnews.netlify.app/"
-    }
-  }
-  </script>
-
-  <script>
-  'use strict';
-
-  /*
-   * BHARAT VIRAL
-   * Category Page - Production-Oriented Version
-   *
-   * Required Supabase RPC functions:
-   * 1. get_active_categories()
-   * 2. get_category_articles(p_category, p_limit, p_offset)
-   * 3. get_daily_rashifal(p_date)
-   */
-
-  const SITE_URL = 'https://bharatviralnews.netlify.app';
-
-  const PAGE_SIZE = 7;
-
-  const MAX_REQUEST_TIME = 15000;
-
-  const params = new URLSearchParams(location.search);
-
-  let wanted = String(
-    params.get('category') || 'news'
-  ).toLowerCase().trim();
-
-  let page = Math.max(
-    1,
-    Math.min(
-      100000,
-      parseInt(params.get('page') || '1', 10) || 1
-    )
-  );
-
-  let catalog = [];
-
-  let currentCategory = null;
-
-  let articleRequestController = null;
-
-  let rashifalController = null;
-
-  let isLoading = false;
-
-  const heading = document.getElementById('heading');
-  const sub = document.getElementById('sub');
-  const grid = document.getElementById('grid');
-  const pagination = document.getElementById('pagination');
-  const picker = document.getElementById('rashifalPicker');
-  const canonical = document.getElementById('canonical');
-  const meta = document.getElementById('metaDescription');
-  const breadcrumbCurrent = document.getElementById('breadcrumbCurrent');
-  const structuredData = document.getElementById('structuredData');
-
-  /*
-   * Basic HTML escaping.
-   * सभी database values को HTML में डालने से पहले escape किया जाता है।
-   */
-  function esc(value) {
-    return String(value ?? '').replace(
-      /[&<>"']/g,
-      function(char) {
-        return {
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#039;'
-        }[char];
-      }
-    );
-  }
-
-  /*
-   * Safe URL handling.
-   * केवल http/https images को allow किया जाता है।
-   */
-  function safeImageUrl(value) {
-    const raw = String(value || '').trim();
-
-    if (!raw) return '';
-
-    try {
-      const url = new URL(raw, SITE_URL);
-
-      if (
-        url.protocol !== 'https:' &&
-        url.protocol !== 'http:'
-      ) {
-        return '';
-      }
-
-      return url.href;
-    } catch {
-      return '';
-    }
-  }
-
-  /*
-   * Safe internal article URL.
-   */
-  function articleUrl(article) {
-    const id = String(article?.id || '').trim();
-
-    const slug = String(article?.slug || '').trim();
-
-    if (
-      slug &&
-      /^[a-zA-Z0-9._~-]+$/.test(slug)
-    ) {
-      return '/article/' + encodeURIComponent(slug);
-    }
-
-    if (id) {
-      return '/article.html?id=' + encodeURIComponent(id);
-    }
-
-    return '/';
-  }
-
-  /*
-   * Category canonical URL.
-   */
-  function getCategoryCanonicalUrl() {
-    const url =
-      SITE_URL +
-      '/category.html?category=' +
-      encodeURIComponent(wanted);
-
-    return page > 1
-      ? url + '&page=' + page
-      : url;
-  }
-
-  /*
-   * Update SEO metadata.
-   */
-  function updateSEO(category) {
-    const name = String(
-      category?.name || wanted || 'News'
-    ).trim();
-
-    const description = String(
-      category?.description ||
-      'Bharat Viral की प्रकाशित खबरें पढ़ें।'
-    ).trim();
-
-    const url = getCategoryCanonicalUrl();
-
-    document.title = name + ' | Bharat Viral';
-
-    if (meta) {
-      meta.setAttribute('content', description);
-    }
-
-    if (canonical) {
-      canonical.href = url;
-    }
-
-    const ogTitle = document.getElementById('ogTitle');
-    const ogDescription = document.getElementById('ogDescription');
-    const ogUrl = document.getElementById('ogUrl');
-
-    const twitterTitle = document.getElementById('twitterTitle');
-    const twitterDescription = document.getElementById('twitterDescription');
-
-    if (ogTitle) {
-      ogTitle.setAttribute('content', name + ' | Bharat Viral');
-    }
-
-    if (ogDescription) {
-      ogDescription.setAttribute('content', description);
-    }
-
-    if (ogUrl) {
-      ogUrl.setAttribute('content', url);
-    }
-
-    if (twitterTitle) {
-      twitterTitle.setAttribute('content', name + ' | Bharat Viral');
-    }
-
-    if (twitterDescription) {
-      twitterDescription.setAttribute('content', description);
-    }
-
-    if (breadcrumbCurrent) {
-      breadcrumbCurrent.textContent = name;
-    }
-
-    /*
-     * Breadcrumb structured data.
-     */
-    const breadcrumbSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        {
-          '@type': 'ListItem',
-          position: 1,
-          name: 'Home',
-          item: SITE_URL + '/'
-        },
-        {
-          '@type': 'ListItem',
-          position: 2,
-          name: name,
-          item: url
-        }
-      ]
-    };
-
-    /*
-     * Existing CollectionPage schema को update करते हैं।
-     */
-    const collectionSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'CollectionPage',
-      name: name + ' | Bharat Viral',
-      description: description,
-      url: url,
-      inLanguage: 'hi-IN',
-      isPartOf: {
-        '@type': 'WebSite',
-        name: 'Bharat Viral',
-        url: SITE_URL + '/'
-      },
-      publisher: {
-        '@type': 'Organization',
-        name: 'Bharat Viral',
-        url: SITE_URL + '/'
-      }
-    };
-
-    if (structuredData) {
-      structuredData.textContent = JSON.stringify([
-        collectionSchema,
-        breadcrumbSchema
-      ]);
-    }
-  }
-
-  /*
-   * Loading state.
-   */
-  function loading(message) {
-    grid.setAttribute('aria-busy', 'true');
-
-    grid.innerHTML =
-      '<div class="cat-loading" role="status">' +
-      esc(message) +
-      '</div>';
-
-    pagination.innerHTML = '';
-  }
-
-  /*
-   * Error state.
-   */
-  function failed(message) {
-    grid.setAttribute('aria-busy', 'false');
-
-    grid.innerHTML =
-      '<div class="cat-empty" role="alert">' +
-      esc(message) +
-      '</div>';
-
-    pagination.innerHTML = '';
-  }
-
-  /*
-   * Request timeout.
-   */
-  function timeoutSignal(milliseconds) {
-    const controller = new AbortController();
-
-    const timer = setTimeout(
-      () => controller.abort(),
-      milliseconds
-    );
-
-    return {
-      signal: controller.signal,
-      clear: () => clearTimeout(timer)
-    };
-  }
-
-  /*
-   * Supabase REST request.
-   */
-  async function fetchJson(url, options = {}) {
-    if (
-      !window.SUPABASE_URL ||
-      !window.SUPABASE_KEY
-    ) {
-      throw new Error(
-        'Supabase configuration missing'
-      );
-    }
-
-    const request = timeoutSignal(MAX_REQUEST_TIME);
-
-    const headers = {
-      apikey: window.SUPABASE_KEY,
-      Authorization: 'Bearer ' + window.SUPABASE_KEY,
-      Accept: 'application/json',
-      ...(options.headers || {})
-    };
-
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-        signal: options.signal || request.signal
-      });
-
-      const text = await response.text();
-
-      let data = null;
-
-      try {
-        data = text ? JSON.parse(text) : null;
-      } catch {
-        throw new Error(
-          'Supabase ने invalid JSON response दिया'
-        );
-      }
-
-      if (!response.ok) {
-        console.error(
-          'Supabase API Error:',
-          response.status,
-          data
-        );
-
-        throw new Error(
-          data?.message ||
-          data?.error_description ||
-          data?.hint ||
-          'HTTP ' + response.status
-        );
-      }
-
-      return data;
-
-    } finally {
-      request.clear();
-    }
-  }
-
-  /*
-   * Load active categories.
-   */
-  async function loadCatalog() {
-    const rows = await fetchJson(
-      window.SUPABASE_URL +
-      '/rest/v1/rpc/get_active_categories',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({}),
-        cache: 'no-store'
-      }
-    );
-
-    catalog = Array.isArray(rows)
-      ? rows
-      : [];
-
-    /*
-     * Category slug को normalize करते हैं।
-     */
-    catalog = catalog
-      .filter(item => item && item.slug)
-      .map(item => ({
-        ...item,
-        slug: String(item.slug).toLowerCase().trim()
-      }));
-
-    let selected = catalog.find(
-      item => item.slug === wanted
-    );
-
-    /*
-     * Invalid category होने पर News fallback।
-     */
-    if (!selected) {
-      wanted = 'news';
-
-      selected = catalog.find(
-        item => item.slug === 'news'
-      );
-    }
-
-    if (!selected) {
-      throw new Error(
-        'News category उपलब्ध नहीं है'
-      );
-    }
-
-    currentCategory = selected;
-
-    heading.textContent =
-      (selected.icon || '📰') +
-      ' ' +
-      (selected.name || wanted);
-
-    sub.textContent =
-      selected.description ||
-      'इस category की प्रकाशित खबरें';
-
-    updateSEO(selected);
-
-    return selected;
-  }
-
-  /*
-   * Image markup.
-   *
-   * पुराने code की समस्या:
-   * this.closest('.img')
-   *
-   * अब कोई गलत .img selector नहीं है।
-   */
-  function imageMarkup(article) {
-    const url = safeImageUrl(article?.image_url);
-
-    const title = esc(
-      article?.title || 'बड़ी खबर'
-    );
-
-    if (!url) {
-      return '';
-    }
-
-    return (
-      '<div class="cat-img">' +
-        '<img' +
-          ' src="' + esc(url) + '"' +
-          ' alt="' + title + '"' +
-          ' loading="lazy"' +
-          ' decoding="async"' +
-          ' referrerpolicy="no-referrer"' +
-          ' width="640"' +
-          ' height="360"' +
-          ' data-image-fallback="true"' +
-        '>' +
-      '</div>'
-    );
-  }
-
-  /*
-   * Article card.
-   */
-  function card(article) {
-    const category = catalog.find(
-      item =>
-        item.slug ===
-        String(article?.category_slug || '')
-          .toLowerCase()
-          .trim()
-    );
-
-    const label = esc(
-      category
-        ? (category.icon || '') + ' ' + category.name
-        : article?.category_slug || 'NEWS'
-    );
-
-    const title = esc(
-      article?.title || 'बड़ी खबर'
-    );
-
-    const excerpt = esc(
-      article?.excerpt || 'पूरी खबर पढ़ें'
-    );
-
-    const url = esc(articleUrl(article));
-
-    return (
-      '<article class="cat-card">' +
-
-        '<a' +
-          ' class="cat-card-link"' +
-          ' href="' + url + '"' +
-          ' aria-label="' + title + '"' +
-        '>' +
-
-          imageMarkup(article) +
-
-          '<div class="cat-body">' +
-
-            '<span class="cat-cat">' +
-              label +
-            '</span>' +
-
-            '<h3>' +
-              title +
-            '</h3>' +
-
-            '<p>' +
-              excerpt +
-            '</p>' +
-
-            '<span class="cat-read">' +
-              'पूरी खबर पढ़ें' +
-            '</span>' +
-
-          '</div>' +
-
-        '</a>' +
-
-      '</article>'
-    );
-  }
-
-  /*
-   * Image error handling.
-   *
-   * Event delegation का उपयोग किया गया है।
-   * Inline onerror की जरूरत नहीं है।
-   */
-  grid.addEventListener(
-    'error',
-    function(event) {
-      const image = event.target;
-
-      if (
-        !image ||
-        image.tagName !== 'IMG' ||
-        image.dataset.imageFallback !== 'true'
-      ) {
-        return;
-      }
-
-      image.dataset.imageFallback = 'handled';
-
-      const wrapper = image.closest('.cat-img');
-
-      if (wrapper) {
-        wrapper.classList.add('img-error');
-      }
-
-      image.remove();
-    },
-    true
-  );
-
-  /*
-   * Load articles.
-   */
-  async function loadArticles() {
-    if (articleRequestController) {
-      articleRequestController.abort();
-    }
-
-    articleRequestController = new AbortController();
-
-    loading('खबरें लोड हो रही हैं…');
-
-    try {
-      const rows = await fetchJson(
-        window.SUPABASE_URL +
-        '/rest/v1/rpc/get_category_articles',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            p_category: wanted,
-            p_limit: PAGE_SIZE,
-            p_offset: (page - 1) * PAGE_SIZE
-          }),
-          cache: 'no-store',
-          signal: articleRequestController.signal
-        }
-      );
-
-      const list = Array.isArray(rows)
-        ? rows
-        : [];
-
-      const total = list.length
-        ? Number(list[0].total_count) || list.length
-        : 0;
-
-      /*
-       * Empty result.
-       */
-      if (!list.length) {
-        grid.setAttribute('aria-busy', 'false');
-
-        grid.innerHTML =
-          '<div class="cat-empty">' +
-          'इस category में अभी कोई प्रकाशित खबर उपलब्ध नहीं है।' +
-          '</div>';
-
-        pagination.innerHTML = '';
-
-        return;
-      }
-
-      /*
-       * Render cards.
-       */
-      grid.innerHTML = list
-        .map(card)
-        .join('');
-
-      grid.setAttribute('aria-busy', 'false');
-
-      renderPagination(total);
-
-      updateArticleStructuredData(list);
-
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        return;
-      }
-
-      console.error(
-        'Articles loading failed:',
-        error
-      );
-
-      failed(
-        'खबरें लोड नहीं हो पाईं। कृपया थोड़ी देर बाद फिर प्रयास करें।'
-      );
-    }
-  }
-
-  /*
-   * Article ItemList structured data.
-   *
-   * ध्यान दें:
-   * यह article pages के NewsArticle schema का replacement नहीं है।
-   */
-  function updateArticleStructuredData(list) {
-    if (!structuredData) return;
-
-    const categoryName =
-      currentCategory?.name || wanted;
-
-    const itemList = list.map(
-      (article, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        name: String(article?.title || ''),
-        url: SITE_URL + articleUrl(article)
-      })
-    );
-
-    const schema = {
-      '@context': 'https://schema.org',
-      '@type': 'CollectionPage',
-      name: categoryName + ' | Bharat Viral',
-      url: getCategoryCanonicalUrl(),
-      inLanguage: 'hi-IN',
-      mainEntity: {
-        '@type': 'ItemList',
-        itemListElement: itemList
-      },
-      isPartOf: {
-        '@type': 'WebSite',
-        name: 'Bharat Viral',
-        url: SITE_URL + '/'
-      }
-    };
-
-    structuredData.textContent =
-      JSON.stringify(schema);
-  }
-
-  /*
-   * Pagination.
-   */
-  function renderPagination(total) {
-    pagination.innerHTML = '';
-
-    if (
-      !total ||
-      total <= PAGE_SIZE
-    ) {
-      return;
-    }
-
-    const pages = Math.ceil(
-      total / PAGE_SIZE
-    );
-
-    if (page > pages) {
-      const url =
-        'category.html?category=' +
-        encodeURIComponent(wanted) +
-        '&page=1';
-
-      location.replace(url);
-
-      return;
-    }
-
-    let from = Math.max(1, page - 2);
-
-    let to = Math.min(
-      pages,
-      from + 4
-    );
-
-    if (to - from + 1 < 5) {
-      from = Math.max(
-        1,
-        to - 4
-      );
-    }
-
-    function makeLink(number, label, className = '') {
-      return (
-        '<a' +
-          ' class="' + esc(className) + '"' +
-          ' href="category.html?category=' +
-          encodeURIComponent(wanted) +
-          '&page=' +
-          number +
-        '">' +
-          esc(label) +
-        '</a>'
-      );
-    }
-
-    let html = '';
-
-    if (page > 1) {
-      html += makeLink(
-        page - 1,
-        '‹ पिछला',
-        'next'
-      );
-    }
-
-    if (from > 1) {
-      html += makeLink(1, '1');
-    }
-
-    if (from > 2) {
-      html += '<span aria-hidden="true">…</span>';
-    }
-
-    for (
-      let number = from;
-      number <= to;
-      number++
-    ) {
-      if (number === page) {
-        html +=
-          '<span class="active" aria-current="page">' +
-          number +
-          '</span>';
-      } else {
-        html += makeLink(
-          number,
-          String(number)
-        );
-      }
-    }
-
-    if (to < pages - 1) {
-      html += '<span aria-hidden="true">…</span>';
-    }
-
-    if (to < pages) {
-      html += makeLink(
-        pages,
-        String(pages)
-      );
-    }
-
-    if (page < pages) {
-      html += makeLink(
-        page + 1,
-        'अगला ›',
-        'next'
-      );
-    }
-
-    html +=
-      '<div class="cat-page-note" style="flex-basis:100%">' +
-      'पेज ' + page + ' / ' + pages +
-      '</div>';
-
-    pagination.innerHTML = html;
-  }
-
-  /*
-   * Rashifal day options.
-   */
-  function populateDays() {
-    const day = document.getElementById('rDay');
-    const month = document.getElementById('rMonth');
-    const year = document.getElementById('rYear');
-
-    if (!day || !month || !year) return;
-
-    const old =
-      Number(day.value) ||
-      new Date().getDate();
-
-    const selectedYear =
-      Number(year.value) ||
-      new Date().getFullYear();
-
-    const selectedMonth =
-      Number(month.value) ||
-      new Date().getMonth() + 1;
-
-    const max = new Date(
-      selectedYear,
-      selectedMonth,
-      0
-    ).getDate();
-
-    let html = '';
-
-    for (
-      let i = 1;
-      i <= max;
-      i++
-    ) {
-      const value = String(i).padStart(2, '0');
-
-      html +=
-        '<option value="' +
-        value +
-        '">' +
-        i +
-        '</option>';
-    }
-
-    day.innerHTML = html;
-
-    day.value = String(
-      Math.min(old, max)
-    ).padStart(2, '0');
-  }
-
-  /*
-   * Rashifal setup.
-   */
-  function setupRashifal() {
-    picker.style.display = 'block';
-
-    const now = new Date();
-
-    const day = document.getElementById('rDay');
-    const month = document.getElementById('rMonth');
-    const year = document.getElementById('rYear');
-
-    let monthHTML = '';
-    let yearHTML = '';
-
-    for (let i = 1; i <= 12; i++) {
-      const value = String(i).padStart(2, '0');
-
-      monthHTML +=
-        '<option value="' +
-        value +
-        '">' +
-        i +
-        '</option>';
-    }
-
-    for (
-      let i = now.getFullYear();
-      i >= now.getFullYear() - 10;
-      i--
-    ) {
-      yearHTML +=
-        '<option value="' +
-        i +
-        '">' +
-        i +
-        '</option>';
-    }
-
-    month.innerHTML = monthHTML;
-    year.innerHTML = yearHTML;
-
-    month.value = String(
-      now.getMonth() + 1
-    ).padStart(2, '0');
-
-    year.value = String(
-      now.getFullYear()
-    );
-
-    populateDays();
-
-    day.value = String(
-      now.getDate()
-    ).padStart(2, '0');
-
-    month.addEventListener(
-      'change',
-      populateDays
-    );
-
-    year.addEventListener(
-      'change',
-      populateDays
-    );
-
-    document
-      .getElementById('rGo')
-      .addEventListener(
-        'click',
-        loadRashifal
-      );
-  }
-
-  /*
-   * Safe rich text for Rashifal.
-   */
-  function safeRichText(value) {
-    let raw = String(value ?? '')
-      .trim()
-      .replace(
-        /^\s*```(?:html|HTML)?\s*/,
-        ''
-      )
-      .replace(
-        /\s*```\s*$/,
-        ''
-      )
-      .trim();
-
-    if (
-      window.DOMPurify
-    ) {
-      return window.DOMPurify.sanitize(
-        raw,
-        {
-          ALLOWED_TAGS: [
-            'h3',
-            'h4',
-            'h5',
-            'p',
-            'br',
-            'strong',
-            'b',
-            'em',
-            'i',
-            'ul',
-            'ol',
-            'li',
-            'blockquote'
-          ],
-          ALLOWED_ATTR: []
-        }
-      );
-    }
-
-    return esc(raw);
-  }
-
-  /*
-   * Load Rashifal.
-   */
-  async function loadRashifal() {
-    if (rashifalController) {
-      rashifalController.abort();
-    }
-
-    rashifalController =
-      new AbortController();
-
-    const year = Number(
-      document.getElementById('rYear').value
-    );
-
-    const month = Number(
-      document.getElementById('rMonth').value
-    );
-
-    const day = Number(
-      document.getElementById('rDay').value
-    );
-
-    const date =
-      year +
-      '-' +
-      String(month).padStart(2, '0') +
-      '-' +
-      String(day).padStart(2, '0');
-
-    loading('राशिफल लोड हो रहा है…');
-
-    try {
-      const rows = await fetchJson(
-        window.SUPABASE_URL +
-        '/rest/v1/rpc/get_daily_rashifal',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            p_date: date
-          }),
-          cache: 'no-store',
-          signal: rashifalController.signal
-        }
-      );
-
-      const list = Array.isArray(rows)
-        ? rows
-        : [];
-
-      grid.innerHTML = list
-        .map(article =>
-          '<article class="cat-card">' +
-
-            '<div class="cat-body">' +
-
-              '<span class="cat-cat">🌙 राशिफल</span>' +
-
-              '<h3>' +
-                esc(
-                  article.title ||
-                  article.rashi ||
-                  'राशिफल'
-                ) +
-              '</h3>' +
-
-              '<div class="cat-rashifal-content">' +
-                safeRichText(article.content) +
-              '</div>' +
-
-              (
-                article.source_name
-                  ? '<p style="font-size:11px;color:#777;min-height:0">' +
-                    'स्रोत: ' +
-                    esc(article.source_name) +
-                    '</p>'
-                  : ''
-              ) +
-
-            '</div>' +
-
-          '</article>'
-        )
-        .join('');
-
-      if (!list.length) {
-        grid.innerHTML =
-          '<div class="cat-empty">' +
-          'इस तारीख का राशिफल उपलब्ध नहीं है।' +
-          '</div>';
-      }
-
-      grid.setAttribute('aria-busy', 'false');
-
-      pagination.innerHTML = '';
-
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        return;
-      }
-
-      console.error(
-        'Rashifal loading failed:',
-        error
-      );
-
-      failed(
-        'राशिफल लोड नहीं हो पाया। कृपया थोड़ी देर बाद फिर प्रयास करें।'
-      );
-    }
-  }
-
-  /*
-   * Initialize page.
-   */
-  async function init() {
-    if (isLoading) return;
-
-    isLoading = true;
-
-    loading('लोड हो रहा है…');
-
-    try {
-      const category = await loadCatalog();
-
-      if (
-        category.slug === 'rashifal'
-      ) {
-        setupRashifal();
-        await loadRashifal();
-      } else {
-        await loadArticles();
-      }
-
-    } catch (error) {
-      console.error(
-        'Category initialization failed:',
-        error
-      );
-
-      failed(
-        'डेटा लोड नहीं हो पाया। कृपया थोड़ी देर बाद फिर प्रयास करें।'
-      );
-
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  /*
-   * Navigation.
-   */
-  document
-    .getElementById('homeButton')
-    .addEventListener(
-      'click',
-      () => {
-        location.href = '/';
-      }
-    );
-
-  document
-    .getElementById('backButton')
-    .addEventListener(
-      'click',
-      () => {
-        if (history.length > 1) {
-          history.back();
-        } else {
-          location.href = '/';
-        }
-      }
-    );
-
-  /*
-   * Start.
-   */
-  init();
-
-  </script>
 
 </body>
 </html>

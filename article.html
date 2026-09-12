@@ -247,12 +247,17 @@ function setupSEO(a){
    : String(tagsRaw||'').split(/[,|\n]+/).map(x=>x.trim()).filter(Boolean);
 
  document.title=title+' | Bharat Viral';
- document.querySelector('meta[name="robots"]')?.setAttribute(
-   'content',
-   String(a.status||'').toLowerCase()==='published'
-     ? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
-     : 'noindex, follow'
- );
+ const isPublished =
+  String(a.status || '').toLowerCase() === 'published';
+
+document
+  .querySelector('meta[name="robots"]')
+  ?.setAttribute(
+    'content',
+    isPublished
+      ? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+      : 'noindex, follow'
+  );
  document.getElementById('metaDescription')?.setAttribute('content',String(description).substring(0,160));
  document.getElementById('canonicalUrl')?.setAttribute('href',url);
  document.getElementById('ogTitle')?.setAttribute('content',title);

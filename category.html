@@ -309,12 +309,23 @@
     }
 
     function imageMarkup(a) {
-      const url = a.image_url || '';
-      const title = esc(a.title || 'बड़ी खबर');
+  const url = String(a.image_url || '').trim();
+  const title = esc(a.title || 'बड़ी खबर');
 
-      if (!url) {
-        return '';
-      }
+  if (!url) {
+    return '';
+  }
+
+  return (
+    '<div class="cat-img">' +
+    '<img src="' + esc(url) + '"' +
+    ' alt="' + title + '"' +
+    ' loading="lazy"' +
+    ' decoding="async"' +
+    ' referrerpolicy="no-referrer">' +
+    '</div>'
+  );
+}
 
       return (
         '<div class="cat-img">' +

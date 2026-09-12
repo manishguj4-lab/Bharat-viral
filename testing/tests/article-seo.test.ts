@@ -171,7 +171,7 @@ describe('article-seo handler', () => {
 
     const originalFetch = global.fetch;
     global.fetch = async (url) => {
-      if (url.toString().includes('article.html')) {
+      if (url.toString().includes('article-template.html') || url.toString().includes('article.html')) {
         return new Response('<html><head><title>Test</title><script type="application/ld+json">[{"@type":"NewsArticle","headline":"Real Title","author":{"@type":"Organization","name":"Editorial Team"},"image":["https://example.com/image.jpg"],"datePublished":"2024-01-01T00:00:00Z"},{"@type":"BreadcrumbList"}]</script></head><body><article id="articleBox"></article></body></html>', { status: 200, headers: { 'Content-Type': 'text/html' } });
       }
       return {

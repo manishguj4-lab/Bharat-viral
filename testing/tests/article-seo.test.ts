@@ -165,7 +165,7 @@ describe('article-seo handler', () => {
     }
   });
 
-  it('returns 200 response with correct structured data for valid article', async () => {
+      it('returns 200 response with correct structured data for valid article', async () => {
     const module = await import('../../netlify/edge-functions/article-ssr.js');
     const handler = module.default;
 
@@ -201,9 +201,8 @@ describe('article-seo handler', () => {
     const request = new Request('https://bharatviralnews.netlify.app/article/test-article');
 
     try {
-const response = await handler(request, {});
+      const response = await handler(request, {});
       assert.strictEqual(response.status, 200, "Should return 200");
-
     } finally {
       global.fetch = originalFetch;
       global.Deno = originalDeno;

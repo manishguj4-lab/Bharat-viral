@@ -156,7 +156,7 @@ export default async (req, context) => {
       headers: { "Content-Type": "application/json" }
     });
   } catch (error) {
-    console.error("Internal Server Error:", error.message);
+    console.warn("Internal Server Error:", error.message);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" }

@@ -85,12 +85,12 @@ describe('news-sitemap handler', () => {
     const module = await import('../../netlify/functions/news-sitemap.js');
     const handler = module.default;
     const originalFetch = global.fetch;
-    const originalConsoleError = console.error;
+    const originalConsoleError = console.warn;
 
     global.fetch = async () => ({ ok: false, status: 500 });
 
     let consoleErrorCalled = false;
-    console.error = () => { consoleErrorCalled = true; };
+    console.warn = () => { consoleErrorCalled = true; };
 
     const originalEnv = process.env;
     process.env = { ...originalEnv, SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' };
@@ -98,14 +98,14 @@ describe('news-sitemap handler', () => {
     try {
       const req = new Request('https://bharatviralnews.netlify.app/news-sitemap.xml');
       const response = await handler(req, {});
-      assert.strictEqual(consoleErrorCalled, true, 'console.error should have been called');
+      assert.strictEqual(consoleErrorCalled, true, 'console.warn should have been called');
       assert.strictEqual(response.status, 503);
       const body = await response.text();
       assert.ok(body.includes('<urlset'), 'Body should contain urlset');
       assert.ok(!body.includes('<url>'), 'Body should not contain any urls');
     } finally {
       global.fetch = originalFetch;
-      console.error = originalConsoleError;
+      console.warn = originalConsoleError;
       process.env = originalEnv;
     }
   });

@@ -412,9 +412,8 @@ export default async function sitemap(req) {
      * ==========================================
      */
 
-    console.error(
-      "Sitemap generation error:",
-      error
+    console.warn(
+      "Sitemap generation error: Service Unavailable"
     );
 
     /*

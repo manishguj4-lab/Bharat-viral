@@ -107,7 +107,7 @@ export default async (req, context) => {
     });
 
   } catch (error) {
-    console.error("News Sitemap error:", error);
+    console.warn("News Sitemap error: Service Unavailable");
     const body = [
       '<?xml version="1.0" encoding="UTF-8"?>',
       '<urlset',

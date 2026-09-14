@@ -99,12 +99,12 @@ describe('sitemap handler', () => {
     const module = await import('../../netlify/functions/sitemap.js');
     const handler = module.default;
     const originalFetch = global.fetch;
-    const originalConsoleError = console.error;
+    const originalConsoleError = console.warn;
 
     global.fetch = async () => ({ ok: false, status: 500 });
 
     let consoleErrorCalled = false;
-    console.error = () => { consoleErrorCalled = true; };
+    console.warn = () => { consoleErrorCalled = true; };
 
     const originalEnv = process.env;
     process.env = { ...originalEnv, SUPABASE_URL: 'http://localhost', SUPABASE_KEY: 'test-key' };
@@ -113,7 +113,7 @@ describe('sitemap handler', () => {
       const req = new Request('https://bharatviralnews.netlify.app/sitemap.xml');
       const response = await handler(req, {});
 
-      assert.strictEqual(consoleErrorCalled, true, 'console.error should have been called');
+      assert.strictEqual(consoleErrorCalled, true, 'console.warn should have been called');
       assert.strictEqual(response.status, 503);
       assert.strictEqual(response.headers.get('Content-Type'), 'application/xml; charset=UTF-8');
       assert.strictEqual(response.headers.get('Cache-Control'), 'no-cache, no-store, must-revalidate');
@@ -123,7 +123,7 @@ describe('sitemap handler', () => {
       assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/</loc>')); // Static fallback URL
     } finally {
       global.fetch = originalFetch;
-      console.error = originalConsoleError;
+      console.warn = originalConsoleError;
       process.env = originalEnv;
     }
   });

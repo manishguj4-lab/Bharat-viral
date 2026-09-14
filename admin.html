@@ -1965,7 +1965,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
       }
     }catch(err){
       clearTimeout(fallbackTimer);
-      console.error("Admin auth initialization failed:", err);
+      console.warn("Admin auth initialization failed:", err);
 
       if(err && err.message === "AUTH_TIMEOUT"){
         showLogin("Login check timed out. कृपया अपना admin email और password डालकर Login करें।");
@@ -2417,7 +2417,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
     if(typeof loadArticlesFromDB==="function"){
       setTimeout(function(){
         Promise.resolve(loadArticlesFromDB()).catch(function(err){
-          console.error("All Articles refresh error:", err);
+          console.warn("All Articles refresh error:", err);
           if(tbody) tbody.innerHTML='<tr><td colspan="5"><div class="empty">Articles load नहीं हुए।</div></td></tr>';
         });
       },50);
@@ -2603,7 +2603,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
    inlineImageAlt.value="";
    inlineImageStatus.textContent="✅ Image Article Content में insert हो गई।";
   }catch(error){
-   console.error(error);
+   console.warn(error);
    inlineImageStatus.textContent="❌ Image insert नहीं हुई।";
    alert("❌ Image upload/insert failed:\n"+(error.message||"Unknown error"));
   }finally{
@@ -2632,7 +2632,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
    inlinePdfFile.value=""; inlinePdfTitle.value="";
    inlineImageStatus.textContent="✅ PDF Article Content में insert हो गई।";
   }catch(error){
-   console.error(error);
+   console.warn(error);
    inlineImageStatus.textContent="❌ PDF insert नहीं हुई।";
    alert("❌ PDF upload/insert failed:\n"+(error.message||"Unknown error"));
   }finally{btn.disabled=false;btn.textContent=old;}
@@ -2818,7 +2818,7 @@ function collect(status){
 
       clearArticleForm();
     } catch (error) {
-      console.error("Bharat Viral article save error:", {
+      console.warn("Bharat Viral article save error:", {
         stage: saveStage,
         message: error?.message || String(error),
         error
@@ -3047,7 +3047,7 @@ function collect(status){
       alert("✅ Article successfully updated.");
 
     } catch (error) {
-      console.error(error);
+      console.warn(error);
       alert("❌ Update failed:\n" + (error.message || "Unknown error"));
     } finally {
       button.disabled = false;
@@ -3083,7 +3083,7 @@ function collect(status){
       alert("🗑️ Article delete हो गया।");
 
     } catch (error) {
-      console.error(error);
+      console.warn(error);
       alert("❌ Delete failed:\n" + (error.message || "Unknown error"));
     }
   }
@@ -3186,7 +3186,7 @@ function collect(status){
         .order("created_at", { ascending: false });
 
       if (result.error) {
-        console.error("Dashboard articles:", result.error);
+        console.warn("Dashboard articles:", result.error);
         const body=document.getElementById("bvRecentPostsBody");
         if(body) body.innerHTML='<tr><td colspan="4" class="bv-empty-row">Articles load नहीं हुए: '+escapeHtml(result.error.message)+'</td></tr>';
         return;
@@ -3207,7 +3207,7 @@ function collect(status){
 
       if(typeof bvRenderDashboard === "function") bvRenderDashboard();
     } catch(e) {
-      console.error(e);
+      console.warn(e);
     }
   }
 
@@ -3347,7 +3347,7 @@ function collect(status){
       }
       bvRenderDashboard();
     }catch(err){
-      console.error('Latest posts:',err);
+      console.warn('Latest posts:',err);
       if(!Array.isArray(window.articles)||!window.articles.length){
         body.innerHTML='<tr><td colspan="4" class="bv-empty-row">Latest posts load नहीं हुए: '+String(err.message||err)+'</td></tr>';
       }
@@ -3494,7 +3494,7 @@ function collect(status){
 
       renderTrafficChart(Array.isArray(result.days)?result.days:[]);
     }catch(e){
-      console.error("Real analytics error:",e);
+      console.warn("Real analytics error:",e);
       if(topBox) topBox.innerHTML='<div class="empty">Analytics load नहीं हुआ। पहले Supabase SQL चलाएँ, फिर page reload करें।</div>';
     }
   }
@@ -3748,7 +3748,7 @@ function collect(status){
       window.bvCategories=cats;
       return cats;
     }catch(e){
-      console.error("Categories:",e);
+      console.warn("Categories:",e);
       const box=document.getElementById("categoryManagerList");
       if(box) box.innerHTML='<div class="empty">Categories load नहीं हुईं। पहले Supabase में Dynamic Category SQL चलाएँ।</div>';
       return [];
@@ -3799,7 +3799,7 @@ function collect(status){
       if(typeof loadDashboardFromDB==="function") await loadDashboardFromDB();
 
     }catch(e){
-      console.error("Category delete error:",e);
+      console.warn("Category delete error:",e);
       alert("❌ Category delete नहीं हुई: "+(e.message||e));
     }
   }
@@ -4252,7 +4252,7 @@ if ("serviceWorker" in navigator) {
                 console.log("Bharat Viral Admin Service Worker registered");
             })
             .catch(function (error) {
-                console.error("Admin Service Worker registration failed:", error);
+                console.warn("Admin Service Worker registration failed:", error);
             });
     });
 }
@@ -4401,7 +4401,7 @@ if ("serviceWorker" in navigator) {
         fill(s);
       }
     }catch(e){
-      console.error("Settings load:",e);
+      console.warn("Settings load:",e);
       toast("Settings load नहीं हुई: "+(e.message||e),false);
     }
   }
@@ -4415,7 +4415,7 @@ if ("serviceWorker" in navigator) {
       await dbSave(s);
       toast("सभी settings Supabase में save हो गईं।",true);
     }catch(e){
-      console.error("Settings save:",e);
+      console.warn("Settings save:",e);
       toast("Settings save नहीं हुई: "+(e.message||e),false);
     }finally{
       buttons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.oldText||"Save";});
@@ -4531,7 +4531,7 @@ async function save(){
    key,value:String(value??""),updated_at:new Date().toISOString()
  }));
  const r=await sb.from("site_settings").upsert(rows,{onConflict:"key"});
- if(r.error){console.error(r.error);alert("Settings save error: "+r.error.message);return;}
+ if(r.error){console.warn(r.error);alert("Settings save error: "+r.error.message);return;}
  window.bvSiteSettings=s;
  alert("✅ Settings saved. Website पर next refresh में apply होंगी.");
 }
@@ -4637,7 +4637,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
         '</tr>';
       }).join("");
     }catch(err){
-      console.error("Advertisement load failed:",err);
+      console.warn("Advertisement load failed:",err);
       body.innerHTML='<tr><td colspan="6"><div class="empty">Advertisement Slots load नहीं हुए: '+esc(err?.message||err)+'</div></td></tr>';
     }
   }
@@ -4674,7 +4674,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
       await loadAds();
       notify(f.id ? "Advertisement Slot update होकर permanently save हो गया।" : "Advertisement Slot permanently save हो गया।",true);
     }catch(err){
-      console.error("Advertisement save failed:",err);
+      console.warn("Advertisement save failed:",err);
       notify("Advertisement Slot save नहीं हुआ: "+(err?.message||err),false);
     }finally{
       if(btn){btn.disabled=false;btn.textContent="Save Slot";}
@@ -4829,7 +4829,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
       if(ar.error)throw ar.error;
       localStorage.setItem('bv_site_settings_branding',JSON.stringify({logoUrl:$("setLogoUrl")?.value||"",faviconUrl:$("setFaviconUrl")?.value||"",webLogoUrl:$("webLogoUrl")?.value||"",webFaviconUrl:$("webFaviconUrl")?.value||""}));
       msg((kind==='logo'?'Logo':'Favicon')+' successfully upload और permanently save हो गया।',true);
-    }catch(e){console.error('branding upload',e);msg('Upload failed: '+(e.message||e),false);}
+    }catch(e){console.warn('branding upload',e);msg('Upload failed: '+(e.message||e),false);}
   }
   function bind(buttonId,fileId,targetId,previewId){
     const b=$(buttonId), f=$(fileId); if(!b||!f||b.dataset.bound==='1')return;
@@ -4872,7 +4872,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
       };
       return window.bvAnalyticsHealth;
     }catch(e){
-      console.error("Analytics health check:",e);
+      console.warn("Analytics health check:",e);
       window.bvAnalyticsHealth={ok:false,error:e?.message||String(e)};
       return window.bvAnalyticsHealth;
     }
@@ -5095,7 +5095,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
     }
 
     if (r.error) {
-      console.error("Manual notice save failed:", r.error);
+      console.warn("Manual notice save failed:", r.error);
       toast("Manual Notice save नहीं हुआ: " + r.error.message, false);
       return;
     }
@@ -5458,7 +5458,7 @@ body.bv-dark #menuOverlay{
         try{
           await saveSettingsFinal(b);
         }catch(err){
-          console.error("Final settings save:",err);
+          console.warn("Final settings save:",err);
           message("❌ Settings save नहीं हुई: "+(err.message||err),false);
         }finally{
           b.disabled=false;
@@ -5607,7 +5607,7 @@ body.bv-dark #menuOverlay{
         else if(typeof deleteArticle==="function") deleteArticle(btn.dataset.id);
       }));
     }catch(err){
-      console.error("All Articles load error",err);
+      console.warn("All Articles load error",err);
       tbody.innerHTML='<tr><td colspan="5"><div class="empty">Articles load नहीं हुए: '+esc(err.message||err)+'</div></td></tr>';
     }
   }

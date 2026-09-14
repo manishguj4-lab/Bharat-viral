@@ -548,8 +548,8 @@ html,body{max-width:100%;overflow-x:hidden!important}
 <div class="search-panel" id="searchPanel">
 <div class="search-inner">
 <input type="text" id="searchInput" placeholder="खबर, शिक्षा, टेक्नोलॉजी खोजें..." autocomplete="off">
-<button class="search-submit" onclick="performSearch()">Search</button>
-<button class="close-search" onclick="closeSearch()">✕</button>
+<button class="search-submit" onclick="performSearch()" aria-label="Submit search">Search</button>
+<button class="close-search" onclick="closeSearch()" aria-label="Close search">✕</button>
 </div>
 <div id="searchKeywords" class="bv-search-keywords">
   <span class="bv-search-keyword-title">🔍 Popular Keywords</span>
@@ -656,7 +656,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
 
 <section class="newsletter">
 <div><h2>📩 Bharat Viral से जुड़े रहें</h2><p>नई खबरें, education और important updates सीधे पाएं।</p></div>
-<div class="subscribe"><input type="email" placeholder="आपका Email"><button onclick="subscribeUser()">Subscribe</button></div>
+<div class="subscribe"><input type="email" placeholder="आपका Email"><button onclick="subscribeUser()" aria-label="Subscribe">Subscribe</button></div>
 </section>
 
 </div>
@@ -793,7 +793,7 @@ function renderHeroSlide(){
     openArticleById(hero.id);
   };
   hi.style.cursor="pointer";
-  const image=hero.image_url ? '<img class="hero-slide-img" width="800" height="450" decoding="async" src="'+escapeHtml(hero.image_url)+'" alt="'+escapeHtml(title)+'">' : '<div class="hero-placeholder">📰</div>';
+  const image=hero.image_url ? '<img class="hero-slide-img" width="800" height="450" decoding="async" src="'+escapeHtml(hero.image_url)+'" alt="'+escapeHtml(title)+'" loading="eager" fetchpriority="high">' : '<div class="hero-placeholder">📰</div>';
   hi.querySelectorAll(".hero-slide-img,.hero-placeholder,.hero-slide-overlay,.slide-count").forEach(x=>x.remove());
   hi.insertAdjacentHTML("afterbegin",image+'<div class="hero-slide-overlay">'+escapeHtml(title)+'</div><div class="slide-count">'+(heroIndex+1)+' / '+heroList.length+'</div>');
   const dots=document.getElementById("heroDots");
@@ -1178,6 +1178,12 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
   const K=window.SUPABASE_KEY;
   const H={apikey:K,Authorization:"Bearer "+K};
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+  function safeRichText(html) {
+    if (window.DOMPurify) {
+      return window.DOMPurify.sanitize(html);
+    }
+    return html;
+  }
   async function loadBreakingNews(){
     const track=document.getElementById("bvBreakingTrack");
     if(!track)return;
@@ -1191,7 +1197,7 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
         return;
       }
       const set=rows.map(n=>'<span class="bv-breaking-item">' + (n.url ? '<a href="'+esc(n.url)+'" style="color:#fff;text-decoration:none;">' : '') + esc(n.title) + (n.url ? '</a>' : '') + '</span>').join("");
-      track.innerHTML='<div class="bv-breaking-set">'+set+'</div><div class="bv-breaking-set">'+set+'</div>';
+      track.innerHTML=safeRichText('<div class="bv-breaking-set">'+set+'</div><div class="bv-breaking-set">'+set+'</div>');
       track.style.animation="bvBreakingMoveFinal 36s linear infinite";
     }catch(e){
       console.warn("Breaking News:",e);
@@ -1389,6 +1395,12 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
     );
   }
 
+  function safeRichText(html) {
+    if (window.DOMPurify) {
+      return window.DOMPurify.sanitize(html);
+    }
+    return html;
+  }
   async function loadNotices(){
     const sb=client(); if(!sb) return;
     const host=noticeHost(); if(!host) return;
@@ -1405,7 +1417,7 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
       return !x.status || st==="published" || st==="active";
     });
 
-    host.innerHTML=rows.map(x=>{
+    host.innerHTML=safeRichText(rows.map(x=>{
       const title=x.title||x.heading||"";
       const content=x.content||x.message||x.description||"";
       const href=x.link_url||x.url||x.link||"";
@@ -1413,7 +1425,7 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
       return href
         ? '<a class="bv-live-notice" href="'+esc(href)+'" target="_blank" rel="noopener">'+body+'</a>'
         : '<div class="bv-live-notice">'+body+'</div>';
-    }).join("");
+    }).join(""));
 
     host.style.overflowX="auto";
     host.style.overflowY="hidden";
@@ -1638,6 +1650,12 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 <script id="bv-manual-notice-box-live">
 (function(){
 "use strict";
+function safeRichText(html) {
+  if (window.DOMPurify) {
+    return window.DOMPurify.sanitize(html);
+  }
+  return html;
+}
 async function loadManualNoticeBox(){
   const sb=window.supabaseClient||window.sb;
   const body=document.getElementById("bvManualNoticeBody");
@@ -1663,7 +1681,7 @@ async function loadManualNoticeBox(){
     return;
   }
 
-  body.innerHTML=rows.map(x=>{
+  body.innerHTML=safeRichText(rows.map(x=>{
     const title=x.title||x.heading||"";
     const content=x.content||x.message||x.description||"";
     const url=x.link_url||x.url||x.link||"";
@@ -1672,7 +1690,7 @@ async function loadManualNoticeBox(){
     if(content) html+=(title?"<br>":"")+escapeHtml(content);
     if(url) html+='<br><a href="'+escapeHtml(url)+'" target="_blank" rel="noopener">सूचना खोलें →</a>';
     return '<div class="bv-notice-item">'+html+'</div>';
-  }).join("");
+  }).join(""));
 }
 function escapeHtml(v){
   return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));

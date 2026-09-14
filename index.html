@@ -1013,7 +1013,7 @@ async function loadPublishedArticles(){
     }
 
   }catch(e){
-    console.error("Dynamic category load failed:",e);
+    console.warn("Dynamic category load failed:",e);
     const nav=document.getElementById("dynamicCategoryNav");
     const shortcuts=document.getElementById("dynamicCategoryCards");
     const sections=document.getElementById("dynamicCategorySections");

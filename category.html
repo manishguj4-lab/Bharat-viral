@@ -721,7 +721,7 @@
 
       } catch (e) {
         if (e.name !== 'AbortError') {
-          console.error(e);
+          console.warn(e);
 
           failed(
             'राशिफल लोड नहीं हो पाया। कृपया थोड़ी देर बाद फिर प्रयास करें।'
@@ -744,7 +744,7 @@
         }
 
       } catch (e) {
-        console.error(e);
+        console.warn(e);
 
         failed(
           'डेटा लोड नहीं हो पाया। कृपया थोड़ी देर बाद फिर प्रयास करें।'

@@ -150,7 +150,7 @@ async function downloadPdfFile(url, filename){
   a.remove();
   setTimeout(()=>URL.revokeObjectURL(blobUrl),1000);
  }catch(error){
-  console.error("PDF download failed:",error);
+  console.warn("PDF download failed:",error);
   window.open(url,"_blank","noopener,noreferrer");
  }
 }
@@ -403,7 +403,7 @@ const imgObserver = new MutationObserver(mutations => {
 });
 imgObserver.observe(document.body, { childList: true, subtree: true });
 
-load().catch(e=>{document.getElementById('articleBox').innerHTML='<div class="art-body"><h2>Article load नहीं हो सकी</h2><p>कृपया थोड़ी देर बाद फिर कोशिश करें।</p></div>';console.error(e);});
+load().catch(e=>{document.getElementById('articleBox').innerHTML='<div class="art-body"><h2>Article load नहीं हो सकी</h2><p>कृपया थोड़ी देर बाद फिर कोशिश करें।</p></div>';console.warn(e);});
 </script>
 
 <div class="bv-adsense-auto-slot" data-adsense-placement="article_bottom" style="width:100%;text-align:center;min-height:60px;margin:18px auto;"></div>

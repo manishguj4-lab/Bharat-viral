@@ -22,7 +22,9 @@ export default async (req, context) => {
       return Number.isNaN(d.getTime()) ? null : d;
     }
 
-        let allArticles = [];
+        const timeThreshold = new Date(Date.now() - NEWS_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+
+    let allArticles = [];
     let start = 0;
     const limit = 1000;
     let hasMore = true;
@@ -32,6 +34,7 @@ export default async (req, context) => {
         "/rest/v1/articles" +
         "?select=id,slug,title,published_at,updated_at,created_at,status" +
         "&status=eq.published&slug=not.is.null&title=not.is.null" +
+        `&published_at=gte.${timeThreshold}` +
         `&order=published_at.desc&limit=${limit}&offset=${start}`;
 
       const response = await fetch(endpoint, {
@@ -51,14 +54,6 @@ export default async (req, context) => {
       if (articles.length < limit) {
         hasMore = false;
       } else {
-        const lastArticle = articles[articles.length - 1];
-        const lastDate = validDate(lastArticle.published_at) || validDate(lastArticle.created_at);
-        if (lastDate) {
-          const ageHours = (Date.now() - lastDate.getTime()) / (1000 * 60 * 60);
-          if (ageHours > NEWS_WINDOW_HOURS) {
-            hasMore = false;
-          }
-        }
         start += limit;
       }
     }

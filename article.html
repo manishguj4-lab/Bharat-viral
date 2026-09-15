@@ -377,31 +377,7 @@ function shareTelegram(){window.open('https://t.me/share/url?url='+encodeURIComp
 function shareInstagram(){navigator.clipboard?.writeText(shareUrl).catch(()=>{});alert('News link copy हो गया। अब Instagram पर इसे share कर सकते हैं।');window.open('https://www.instagram.com/','_blank','noopener');}
 async function copyLink(){try{await navigator.clipboard.writeText(shareUrl);alert('News link copy हो गया।');}catch(e){alert(shareUrl);}}
 
-function applyImageFallback(img) {
-  if (!img || img.dataset.fallbackApplied === "1") return;
 
-  img.addEventListener("error", function () {
-    if (img.dataset.fallbackApplied === "1") return;
-
-    img.dataset.fallbackApplied = "1";
-    img.onerror = null;
-    img.src = "/icon-192.png";
-  }, { once: true });
-}
-
-document.querySelectorAll("img").forEach(applyImageFallback);
-
-const imgObserver = new MutationObserver(mutations => {
-  mutations.forEach(mutation => {
-    mutation.addedNodes.forEach(node => {
-      if (node.nodeType === 1) {
-        if (node.tagName === "IMG") applyImageFallback(node);
-        node.querySelectorAll?.("img").forEach(applyImageFallback);
-      }
-    });
-  });
-});
-imgObserver.observe(document.body, { childList: true, subtree: true });
 
 load().catch(e=>{document.getElementById('articleBox').innerHTML='<div class="art-body"><h2>Article load नहीं हो सकी</h2><p>कृपया थोड़ी देर बाद फिर कोशिश करें।</p></div>';console.warn(e);});
 </script>
@@ -606,5 +582,6 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 </div>
 </footer>
 
+<script src="/assets/js/image-fallback.js"></script>
 </body>
 </html>

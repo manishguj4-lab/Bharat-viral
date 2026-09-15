@@ -180,8 +180,8 @@ const metaImage =
     .replace(/>/g, '\\u003e')
     .replace(/&/g, '\\u0026');
 
-  // Fetch the actual article.html file to act as the template
-  const templateResponse = await fetch(new URL("/article.html", request.url));
+  // Fetch the actual article-template.html file to act as the template
+  const templateResponse = await fetch(new URL("/article-template.html", request.url));
 
   const articleBoxHtml = `
     ${hasArticleImage

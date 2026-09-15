@@ -656,7 +656,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
 
 <section class="newsletter">
 <div><h2>📩 Bharat Viral से जुड़े रहें</h2><p>नई खबरें, education और important updates सीधे पाएं।</p></div>
-<div class="subscribe"><input type="email" placeholder="आपका Email"><button onclick="subscribeUser()" aria-label="Subscribe">Subscribe</button></div>
+<div class="subscribe"><input type="email" placeholder="आपका Email" aria-label="Subscribe Email"><button onclick="subscribeUser()" aria-label="Subscribe">Subscribe</button></div>
 </section>
 
 </div>
@@ -1771,5 +1771,6 @@ if ("caches" in window) {
   caches.keys().then(keys => keys.filter(k => /bharat-viral/i.test(k)).forEach(k => caches.delete(k))).catch(()=>{});
 }
 </script>
+<script src="/assets/js/image-fallback.js"></script>
 </body>
 </html>

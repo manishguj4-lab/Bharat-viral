@@ -604,7 +604,6 @@
         /<\/?(?:h[3-5]|p|strong|b|em|i|ul|ol|li|br|blockquote)\b/i.test(raw)
       ) {
         const textarea = document.createElement('textarea');
-
         textarea.innerHTML = raw;
         raw = textarea.value;
       }

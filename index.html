@@ -1179,11 +1179,11 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
   const H={apikey:K,Authorization:"Bearer "+K};
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
   function safeRichText(html) {
-    if (window.DOMPurify) {
-      return window.DOMPurify.sanitize(html);
-    }
-    return html;
+  if (window.DOMPurify) {
+    return window.DOMPurify.sanitize(html);
   }
+  return String(html ?? '').replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"}[c]));
+}
   async function loadBreakingNews(){
     const track=document.getElementById("bvBreakingTrack");
     if(!track)return;
@@ -1396,11 +1396,11 @@ document.querySelectorAll("[data-nav]").forEach(link=>{
   }
 
   function safeRichText(html) {
-    if (window.DOMPurify) {
-      return window.DOMPurify.sanitize(html);
-    }
-    return html;
+  if (window.DOMPurify) {
+    return window.DOMPurify.sanitize(html);
   }
+  return String(html ?? '').replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"}[c]));
+}
   async function loadNotices(){
     const sb=client(); if(!sb) return;
     const host=noticeHost(); if(!host) return;
@@ -1654,7 +1654,7 @@ function safeRichText(html) {
   if (window.DOMPurify) {
     return window.DOMPurify.sanitize(html);
   }
-  return html;
+  return String(html ?? '').replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"}[c]));
 }
 async function loadManualNoticeBox(){
   const sb=window.supabaseClient||window.sb;

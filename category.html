@@ -192,7 +192,7 @@
     }
 
     function loading(t) {
-      grid.innerHTML =
+      grid.innerHTML = safeRichText(
         '<div class="cat-loading" role="status">' +
         esc(t) +
         '</div>';
@@ -201,7 +201,7 @@
     }
 
     function failed(t) {
-      grid.innerHTML =
+      grid.innerHTML = safeRichText(
         '<div class="cat-empty" role="alert">' +
         esc(t) +
         '</div>';
@@ -401,7 +401,7 @@
         ? Number(list[0].total_count) || list.length
         : 0;
 
-      grid.innerHTML =
+      grid.innerHTML = safeRichText(
         list.map(card).join('') ||
         '<div class="cat-empty">' +
         'इस category में अभी कोई प्रकाशित खबर उपलब्ध नहीं है।' +
@@ -488,7 +488,7 @@
         pages +
         '</div>';
 
-      pagination.innerHTML = html;
+      pagination.innerHTML = safeRichText(html);
     }
 
     /*
@@ -521,7 +521,7 @@
           '</option>';
       }
 
-      d.innerHTML = html;
+      d.innerHTML = safeRichText(html);
 
       d.value = String(
         Math.min(old, max)
@@ -562,8 +562,8 @@
           '</option>';
       }
 
-      m.innerHTML = monthHtml;
-      y.innerHTML = yearHtml;
+      m.innerHTML = safeRichText(monthHtml);
+      y.innerHTML = safeRichText(yearHtml);
 
       m.value = String(
         now.getMonth() + 1
@@ -605,7 +605,7 @@
       ) {
         const textarea = document.createElement('textarea');
 
-        textarea.innerHTML = raw;
+        textarea.innerHTML = safeRichText(raw);
         raw = textarea.value;
       }
 
@@ -683,7 +683,7 @@
           }
         );
 
-        grid.innerHTML =
+        grid.innerHTML = safeRichText(
           (Array.isArray(rows) ? rows : [])
             .map(a =>
               '<article class="cat-card">' +

@@ -2163,10 +2163,30 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
    ========================================================= */
 (function(){
   const sb = () => window.supabaseClient;
+function safeRichText(html) {
+    if (window.DOMPurify) {
+      if (!window.domPurifyHookAdded) {
+        window.DOMPurify.addHook('afterSanitizeAttributes', function (node) {
+          if (node.tagName === 'A' && node.getAttribute('target') === '_blank') {
+            node.setAttribute('rel', 'noopener noreferrer');
+          }
+        });
+        window.domPurifyHookAdded = true;
+      }
+      return window.DOMPurify.sanitize(html, {
+        ALLOWED_TAGS: ['p','br','strong','em','u','h1','h2','h3','h4','ul','ol','li','a','img','blockquote','code','pre','figure','figcaption', 'iframe', 'video', 'source', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'div', 'span'],
+        ALLOWED_ATTR: ['href','src','alt','title','target','rel','width','height','loading', 'class', 'id', 'allowfullscreen', 'frameborder', 'allow', 'controls', 'poster', 'autoplay', 'muted', 'loop', 'type'],
+        ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
+        FORBID_TAGS: ['script','style','object','embed','form','input'],
+        FORBID_ATTR: ['onerror','onload','onclick','onmouseover','style']
+      });
+    }
+    return String(html ?? '').replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"}[c]));
+  }
 
   function bvMsg(id, text, ok=false){
     const el=document.getElementById(id);
-    if(el) el.innerHTML = '<span style="color:'+(ok?'#166534':'#b51219')+'">'+escapeHtml(text)+'</span>';
+    if(el) el.innerHTML = safeRichText('<span style="color:'+(ok?'#166534':'#b51219')+'">'+escapeHtml(text)+'</span>');
   }
 
   function bvSlug(v){
@@ -2875,9 +2895,7 @@ function collect(status){
 
     if (result.error) {
       if(tbody){
-        tbody.innerHTML =
-          '<tr><td colspan="5"><div class="empty">Articles load नहीं हुए: ' +
-          escapeHtml(result.error.message) + '</div></td></tr>';
+        tbody.innerHTML = safeRichText('<tr><td colspan="5"><div class="empty">Articles load नहीं हुए: ' + escapeHtml(result.error.message) + '</div></td></tr>');
       }
       window.articles = [];
       return;
@@ -2891,442 +2909,28 @@ function collect(status){
     }
 
     if (!window.articles.length) {
-      tbody.innerHTML =
-        '<tr><td colspan="5"><div class="empty">अभी कोई article नहीं है।</div></td></tr>';
+      tbody.innerHTML = safeRichText('<tr><td colspan="5"><div class="empty">अभी कोई article नहीं है।</div></td></tr>');
       if(typeof bvRenderDashboard === "function") bvRenderDashboard();
       return;
     }
 
-    tbody.innerHTML = window.articles.map(function(a) {
+    tbody.innerHTML = safeRichText(window.articles.map(function(a) {
       return '<tr>' +
         '<td><b>' + escapeHtml(a.title || "") + '</b>' +
         '<br><small style="color:#888">' +
         escapeHtml((a.excerpt || "").slice(0, 90)) +
         '</small></td>' +
-        '<td>' + escapeHtml(a.article_type || "") + '</td>' +
-        '<td><span class="tag">' + escapeHtml(a.status || "") + '</span></td>' +
-        '<td>' + Number(a.views || 0) + '</td>' +
-        '<td style="white-space:nowrap;">' +
-          '<button type="button" class="db-edit-btn" data-id="' + escapeHtml(a.id) +
-          '" style="padding:6px 10px;border:1px solid #bbb;border-radius:6px;background:#fff;cursor:pointer;margin-right:5px;">✏️ Edit</button>' +
-          '<button type="button" class="db-delete-btn" data-id="' + escapeHtml(a.id) +
-          '" style="padding:6px 10px;border:0;border-radius:6px;background:#b51219;color:#fff;cursor:pointer;">🗑️ Delete</button>' +
+        '<td><span class="tag">' + escapeHtml(a.category || a.category_name || "News") + '</span></td>' +
+        '<td>' + (a.published_at ? escapeHtml(new Date(a.published_at).toLocaleDateString('en-IN')) : '—') + '</td>' +
+        '<td>👁 ' + Number(a.views || 0).toLocaleString('en-IN') + '</td>' +
+        '<td>' +
+        '<div class="bv-actions">' +
+        '<button class="bv-action-btn edit" onclick="window.bvOpenEditor(\'' + a.id + '\')">✏ Edit</button>' +
+        '<button class="bv-action-btn delete" onclick="window.bvDeleteArticle(\'' + a.id + '\', \'' + escapeHtml(a.title).replace(/'/g,"\\'") + '\')">🗑 Delete</button>' +
+        '</div>' +
         '</td>' +
-      '</tr>';
-    }).join("");
-
-    tbody.querySelectorAll(".db-edit-btn").forEach(function(btn) {
-      btn.addEventListener("click", function() {
-        openEditArticle(this.dataset.id);
-      });
-    });
-
-    tbody.querySelectorAll(".db-delete-btn").forEach(function(btn) {
-      btn.addEventListener("click", function() {
-        deleteArticle(this.dataset.id);
-      });
-    });
-
-    if(typeof bvRenderDashboard === "function") bvRenderDashboard();
-  }
-
-  async function openEditArticle(id) {
-    const result = await window.supabaseClient
-      .from("articles")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (result.error) {
-      alert("Article load नहीं हुआ:\n" + result.error.message);
-      return;
-    }
-
-    const a = result.data;
-
-    document.querySelectorAll("#editArticleModal .edit-category-check").forEach(function(cb){
-      cb.checked = false;
-    });
-
-    document.getElementById("editArticleId").value = a.id;
-    document.getElementById("editTitle").value = a.title || "";
-    document.getElementById("editExcerpt").value = a.excerpt || "";
-    document.getElementById("editContent").value = a.content || "";
-    document.getElementById("editType").value = a.article_type || "news";
-    document.getElementById("editStatus").value = a.status || "draft";
-
-    const savedCategories = Array.isArray(a.categories) ? a.categories : [];
-    savedCategories.forEach(function(category){
-      document.querySelectorAll("#editArticleModal .edit-category-check").forEach(function(cb){
-        if(cb.value === category) cb.checked = true;
-      });
-    });
-
-    document.getElementById("editSeoTitle").value = a.seo_title || "";
-    document.getElementById("editSeoDescription").value = a.seo_description || "";
-    document.getElementById("editAuthor").value = a.author_name || "";
-    document.getElementById("editSource").value = a.source_name || "";
-    document.getElementById("editSourceUrl").value = a.source_url || "";
-    document.getElementById("editImageUrl").value = a.image_url || "";
-    document.getElementById("editImageFile").value = "";
-
-    document.getElementById("editArticleModal").style.display = "block";
-  }
-
-  function closeEditArticle() {
-    document.getElementById("editArticleModal").style.display = "none";
-  }
-
-  async function uploadEditedImage() {
-    const file = document.getElementById("editImageFile").files[0];
-    if (!file) return null;
-
-    return await uploadFileHelper(file);
-  }
-
-  async function updateArticle() {
-    const id = document.getElementById("editArticleId").value;
-    if (!id) return;
-
-    const button = document.getElementById("updateArticleBtn");
-    const oldText = button.textContent;
-    button.disabled = true;
-    button.textContent = "Updating…";
-
-    try {
-      const userResult = await window.supabaseClient.auth.getUser();
-      if (userResult.error || !userResult.data.user) {
-        showLogin();
-        throw new Error("Admin login session समाप्त हो गया है।");
-      }
-
-      const newImage = await uploadEditedImage();
-
-      const payload = {
-        title: document.getElementById("editTitle").value.trim(),
-        excerpt: document.getElementById("editExcerpt").value.trim(),
-        content: document.getElementById("editContent").value.trim(),
-        article_type: document.getElementById("editType").value,
-        status: document.getElementById("editStatus").value,
-        categories: [...document.querySelectorAll("#editArticleModal .edit-category-check:checked")].map(function(cb){ return cb.value; }),
-        seo_title: document.getElementById("editSeoTitle").value.trim(),
-        seo_description: document.getElementById("editSeoDescription").value.trim(),
-        author_name: document.getElementById("editAuthor").value.trim(),
-        source_name: document.getElementById("editSource").value.trim(),
-        source_url: document.getElementById("editSourceUrl").value.trim(),
-        image_url: newImage || document.getElementById("editImageUrl").value.trim() || null,
-        published_at: document.getElementById("editStatus").value === "published"
-          ? new Date().toISOString()
-          : null
-      };
-
-      if (!payload.title || !payload.content) {
-        throw new Error("Title और Content जरूरी हैं।");
-      }
-
-      const result = await window.supabaseClient
-        .from("articles")
-        .update(payload)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (result.error) throw result.error;
-
-      // Rebuild tags after editing title/content/category.
-      try {
-        await window.bvAutoAssignArticleTags?.(result.data, []);
-      } catch (tagError) {
-        console.warn("Dynamic tag update skipped:", tagError);
-      }
-
-      closeEditArticle();
-      await loadArticlesFromDB();
-      await loadDashboardFromDB();
-
-      alert("✅ Article successfully updated.");
-
-    } catch (error) {
-      console.warn(error);
-      alert("❌ Update failed:\n" + (error.message || "Unknown error"));
-    } finally {
-      button.disabled = false;
-      button.textContent = oldText;
-    }
-  }
-
-  async function deleteArticle(id) {
-    const ok = confirm(
-      "क्या आप इस article को permanently delete करना चाहते हैं?\n\n" +
-      "यह action वापस नहीं किया जा सकता।"
-    );
-
-    if (!ok) return;
-
-    try {
-      const userResult = await window.supabaseClient.auth.getUser();
-      if (userResult.error || !userResult.data.user) {
-        showLogin();
-        throw new Error("Admin login session समाप्त हो गया है।");
-      }
-
-      const result = await window.supabaseClient
-        .from("articles")
-        .delete()
-        .eq("id", id);
-
-      if (result.error) throw result.error;
-
-      await loadArticlesFromDB();
-      await loadDashboardFromDB();
-
-      alert("🗑️ Article delete हो गया।");
-
-    } catch (error) {
-      console.warn(error);
-      alert("❌ Delete failed:\n" + (error.message || "Unknown error"));
-    }
-  }
-
-  // Mobile menu: close it when the user taps anywhere outside the sidebar.
-  const sideMenu = document.getElementById("sidebar");
-  const menuBtnEl = document.getElementById("menuBtn");
-  const menuOverlay = document.getElementById("menuOverlay");
-
-  function closeSideMenu(){
-    sideMenu?.classList.remove("open");
-    menuOverlay?.classList.remove("show");
-    if(menuOverlay) menuOverlay.setAttribute("aria-hidden","true");
-  }
-
-  function toggleSideMenu(){
-    if(!sideMenu) return;
-    const willOpen = !sideMenu.classList.contains("open");
-    sideMenu.classList.toggle("open", willOpen);
-    menuOverlay?.classList.toggle("show", willOpen);
-    if(menuOverlay) menuOverlay.setAttribute("aria-hidden", String(!willOpen));
-  }
-
-  menuBtnEl?.addEventListener("click", function(e){
-    e.stopPropagation();
-    toggleSideMenu();
-  });
-
-  menuOverlay?.addEventListener("click", closeSideMenu);
-
-  document.addEventListener("touchstart", function(e){
-    if(window.innerWidth <= 720 && sideMenu?.classList.contains("open")){
-      if(!sideMenu.contains(e.target) && !menuBtnEl?.contains(e.target)){
-        closeSideMenu();
-      }
-    }
-  }, {passive:true});
-
-  // Edit modal HTML is declared after this script, so attach these
-  // listeners only when those elements actually exist.
-  const closeEditModalBtn = document.getElementById("closeEditModal");
-  const cancelEditBtn = document.getElementById("cancelEdit");
-  const updateArticleBtn = document.getElementById("updateArticleBtn");
-  const editArticleModal = document.getElementById("editArticleModal");
-
-  if (closeEditModalBtn) {
-    closeEditModalBtn.addEventListener("click", closeEditArticle);
-  }
-
-  if (cancelEditBtn) {
-    cancelEditBtn.addEventListener("click", closeEditArticle);
-  }
-
-  if (updateArticleBtn) {
-    updateArticleBtn.addEventListener("click", updateArticle);
-  }
-
-  if (editArticleModal) {
-    editArticleModal.addEventListener("click", function(e) {
-      if (e.target === this) closeEditArticle();
-    });
-  }
-
-  // The modal is placed after this script in the HTML.
-  // Attach the same listeners after the document has finished parsing.
-  document.addEventListener("DOMContentLoaded", function() {
-    const closeBtn = document.getElementById("closeEditModal");
-    const cancelBtn = document.getElementById("cancelEdit");
-    const updateBtn = document.getElementById("updateArticleBtn");
-    const modal = document.getElementById("editArticleModal");
-
-    if (closeBtn && !closeBtn.dataset.listenerAttached) {
-      closeBtn.dataset.listenerAttached = "1";
-      closeBtn.addEventListener("click", closeEditArticle);
-    }
-
-    if (cancelBtn && !cancelBtn.dataset.listenerAttached) {
-      cancelBtn.dataset.listenerAttached = "1";
-      cancelBtn.addEventListener("click", closeEditArticle);
-    }
-
-    if (updateBtn && !updateBtn.dataset.listenerAttached) {
-      updateBtn.dataset.listenerAttached = "1";
-      updateBtn.addEventListener("click", updateArticle);
-    }
-
-    if (modal && !modal.dataset.listenerAttached) {
-      modal.dataset.listenerAttached = "1";
-      modal.addEventListener("click", function(e) {
-        if (e.target === this) closeEditArticle();
-      });
-    }
-  });
-
-  async function loadDashboardFromDB() {
-    try {
-      const result = await window.supabaseClient
-        .from("articles")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (result.error) {
-        console.warn("Dashboard articles:", result.error);
-        const body=document.getElementById("bvRecentPostsBody");
-        if(body) body.innerHTML='<tr><td colspan="4" class="bv-empty-row">Articles load नहीं हुए: '+escapeHtml(result.error.message)+'</td></tr>';
-        return;
-      }
-
-      window.articles = result.data || [];
-      const articles = window.articles;
-      const totalViews = articles.reduce((sum,a)=>sum + Number(a.views || 0),0);
-
-      const postsEl=document.getElementById("bvTotalPosts");
-      const viewsEl=document.getElementById("bvTotalViews");
-      if(postsEl) postsEl.textContent=Number(articles.length).toLocaleString("en-IN");
-      if(viewsEl) viewsEl.textContent=totalViews.toLocaleString("en-IN");
-
-      if(typeof bvLoadDashboardAnalytics === "function"){
-        bvLoadDashboardAnalytics(7);
-      }
-
-      if(typeof bvRenderDashboard === "function") bvRenderDashboard();
-    } catch(e) {
-      console.warn(e);
-    }
-  }
-
-  function insertMarkdownLink(textareaId){
-    const textarea=document.getElementById(textareaId);
-    if(!textarea) return;
-    const start=textarea.selectionStart ?? textarea.value.length;
-    const end=textarea.selectionEnd ?? start;
-    const selected=textarea.value.slice(start,end);
-    const label=selected || "इस लिंक पर tap करें";
-    const url=prompt("Website URL डालें:", "https://");
-    if(!url) return;
-    textarea.focus();
-    textarea.setRangeText("["+label+"]("+url.trim()+")",start,end,"end");
-  }
-
-  document.getElementById("insertLinkBtn")?.addEventListener("click",function(){
-    insertMarkdownLink("content");
-  });
-  document.getElementById("editInsertLinkBtn")?.addEventListener("click",function(){
-    insertMarkdownLink("editContent");
-  });
-
-  document.getElementById("saveDraft").addEventListener("click", function() {
-    saveArticleToSupabase("draft");
-  });
-
-  document.getElementById("publishBtn").addEventListener("click", function() {
-    saveArticleToSupabase("published");
-  });
-
-
-  document.getElementById("qaPost")?.addEventListener("click",()=>openPage("article"));
-  document.getElementById("recentViewAll")?.addEventListener("click",()=>openPage("articles"));
-
-
-  // Bharat Viral dashboard: total visitors, total views, total posts and latest 4 posts.
-  function bvFormatNumber(value){
-    return Number(value || 0).toLocaleString("en-IN");
-  }
-
-  function bvGetArticleStatus(article){
-    const raw = String(article?.status ?? article?.publication_status ?? "").toLowerCase();
-    if(raw === "published" || article?.published === true || article?.is_published === true) return "published";
-    if(raw === "draft" || raw === "unpublished") return "draft";
-    // The existing panel uses published_at to identify published content.
-    if(article?.published_at) return "published";
-    return "draft";
-  }
-
-  function bvGetArticleTitle(article){
-    return article?.title || article?.headline || article?.name || "Untitled Article";
-  }
-
-  function bvGetArticleCategory(article){
-    let v = article?.category || article?.category_name || article?.article_type || article?.categories;
-    if(Array.isArray(v)) v=v.map(x=>typeof x==="object"?(x?.name||x?.slug||""):x).filter(Boolean).join(", ");
-    else if(v && typeof v === "object") v=v.name || v.slug || v.title || "";
-    return String(v || article?.category_id || "—");
-  }
-
-  function bvGetArticleId(article){
-    return article?.id || article?.article_id || "";
-  }
-
-  function bvGetArticleDate(article){
-    return article?.created_at || article?.updated_at || article?.published_at || "";
-  }
-
-  function bvRenderDashboard(){
-    const list = Array.isArray(window.articles) ? window.articles : [];
-    const getDate=(a)=>a?.created_at||a?.createdAt||a?.updated_at||a?.updatedAt||a?.published_at||a?.publishedAt||a?.date||"";
-    const getTitle=(a)=>a?.title||a?.headline||a?.name||a?.article_title||"Untitled Article";
-    const getCategory=(a)=>{
-      let v=a?.category||a?.category_name||a?.categoryName||a?.article_type||a?.type||a?.categories||a?.category_id;
-      if(Array.isArray(v)) v=v.map(x=>typeof x==='object'?(x?.name||x?.slug||x?.title||''):x).filter(Boolean).join(', ');
-      if(v&&typeof v==='object') v=v.name||v.slug||v.title||v.id||'';
-      return String(v||'—');
-    };
-    const getStatus=(a)=>{
-      const raw=String(a?.status??a?.publication_status??a?.publicationStatus??'').toLowerCase();
-      if(raw==='published'||a?.published===true||a?.is_published===true||a?.isPublished===true||a?.published_at||a?.publishedAt) return 'published';
-      return 'draft';
-    };
-    const getId=(a)=>a?.id||a?.article_id||a?.articleId||'';
-    const sorted=[...list].sort((a,b)=>{
-      const da=Date.parse(getDate(a))||0, db=Date.parse(getDate(b))||0;
-      return db-da;
-    });
-
-    const totalViews=list.reduce((sum,a)=>{
-      const v=Number(a?.views??a?.view_count??a?.viewCount??a?.total_views??a?.totalViews??0);
-      return sum+(Number.isFinite(v)?v:0);
-    },0);
-    const postsEl=document.getElementById('bvTotalPosts');
-    const viewsEl=document.getElementById('bvTotalViews');
-    if(postsEl) postsEl.textContent=bvFormatNumber(list.length);
-    if(viewsEl) viewsEl.textContent=bvFormatNumber(totalViews);
-
-    const body=document.getElementById('bvRecentPostsBody');
-    if(!body) return;
-    const latest=sorted.slice(0,4);
-    if(!latest.length){
-      body.innerHTML='<tr><td colspan="4" class="bv-empty-row">अभी कोई post उपलब्ध नहीं है।</td></tr>';
-      return;
-    }
-    body.innerHTML=latest.map(a=>{
-      const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-      const status=getStatus(a), id=esc(getId(a));
-      return '<tr>'+
-        '<td class="bv-title-cell">'+esc(getTitle(a))+'</td>'+
-        '<td class="bv-category-cell">'+esc(getCategory(a))+'</td>'+
-        '<td><span class="bv-status '+status+'">'+status+'</span></td>'+
-        '<td><div class="bv-actions">'+
-          '<button class="bv-action-btn edit" data-bv-action="edit" data-bv-id="'+id+'">✏️ Edit</button>'+
-          '<button class="bv-action-btn delete" data-bv-action="delete" data-bv-id="'+id+'">🗑️ Delete</button>'+
-        '</div></td>'+
-      '</tr>';
-    }).join('');
+        '</tr>';
+    }).join(''));
   }
 
   // Directly refresh the Latest Posts panel from Supabase. This is intentionally
@@ -5136,7 +4740,7 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 
     if (!host) return;
 
-    host.innerHTML = (r.data || []).map(n => `
+    host.innerHTML = safeRichText((r.data || []).map(n => `
       <div class="notice-row" data-notice-id="${String(n.id ?? "").replace(/"/g,"&quot;")}">
         <div>
           <strong>${escapeHtml(n.title || "Notice")}</strong>

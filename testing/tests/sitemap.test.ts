@@ -81,10 +81,10 @@ describe('sitemap handler', () => {
 
       // Check article URLs
       assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/article/test-article-1</loc>'));
-      assert.ok(body.includes('<lastmod>2024-01-01T12:00:00.000Z</lastmod>'));
+      assert.ok(body.includes('<lastmod>2024-01-01T12:00:00Z</lastmod>'));
 
       assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/article/test-article-2</loc>'));
-      assert.ok(body.includes('<lastmod>2024-01-02T12:00:00.000Z</lastmod>'));
+      assert.ok(body.includes('<lastmod>2024-01-02T12:00:00Z</lastmod>'));
 
       // Ensure item without slug is skipped
       assert.ok(!body.includes('no-slug'));

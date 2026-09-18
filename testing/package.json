@@ -19,9 +19,10 @@
   },
   "homepage": "https://github.com/manishguj4-lab/Bharat-viral#readme",
   "devDependencies": {
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.6.1",
     "tsx": "^4.23.13",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "xss": "^1.0.15"
   },
   "dependencies": {
     "html-rewriter-wasm": "^0.4.1"

@@ -26,7 +26,7 @@ function isoDate(value) {
     return null;
   }
 
-  return date.toISOString();
+  return date.toISOString().split(".")[0] + "Z";
 }
 
 async function fetchWithTimeout(

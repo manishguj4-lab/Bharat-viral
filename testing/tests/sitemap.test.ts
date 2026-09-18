@@ -76,8 +76,8 @@ describe('sitemap handler', () => {
       assert.ok(!locMatch, 'Homepage should not have a fake lastmod');
 
       // Check category URLs
-      assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/category.html?category=news</loc>'));
-      assert.ok(!body.includes('<loc>https://bharatviralnews.netlify.app/category.html?category=trending</loc>')); // Filtered out
+      assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/category/news</loc>'));
+      assert.ok(!body.includes('<loc>https://bharatviralnews.netlify.app/category/trending</loc>')); // Filtered out
 
       // Check article URLs
       assert.ok(body.includes('<loc>https://bharatviralnews.netlify.app/article/test-article-1</loc>'));

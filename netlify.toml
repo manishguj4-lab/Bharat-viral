@@ -17,6 +17,11 @@
   directory = "netlify/functions"
 
 [[redirects]]
+  from = "/category/:slug"
+  to = "/category.html?category=:slug"
+  status = 200
+
+[[redirects]]
   from = "/news-sitemap.xml"
   to = "/.netlify/functions/news-sitemap"
   status = 200

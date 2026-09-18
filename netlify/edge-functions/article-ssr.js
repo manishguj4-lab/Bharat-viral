@@ -65,8 +65,8 @@ export default async (request, context) => {
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
 
-  const title = article.title || "Bharat Viral";
-  const description = article.excerpt || article.description || `${title} — Bharat Viral पर पूरी खबर पढ़ें।`;
+  const title = article.seo_title || article.seoTitle || article.title || "Bharat Viral";
+  const description = article.seo_description || article.seoDescription || article.meta_description || article.metaDescription || article.excerpt || article.description || article.title || "Bharat Viral पर ताजा खबरें और वायरल समाचार पढ़ें।";
 
   const originalImage =
   article.image_url ||
@@ -92,6 +92,7 @@ const metaImage =
   }
 
   const category = article.category || article.category_name || "News";
+  const categorySlug = String(article.category_slug || category).toLowerCase().trim().replace(/[\s_]+/g, '-');
   const author = article.author || article.author_name || "Bharat Viral";
   const isOrganizationAuthor = author.toLowerCase().includes("bharat viral") || author.toLowerCase().includes("editorial");
 
@@ -163,7 +164,7 @@ const metaImage =
         "@type": "ListItem",
         "position": 2,
         "name": category,
-        "item": `${site}/category.html?category=${encodeURIComponent(category.toLowerCase())}`
+        "item": `${site}/category/${encodeURIComponent(categorySlug)}`
       },
       {
         "@type": "ListItem",
@@ -183,6 +184,37 @@ const metaImage =
   // Fetch the actual article-template.html file to act as the template
   const templateResponse = await fetch(new URL("/article-template.html", request.url));
 
+  // Fetch related articles for SSR internal linking
+  let relatedHtml = '';
+  try {
+    const relatedCategory = categorySlug || 'news';
+    const relatedEndpoint = `${SUPABASE_URL}/rest/v1/articles?select=id,title,image_url,published_at,created_at,category_slug,slug&status=eq.published&slug=neq.${encodeURIComponent(slug)}&order=published_at.desc&limit=6`;
+    const relatedResponse = await fetch(relatedEndpoint, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+      },
+    });
+
+    if (relatedResponse.ok) {
+      const relatedRows = await relatedResponse.json();
+      if (Array.isArray(relatedRows) && relatedRows.length > 0) {
+        const cards = relatedRows.map(x => {
+          const href = x.slug ? `/article/${encodeURIComponent(x.slug)}` : `article.html?id=${encodeURIComponent(x.id)}`;
+          const imgMarkup = x.image_url
+            ? `<img src="${esc(x.image_url)}" alt="${esc(x.title)}" loading="lazy" decoding="async">`
+            : '';
+          const catName = esc(String(x.category_slug || 'NEWS').replace(/-/g, ' ').toUpperCase());
+          return `<a class="art-related-card" href="${href}">${imgMarkup}<div class="art-related-card-body"><div class="art-related-card-title">${esc(x.title)}</div><div class="art-related-card-meta">${catName}</div></div></a>`;
+        }).join('');
+
+        relatedHtml = `<section class="art-related-news"><h2>Related News</h2><div class="art-related-grid">${cards}</div></section>`;
+      }
+    }
+  } catch {
+    relatedHtml = '';
+  }
+
   const articleBoxHtml = `
     ${hasArticleImage
   ? `<img class="art-hero" src="${esc(image)}" alt="${esc(title)}" itemprop="image" loading="eager">`
@@ -195,6 +227,7 @@ const metaImage =
       <div class="art-meta">${esc(author)}${published ? ` · <time datetime="${esc(published)}" itemprop="datePublished">${esc(published)}</time>` : ''}</div>
       <div class="art-excerpt" itemprop="description">${esc(description)}</div>
       <div class="art-content" itemprop="articleBody">${sanitizedContent}</div>
+      ${relatedHtml}
     </div>
   `;
 

@@ -5,6 +5,15 @@
   SECRETS_SCAN_OMIT_KEYS = "SUPABASE_KEY,SUPABASE_URL"
   SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0,https://ocarsylhsyxjqpzidndb.supabase.co"
 
+
+[[edge_functions]]
+  path = "/category/*"
+  function = "category-ssr"
+
+[[edge_functions]]
+  path = "/category.html"
+  function = "category-ssr"
+
 [[edge_functions]]
   path = "/article/*"
   function = "article-ssr"
@@ -16,10 +25,6 @@
 [functions]
   directory = "netlify/functions"
 
-[[redirects]]
-  from = "/category/:slug"
-  to = "/category.html?category=:slug"
-  status = 200
 
 [[redirects]]
   from = "/news-sitemap.xml"

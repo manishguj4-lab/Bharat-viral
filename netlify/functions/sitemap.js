@@ -267,7 +267,7 @@ export default async function sitemap(req) {
       for (const category of categories) {
         const slug = String(category.slug).trim();
         const categoryUrl =
-          `${SITE}/category.html?category=` +
+          `${SITE}/category/` +
           encodeURIComponent(slug);
 
         addUrl(

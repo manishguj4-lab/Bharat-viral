@@ -7,14 +7,14 @@ Bharat Viral is an Indian news and information platform. It provides accurate, t
 https://bharatviralnews.netlify.app/
 
 ## Content Categories
-Categories are accessed via the pattern `https://bharatviralnews.netlify.app/category.html?category={slug}`.
+Categories are accessed via the pattern `https://bharatviralnews.netlify.app/category/{slug}`.
 Some of the main categories include:
-- News: https://bharatviralnews.netlify.app/category.html?category=news
-- Education: https://bharatviralnews.netlify.app/category.html?category=education
-- Sports: https://bharatviralnews.netlify.app/category.html?category=sports
-- Technology: https://bharatviralnews.netlify.app/category.html?category=technology
-- Social Media: https://bharatviralnews.netlify.app/category.html?category=social
-- Rashifal: https://bharatviralnews.netlify.app/category.html?category=rashifal
+- News: https://bharatviralnews.netlify.app/category/news
+- Education: https://bharatviralnews.netlify.app/category/education
+- Sports: https://bharatviralnews.netlify.app/category/sports
+- Technology: https://bharatviralnews.netlify.app/category/technology
+- Social Media: https://bharatviralnews.netlify.app/category/social
+- Rashifal: https://bharatviralnews.netlify.app/category/rashifal
 
 ## Important Public Pages
 - About Us: https://bharatviralnews.netlify.app/about.html

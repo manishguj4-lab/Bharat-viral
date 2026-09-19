@@ -148,7 +148,10 @@
 
     const params = new URLSearchParams(location.search);
 
-    let wanted = (params.get('category') || 'news')
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    const pathCategory = (pathParts[0] === 'category' && pathParts[1]) ? decodeURIComponent(pathParts[1]) : '';
+
+    let wanted = (pathCategory || params.get('category') || 'news')
       .toLowerCase()
       .trim();
 
@@ -171,9 +174,9 @@
 
     function getCategoryCanonicalUrl() {
       return (
-        'https://bharatviralnews.netlify.app/category.html?category=' +
+        'https://bharatviralnews.netlify.app/category/' +
         encodeURIComponent(wanted) +
-        (page > 1 ? '&page=' + page : '')
+        (page > 1 ? '?page=' + page : '')
       );
     }
 
@@ -195,7 +198,8 @@
       grid.innerHTML = safeRichText(
         '<div class="cat-loading" role="status">' +
         esc(t) +
-        '</div>';
+        '</div>'
+      );
 
       pagination.innerHTML = '';
     }
@@ -204,7 +208,8 @@
       grid.innerHTML = safeRichText(
         '<div class="cat-empty" role="alert">' +
         esc(t) +
-        '</div>';
+        '</div>'
+      );
 
       pagination.innerHTML = '';
     }
@@ -405,7 +410,8 @@
         list.map(card).join('') ||
         '<div class="cat-empty">' +
         'इस category में अभी कोई प्रकाशित खबर उपलब्ध नहीं है।' +
-        '</div>';
+        '</div>'
+      );
 
       renderPagination(total);
     }
@@ -420,9 +426,9 @@
 
       if (page > pages) {
         location.replace(
-          'category.html?category=' +
+          '/category/' +
           encodeURIComponent(wanted) +
-          '&page=1'
+          '?page=1'
         );
 
         return;
@@ -438,10 +444,9 @@
       const make = (p, label, c = '') =>
         '<a class="' +
         c +
-        '" href="category.html?category=' +
+        '" href="/category/' +
         encodeURIComponent(wanted) +
-        '&page=' +
-        p +
+        (p > 1 ? '?page=' + p : '') +
         '">' +
         label +
         '</a>';
@@ -781,21 +786,21 @@
         </a>
 
         <a
-          href="/category.html?category=news"
+          href="/category/news"
           style="color:#00AEEF;font-weight:bold;text-decoration:none;"
         >
           News
         </a>
 
         <a
-          href="/category.html?category=fact-check"
+          href="/category/fact-check"
           style="color:#00AEEF;font-weight:bold;text-decoration:none;"
         >
           Fact Check
         </a>
 
         <a
-          href="/category.html?category=tech-education"
+          href="/category/tech-education"
           style="color:#00AEEF;font-weight:bold;text-decoration:none;"
         >
           Tech &amp; Education

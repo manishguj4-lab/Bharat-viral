@@ -128,7 +128,7 @@ footer{background:#171717;color:#fff;padding:35px 20px 15px}.footer-grid{width:1
 .top-bar{font-size:9px;padding:6px 10px}.header-inner{min-height:85px;padding:8px 12px;gap:10px}.logo{width:70px;height:70px}
 .brand h1{font-size:20px}.brand p{font-size:9px;margin-top:3px}.search-btn{width:40px;height:40px;font-size:19px}
 .nav-inner{padding:0 7px}.nav-item{font-size:9px;padding:12px 9px}.home-btn{padding:8px 10px}.container{padding:10px}
-.hero{height:220px;min-height:0}.hero-content{display:none}.hero-image{height:220px}.hero h2{font-size:22px}.hero p{font-size:12px}
+.hero{height:230px;min-height:230px}.hero-content{display:none}.hero-image{height:230px}.hero h2{font-size:22px}.hero p{font-size:12px}
 .categories{grid-template-columns:repeat(5,1fr)}.category{padding:14px 4px}.category-icon{font-size:20px}.category h3{font-size:8px}
 .section-title{font-size:18px}.section-more{font-size:9px;padding:6px 9px}.news-grid{grid-template-columns:repeat(2,1fr);gap:9px}
 .news-img{height:115px;font-size:38px}.news-body{padding:9px}.news-body h3{font-size:13px;color:#005b82;font-weight:900}.news-body p{font-size:9px}
@@ -524,9 +524,9 @@ html,body{max-width:100%;overflow-x:hidden!important}
 </style>
 
 <!-- Supabase client: required for live admin settings, notices and ads -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/supabase-client.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.4.15/purify.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="/supabase-client.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.4.15/purify.min.js"></script>
 </head>
 
 <body>
@@ -592,6 +592,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
 <button type="button" class="read-btn" id="heroReadBtn" onclick="openArticle('भारत की महत्वपूर्ण खबरें')">पूरी खबर पढ़ें</button>
 </div>
 <div class="hero-image" id="heroImage">
+<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 450' fill='%23e9eef2'%3E%3Crect width='800' height='450'/%3E%3C/svg%3E" alt="Hero placeholder" class="hero-slide-img" fetchpriority="high" id="initialHeroImg">
 <button class="hero-arrow prev" id="heroPrev" type="button" aria-label="Previous news">‹</button>
 <button class="hero-arrow next" id="heroNext" type="button" aria-label="Next news">›</button>
 <div class="hero-dots" id="heroDots"></div>
@@ -600,7 +601,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
 
 <div class="bv-manual-ad-slot" data-ad-slot="homepage_top" style="display:none;width:100%;max-width:100%;margin:18px auto;text-align:center;overflow:hidden;"></div>
 
-<section class="categories" id="dynamicCategoryCards"><div class="bv-category-nav-loading">Categories load हो रही हैं...</div></section>
+<section class="categories" id="dynamicCategoryCards"><div class="category"><div class="category-icon">⏳</div><span class="category-title" style="display:block; font-size:13px; font-weight:bold; margin-top:8px">Loading...</span></div><div class="category"></div><div class="category"></div><div class="category"></div><div class="category"></div></section>
 
 
 
@@ -871,7 +872,7 @@ async function loadPublishedArticles(){
         {headers:H,cache:"default"}
       ),
       fetch(
-        U+"/rest/v1/articles?select=*&order=created_at.desc&limit=200",
+        U+"/rest/v1/articles?select=*&order=created_at.desc&limit=50",
         {headers:H,cache:"default"}
       )
     ]);

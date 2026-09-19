@@ -1564,7 +1564,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
     <p style="color:#718096;line-height:1.7">नया published article और active category sitemap में automatically शामिल होते हैं, बशर्ते Cloudflare sitemap function deploy हो।</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-red" id="refreshSitemapBtn">🔄 Check Sitemap</button>
-      <a class="btn" href="/sitemap.xml" target="_blank" style="font-size:12px;padding:7px 10px;text-decoration:none">🗺️ Open sitemap.xml</a>
+      <a class="btn" href="/sitemap.xml" target="_blank" rel="noopener noreferrer" style="font-size:12px;padding:7px 10px;text-decoration:none">🗺️ Open sitemap.xml</a>
     </div>
     <div id="sitemapStatus" style="margin-top:12px;padding:10px;border-radius:9px;background:#f7fafc;color:#475569;font-size:12px">Sitemap status check करें।</div>
   </div></div>
@@ -2143,7 +2143,7 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
       '<td><span class="tag">'+escapeHtml(a.status||"draft")+'</span></td>'+
       '<td style="color:'+(title?'#166534':'#b51219')+'">'+escapeHtml(clip(title||"Missing",55))+'</td>'+
       '<td style="color:'+(desc?'#166534':'#b51219')+'">'+escapeHtml(clip(desc||"Missing",75))+'</td>'+
-      '<td><a href="'+escapeHtml(canonical)+'" target="_blank" style="font-size:11px">'+escapeHtml(clip(canonical,55))+'</a></td>'+
+      '<td><a href="'+escapeHtml(canonical)+'" target="_blank" rel="noopener noreferrer" style="font-size:11px">'+escapeHtml(clip(canonical,55))+'</a></td>'+
       '<td><button type="button" class="seo-edit-btn" data-id="'+escapeHtml(a.id)+'" style="padding:6px 10px;border:1px solid #bbb;border-radius:6px;background:#fff;cursor:pointer">✏️ Edit SEO</button></td>'+
     '</tr>';
   }).join("");

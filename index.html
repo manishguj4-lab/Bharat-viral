@@ -542,17 +542,37 @@ html,body{max-width:100%;overflow-x:hidden!important}
     <div class="bv-logo-name">BHARAT<br>VIRAL</div>
   </div>
 </div>
-<div class="brand"><h1>BHARAT VIRAL</h1><p>जो वायरल है, उसकी सच्ची जानकारी</p></div>
-<button class="search-btn" id="searchBtn" aria-label="Search">🔍</button>
+<div class="brand"><h1>BHARAT VIRAL</h1><p data-i18n="brand_p">जो वायरल है, उसकी सच्ची जानकारी</p></div>
+<div class="header-controls" style="display:flex; gap:8px; align-items:center; position:relative;">
+  <button class="lang-btn" id="langBtn" onclick="toggleLangMenu(event)" aria-label="Language">🌐</button>
+  <div id="langDropdown" class="bv-lang-dropdown" hidden>
+    <button onclick="setLanguage('hi')">Hindi <span id="hiStatus">ON</span></button>
+    <button onclick="setLanguage('en')">English <span id="enStatus">OFF</span></button>
+  </div>
+  <button class="search-btn" id="searchBtn" aria-label="Search">🔍</button>
+  <button class="burger-menu-btn" id="burgerBtn" onclick="toggleBurgerMenu(event)" aria-label="Menu">☰</button>
+  <div id="burgerDropdown" class="bv-burger-dropdown" hidden>
+      <a href="/" data-i18n="home">Home</a>
+      <a href="#home" data-i18n="all_categories">All Categories</a>
+      <a href="/about.html" data-i18n="about_us">About Us</a>
+      <a href="/contact.html" data-i18n="contact_us">Contact Us</a>
+    <div class="bv-burger-settings">
+        <span data-i18n="settings">Settings</span>
+      <label class="bv-read-mode-toggle" style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+          <input type="checkbox" id="readModeToggle" onchange="toggleReadMode()"> <span data-i18n="read_mode">Read Mode</span>
+      </label>
+    </div>
+  </div>
+</div>
 </div>
 <div class="search-panel" id="searchPanel">
 <div class="search-inner">
-<input type="text" id="searchInput" placeholder="खबर, शिक्षा, टेक्नोलॉजी खोजें..." autocomplete="off">
+<input type="text" id="searchInput" data-i18n="search_placeholder" placeholder="खबर, शिक्षा, टेक्नोलॉजी खोजें..." autocomplete="off">
 <button class="search-submit" onclick="performSearch()" aria-label="Submit search">Search</button>
 <button class="close-search" onclick="closeSearch()" aria-label="Close search">✕</button>
 </div>
 <div id="searchKeywords" class="bv-search-keywords">
-  <span class="bv-search-keyword-title">🔍 Popular Keywords</span>
+  <span class="bv-search-keyword-title" data-i18n="popular_keywords">🔍 Popular Keywords</span>
   <div id="searchKeywordList" class="bv-search-keyword-list">
     <button type="button" class="bv-keyword-chip">News</button>
     <button type="button" class="bv-keyword-chip">Entertainment</button>
@@ -566,10 +586,10 @@ html,body{max-width:100%;overflow-x:hidden!important}
 
 <!-- Dynamic Breaking News -->
 <div id="bvBreakingNews" class="bv-breaking-wrap" aria-label="Breaking News">
-  <div class="bv-breaking-label">📌 BREAKING NEWS</div>
+  <div class="bv-breaking-label" data-i18n="breaking_label">📌 BREAKING NEWS</div>
   <div class="bv-breaking-viewport">
     <div id="bvBreakingTrack" class="bv-breaking-track">
-      <div class="bv-breaking-empty">ताज़ा खबरें लोड हो रही हैं...</div>
+      <div class="bv-breaking-empty" data-i18n="breaking_empty">ताज़ा खबरें लोड हो रही हैं...</div>
     </div>
   </div>
 </div>
@@ -1749,5 +1769,6 @@ if ("caches" in window) {
 }
 </script>
 <script src="/assets/js/image-fallback.js"></script>
+<script src="/assets/js/ui-controls.js"></script>
 </body>
 </html>

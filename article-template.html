@@ -36,9 +36,32 @@
 <div class="bv-manual-ad-slot" data-ad-slot="article_top"
      style="display:none;width:100%;max-width:100%;margin:18px auto;text-align:center;overflow:hidden;"></div>
 
-<header class="art-top"><a href="/">← Bharat Viral</a><span>FULL NEWS</span></header>
+<header class="art-top" style="display:flex; justify-content:space-between; align-items:center; position:relative;">
+  <a href="/">← Bharat Viral</a>
+  <div class="header-controls" style="display:flex; gap:8px; align-items:center; position:relative;">
+    <button class="lang-btn" id="langBtn" onclick="toggleLangMenu(event)" aria-label="Language" style="width:36px; height:36px; font-size:18px;">🌐</button>
+    <div id="langDropdown" class="bv-lang-dropdown" hidden>
+      <button onclick="setLanguage('hi')">Hindi <span id="hiStatus">ON</span></button>
+      <button onclick="setLanguage('en')">English <span id="enStatus">OFF</span></button>
+    </div>
+    <button class="burger-menu-btn" id="burgerBtn" onclick="toggleBurgerMenu(event)" aria-label="Menu" style="width:36px; height:36px; font-size:18px;">☰</button>
+    <div id="burgerDropdown" class="bv-burger-dropdown" hidden>
+      <a href="/" data-i18n="home">Home</a>
+      <a href="#home" data-i18n="all_categories">All Categories</a>
+      <a href="/about.html" data-i18n="about_us">About Us</a>
+      <a href="/contact.html" data-i18n="contact_us">Contact Us</a>
+      <div class="bv-burger-settings">
+        <span data-i18n="settings">Settings</span>
+        <label class="bv-read-mode-toggle" style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+          <input type="checkbox" id="readModeToggle" onchange="toggleReadMode()"> <span data-i18n="read_mode">Read Mode</span>
+        </label>
+      </div>
+    </div>
+  </div>
+</header>
 <div class="art-wrap"><a class="art-back" href="/">← वापस Homepage पर</a><article class="art-article" id="articleBox"><div id="loading" class="art-body">Article loading…</div></article></div>
 <script src="/supabase-client.js"></script>
+<script src="/assets/js/ui-controls.js"></script>
 <script>
 
 

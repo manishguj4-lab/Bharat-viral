@@ -18,6 +18,7 @@
 <link rel="canonical" href="https://bharatviralnews.netlify.app/">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta property="og:type" content="website">
+<meta property="og:locale" content="hi_IN">
 <meta property="og:site_name" content="Bharat Viral">
 <meta property="og:title" content="Bharat Viral | जो वायरल है, उसकी सच्ची जानकारी">
 <meta property="og:description" content="Bharat Viral पर पाएं भारत की ताजा वायरल खबरें, ट्रेंडिंग न्यूज़, सरकारी नौकरी, रिजल्ट, एडमिट कार्ड, भर्ती और जरूरी अपडेट की सच्ची व भरोसेमंद जानकारी।">
@@ -559,7 +560,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
     <div class="bv-burger-settings">
         <span data-i18n="settings">Settings</span>
       <label class="bv-read-mode-toggle" style="cursor:pointer; display:flex; align-items:center; gap:5px;">
-          <input type="checkbox" id="readModeToggle" onchange="toggleReadMode()"> <span data-i18n="read_mode">Read Mode</span>
+          <input type="checkbox" id="readModeToggle" aria-label="Toggle Read Mode" onchange="toggleReadMode()"> <span data-i18n="read_mode">Read Mode</span>
       </label>
     </div>
   </div>
@@ -567,7 +568,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
 </div>
 <div class="search-panel" id="searchPanel">
 <div class="search-inner">
-<input type="text" id="searchInput" data-i18n="search_placeholder" placeholder="खबर, शिक्षा, टेक्नोलॉजी खोजें..." autocomplete="off">
+<input type="text" id="searchInput" aria-label="Search" data-i18n="search_placeholder" placeholder="खबर, शिक्षा, टेक्नोलॉजी खोजें..." autocomplete="off">
 <button class="search-submit" onclick="performSearch()" aria-label="Submit search">Search</button>
 <button class="close-search" onclick="closeSearch()" aria-label="Close search">✕</button>
 </div>

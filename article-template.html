@@ -79,11 +79,12 @@ function decodeHTMLText(raw){
 }
 
 let domPurifyHookAdded = false;
+if (typeof window._bvGlobalPurifyHookAdded === "undefined") { window._bvGlobalPurifyHookAdded = false; }
 function sanitizeArticleHTML(raw){
  let source=String(raw??'');
  source=decodeHTMLText(source);
  if(window.DOMPurify){
-  if (!domPurifyHookAdded) {
+  if (!window._bvGlobalPurifyHookAdded) {
     window.DOMPurify.addHook('afterSanitizeAttributes', function (node) {
       if ('target' in node) {
         node.setAttribute('target', '_blank');
@@ -98,7 +99,7 @@ function sanitizeArticleHTML(raw){
         }
       }
     });
-    domPurifyHookAdded = true;
+    window._bvGlobalPurifyHookAdded = true;
   }
   return window.DOMPurify.sanitize(source, {
     ALLOWED_TAGS: ["p", "div", "h1", "h2", "h3", "h4", "h5", "h6", "strong", "b", "em", "i", "u", "ul", "ol", "li", "a", "br", "blockquote", "table", "thead", "tbody", "tr", "th", "td", "img", "figure", "figcaption", "iframe", "video", "source"],

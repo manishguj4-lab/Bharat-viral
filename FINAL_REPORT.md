@@ -6,16 +6,20 @@ The repository was comprehensively audited against the constraints provided (pre
 ## 2. Files Changed
 *   `admin.html`
 *   `index.html`
+*   `article.html`
+*   `article-template.html`
+*   `_headers`
 
 ## 3. SEO Issues Found and Fixed
 *   **Accessibility / SEO:** Key interactive elements in `index.html` (`.to-top`, `#bvInstallBtn`, `#bvNotifyBtn`) were missing `aria-label`s, harming accessibility scores which factor into modern SEO. Added descriptive `aria-label`s to these elements.
+*   Added `X-Robots-Tag: noindex, nofollow` header to `admin.html`, `admin-sw.js`, and `admin-manifest.json` in `_headers` to properly block indexing. Also added a meta robots tag to `admin.html`.
 *   *Note on `lang` attributes:* The initial audit found that the HTML template files (like `index.html`, `admin.html`, `about.html`, etc.) already correctly included `<html lang="hi">`, satisfying a major SEO requirement for localized content.
 
 ## 4. GEO Issues Found and Fixed
 *   No significant GEO blockers were found in the scope of the applied changes; existing `llms.txt` and schema injections via edge functions are functioning as designed.
 
 ## 5. Performance Issues Found and Fixed
-*   **DOMPurify Implementation Flaw:** Discovered a major performance regression in how `DOMPurify.addHook` was implemented in `index.html`. It was attaching a new hook to the global `window.DOMPurify` object every time `safeRichText` was called, creating an exponential memory leak and main-thread lag over time. Fixed by guarding the hook attachment with a global boolean flag (`window._bvGlobalPurifyHookAdded = true`), ensuring it runs only once per page load.
+*   **DOMPurify Implementation Flaw:** Discovered a major performance regression in how `DOMPurify.addHook` was implemented in `index.html`, `article.html`, `article-template.html`, and `admin.html`. It was attaching a new hook to the global `window.DOMPurify` object every time it was called, creating an exponential memory leak and main-thread lag over time. Fixed by guarding the hook attachment with a global boolean flag (`window._bvGlobalPurifyHookAdded = true`), ensuring it runs only once per page load across all routes.
 
 ## 6. Security Issues Found and Fixed
 *   **Reverse Tabnabbing (XSS/Phishing Risk):** Discovered multiple external links (`target="_blank"`) missing `rel="noopener noreferrer"`.

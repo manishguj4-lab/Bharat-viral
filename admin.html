@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/admin-manifest.json">
 <meta name="theme-color" content="#0b2a5b">
+<meta name="robots" content="noindex, nofollow">
 <title>Bharat Viral — Admin Panel</title>
 <link rel="stylesheet" href="/assets/css/global.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -2165,13 +2166,13 @@ body.bv-dark #themeBtn{background:#17263b!important;color:#fff!important;border-
   const sb = () => window.supabaseClient;
 function safeRichText(html) {
     if (window.DOMPurify) {
-      if (!window.domPurifyHookAdded) {
+      if (!window._bvGlobalPurifyHookAdded) {
         window.DOMPurify.addHook('afterSanitizeAttributes', function (node) {
           if (node.tagName === 'A' && node.getAttribute('target') === '_blank') {
             node.setAttribute('rel', 'noopener noreferrer');
           }
         });
-        window.domPurifyHookAdded = true;
+        window._bvGlobalPurifyHookAdded = true;
       }
       return window.DOMPurify.sanitize(html, {
         ALLOWED_TAGS: ['p','br','strong','em','u','h1','h2','h3','h4','ul','ol','li','a','img','blockquote','code','pre','figure','figcaption', 'iframe', 'video', 'source', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'div', 'span'],

@@ -34,8 +34,15 @@ export default async (request, context) => {
     }
   }
 
-  if (url.pathname === "/category.html" && !slug) {
-      slug = "news"; // Default to news if accessing category.html directly without params
+  if (url.pathname === "/category.html") {
+    slug = slug || "news"; // Default to news if accessing category.html directly without params
+    return new Response(null, {
+      status: 301,
+      headers: {
+        "Location": `/category/${encodeURIComponent(slug)}`,
+        "cache-control": "public, max-age=3600"
+      }
+    });
   }
 
   if (!slug) {

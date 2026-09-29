@@ -35,3 +35,25 @@
   from = "/api/*"
   to = "/.netlify/functions/api/:splat"
   status = 200
+
+[[redirects]]
+  from = "/corrections-policy.html"
+  to = "/corrections-policy"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/grievance-policy.html"
+  to = "/grievance-policy"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/article"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/article/"
+  to = "/"
+  status = 301

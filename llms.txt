@@ -23,8 +23,8 @@ Some of the main categories include:
 - [Terms & Conditions](https://bharatviralnews.netlify.app/terms.html)
 - [Editorial Policy](https://bharatviralnews.netlify.app/editorial-policy.html)
 - [Fact Check Policy](https://bharatviralnews.netlify.app/fact-check-policy.html)
-- [Corrections Policy](https://bharatviralnews.netlify.app/corrections-policy)
-- [Grievance Policy](https://bharatviralnews.netlify.app/grievance-policy)
+- [Corrections Policy](https://bharatviralnews.netlify.app/corrections-policy.html)
+- [Grievance Policy](https://bharatviralnews.netlify.app/grievance-policy.html)
 
 ## Article URL Structure
 Articles are located at: https://bharatviralnews.netlify.app/article/{slug}

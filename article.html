@@ -390,6 +390,75 @@ load().catch(e=>{document.getElementById('articleBox').innerHTML='<div class="ar
      style="display:none;width:100%;max-width:100%;margin:18px auto;text-align:center;overflow:hidden;"></div>
 
 
+<script id="bv-live-manual-ads">
+(function(){
+"use strict";
+const SUPA=window.supabaseClient;
+
+function runScripts(container, code){
+  const tpl=document.createElement("template");
+  tpl.innerHTML=String(code||"").trim();
+  const nodes=[...tpl.content.childNodes];
+  container.innerHTML="";
+  nodes.forEach(node=>{
+    if(node.nodeType===1 && node.tagName.toLowerCase()==="script"){
+      const sc=document.createElement("script");
+      for(const a of [...node.attributes]) sc.setAttribute(a.name,a.value);
+      if(node.src){ sc.async=node.async; sc.defer=node.defer; }
+      else sc.textContent=node.textContent;
+      container.appendChild(sc);
+    }else{
+      container.appendChild(node.cloneNode(true));
+    }
+  });
+}
+
+function addCloseButton(container){
+  const wrap=document.createElement("div");
+  wrap.className="bv-ad-wrap";
+  wrap.style.cssText="position:relative;width:100%;display:block;margin:18px auto;";
+  const close=document.createElement("button");
+  close.type="button";
+  close.textContent="×";
+  close.setAttribute("aria-label","Close advertisement");
+  close.style.cssText="position:absolute;right:2px;top:-18px;width:22px;height:22px;border:0;border-radius:50%;background:#222;color:#fff;font:bold 18px/20px Arial;cursor:pointer;z-index:10;padding:0;";
+  close.onclick=()=>wrap.remove();
+  container.parentNode.insertBefore(wrap,container);
+  wrap.appendChild(container);
+  wrap.appendChild(close);
+}
+
+async function renderManualAds(){
+  if(!SUPA)return;
+  const r=await SUPA.from("advertisements").select("*").eq("enabled",true).order("display_order",{ascending:true});
+  if(r.error){console.warn("Manual ads:",r.error.message);return;}
+  document.querySelectorAll(".bv-manual-ad-slot").forEach(el=>{
+    if(el.dataset.rendered==="1") return;
+    el.style.display="none";
+  });
+  const slots=[...document.querySelectorAll(".bv-manual-ad-slot")];
+  (r.data||[]).forEach(ad=>{
+    const placement=String(ad.placement||ad.slot_name||"").trim().toLowerCase();
+    if(!placement || !ad.ad_code)return;
+    slots.filter(el=>String(el.dataset.adSlot||"").toLowerCase()===placement && el.dataset.rendered!=="1")
+      .forEach(el=>{
+        el.dataset.rendered="1";
+        el.style.display="block";
+        runScripts(el,ad.ad_code);
+        addCloseButton(el);
+      });
+  });
+}
+function start(){
+  renderManualAds();
+  window.addEventListener("bv:article-rendered",renderManualAds);
+  setInterval(renderManualAds,60000);
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
+})();
+</script>
+
+
 <script id="bv-all-settings-live-public">
 (function(){
 "use strict";

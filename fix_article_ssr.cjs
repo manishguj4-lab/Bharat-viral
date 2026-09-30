@@ -1,9 +1,0 @@
-const fs = require('fs');
-let code = fs.readFileSync('netlify/edge-functions/article-ssr.js', 'utf8');
-
-code = code.replace(
-  '  const slug = url.searchParams.get("slug") || decodeURIComponent(url.pathname.replace(/^\\/article\\/?/, ""));\n\n  if (!slug || slug === "article.html") {\n    return createErrorResponse(404, "Not Found", "Article not found.");\n  }',
-  `  const slug = url.searchParams.get("slug") || decodeURIComponent(url.pathname.replace(/^\\/article\\/?/, ""));\n\n  if (!slug || slug === "article.html") {\n    // Redirect /article, /article/, and /article.html (without id/slug) to home\n    const id = url.searchParams.get("id");\n    if (!id) {\n      return new Response(null, {\n        status: 301,\n        headers: {\n          "Location": "/",\n          "cache-control": "public, max-age=3600"\n        }\n      });\n    }\n    \n    // Handle legacy ?id=... requests by fetching the article and redirecting to its canonical URL\n    try {\n      const idEndpoint = \`\${SUPABASE_URL}/rest/v1/articles?select=slug&id=eq.\${encodeURIComponent(id)}&status=eq.published&limit=1\`;\n      const idResponse = await fetch(idEndpoint, {\n        headers: {\n          apikey: SUPABASE_KEY,\n          Authorization: \`Bearer \${SUPABASE_KEY}\`,\n        },\n      });\n      if (idResponse.ok) {\n         const rows = await idResponse.json();\n         if (rows && rows.length > 0 && rows[0].slug) {\n            return new Response(null, {\n              status: 301,\n              headers: {\n                "Location": \`/article/\${encodeURIComponent(rows[0].slug)}\`,\n                "cache-control": "public, max-age=3600"\n              }\n            });\n         }\n      }\n    } catch (e) {}\n    \n    return createErrorResponse(404, "Not Found", "Article not found.");\n  }`
-);
-
-fs.writeFileSync('netlify/edge-functions/article-ssr.js', code);

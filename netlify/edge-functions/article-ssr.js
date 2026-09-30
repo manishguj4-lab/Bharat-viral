@@ -29,41 +29,6 @@ export default async (request, context) => {
   const slug = url.searchParams.get("slug") || decodeURIComponent(url.pathname.replace(/^\/article\/?/, ""));
 
   if (!slug || slug === "article.html") {
-    // Redirect /article, /article/, and /article.html (without id/slug) to home
-    const id = url.searchParams.get("id");
-    if (!id) {
-      return new Response(null, {
-        status: 301,
-        headers: {
-          "Location": "/",
-          "cache-control": "public, max-age=3600"
-        }
-      });
-    }
-
-    // Handle legacy ?id=... requests by fetching the article and redirecting to its canonical URL
-    try {
-      const idEndpoint = `${SUPABASE_URL}/rest/v1/articles?select=slug&id=eq.${encodeURIComponent(id)}&status=eq.published&limit=1`;
-      const idResponse = await fetch(idEndpoint, {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-        },
-      });
-      if (idResponse.ok) {
-         const rows = await idResponse.json();
-         if (rows && rows.length > 0 && rows[0].slug) {
-            return new Response(null, {
-              status: 301,
-              headers: {
-                "Location": `/article/${encodeURIComponent(rows[0].slug)}`,
-                "cache-control": "public, max-age=3600"
-              }
-            });
-         }
-      }
-    } catch (e) {}
-
     return createErrorResponse(404, "Not Found", "Article not found.");
   }
 

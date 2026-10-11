@@ -3,30 +3,9 @@ import assert from 'node:assert';
 
 describe('article-seo handler', () => {
   before(() => {
-    global.HTMLRewriter = class HTMLRewriter {
-      constructor() { this.handlers = []; }
-      on(selector, handler) { this.handlers.push({ selector, handler }); return this; }
-      transform(response) {
-        let appendedHead = '';
-        this.handlers.forEach(h => {
-          if (h.selector === 'head' && h.handler.element) {
-            h.handler.element({
-               append: (content) => { appendedHead += content; }
-            });
-          }
-        });
-        return new Response(
-           response.text().then(text => {
-             // Ensure that we only append once and avoid string replacement issues
-             return text.replace('</head>', appendedHead + '</head>');
-           }),
-           response
-        );
-      }
-    };
+    // Ensure HTMLRewriter is undefined in runtime environment as per regression requirements
+    delete global.HTMLRewriter;
   });
-
-  after(() => { delete global.HTMLRewriter; });
 
   it('returns 503 response when missing required credentials', async () => {
     const module = await import('../../netlify/edge-functions/article-ssr.js');
@@ -203,6 +182,11 @@ describe('article-seo handler', () => {
     try {
       const response = await handler(request, {});
       assert.strictEqual(response.status, 200, "Should return 200");
+      const htmlText = await response.text();
+      assert.ok(htmlText.includes('Real Title | Bharat Viral'), "Rendered title should match article title");
+      assert.ok(htmlText.includes('application/ld+json'), "Should include JSON-LD script");
+      assert.ok(htmlText.includes('itemtype="https://schema.org/NewsArticle"'), "Should add schema itemtype to articleBox");
+      assert.ok(htmlText.includes('https://example.com/image.jpg'), "Should render article image in content box");
     } finally {
       global.fetch = originalFetch;
       global.Deno = originalDeno;

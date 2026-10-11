@@ -3,29 +3,9 @@ import assert from 'node:assert';
 
 describe('category-ssr handler', () => {
   before(() => {
-    global.HTMLRewriter = class HTMLRewriter {
-      constructor() { this.handlers = []; }
-      on(selector, handler) { this.handlers.push({ selector, handler }); return this; }
-      transform(response) {
-        let appendedHead = '';
-        this.handlers.forEach(h => {
-          if (h.selector === 'head' && h.handler.element) {
-            h.handler.element({
-               append: (content) => { appendedHead += content; }
-            });
-          }
-        });
-        return new Response(
-           response.text().then(text => {
-             return text.replace('</head>', appendedHead + '</head>');
-           }),
-           response
-        );
-      }
-    };
+    // Ensure HTMLRewriter is undefined in runtime environment as per regression requirements
+    delete global.HTMLRewriter;
   });
-
-  after(() => { delete global.HTMLRewriter; });
 
   it('returns 503 response when missing required credentials', async () => {
     const module = await import('../../netlify/edge-functions/category-ssr.js');
@@ -91,8 +71,9 @@ describe('category-ssr handler', () => {
       const response = await handler(request, {});
       assert.strictEqual(response.status, 200);
       const text = await response.text();
-      // assert.ok(text.includes('Real Title')); // Disabled because DOM is parsed via HTMLRewriter inside Netlify edge functions instead of string concatenation.
-      // assert.ok(text.includes('application/ld+json')); // Disabled because DOM is parsed via HTMLRewriter inside Netlify edge functions instead of string concatenation.
+      assert.ok(text.includes('News | Bharat Viral'), "Title should be populated");
+      assert.ok(text.includes('Real Title'), "Article title should be in grid");
+      assert.ok(text.includes('application/ld+json'), "JSON-LD schema should be injected");
     } finally {
       global.fetch = originalFetch;
       global.Deno = originalDeno;

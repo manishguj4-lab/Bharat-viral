@@ -1,4 +1,5 @@
 import xss from 'xss';
+import { parse } from 'node-html-parser';
 
 export default async (request, context) => {
   const url = new URL(request.url);
@@ -284,107 +285,59 @@ const metaImage =
     </div>
   `;
 
-  const rewriter = new HTMLRewriter()
-  .on('title', {
-    element(el) {
-      el.setInnerContent(`${title} | Bharat Viral`);
+  const templateText = await templateResponse.text();
+  const root = parse(templateText);
+
+  const titleEl = root.querySelector('title');
+  if (titleEl) titleEl.set_content(`${title} | Bharat Viral`);
+
+  const descEl = root.querySelector('meta[name="description"]');
+  if (descEl) descEl.setAttribute('content', description);
+
+  const robotsEl = root.querySelector('meta[name="robots"]');
+  if (robotsEl) robotsEl.setAttribute('content', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+
+  const canonicalEl = root.querySelector('link[id="canonicalUrl"]') || root.querySelector('link[rel="canonical"]');
+  if (canonicalEl) canonicalEl.setAttribute('href', canonical);
+
+  const ogTitle = root.querySelector('meta[property="og:title"]');
+  if (ogTitle) ogTitle.setAttribute('content', title);
+
+  const ogDesc = root.querySelector('meta[property="og:description"]');
+  if (ogDesc) ogDesc.setAttribute('content', description);
+
+  const ogUrl = root.querySelector('meta[property="og:url"]');
+  if (ogUrl) ogUrl.setAttribute('content', canonical);
+
+  const ogImage = root.querySelector('meta[property="og:image"]');
+  if (ogImage) ogImage.setAttribute('content', metaImage);
+
+  const twTitle = root.querySelector('meta[name="twitter:title"]');
+  if (twTitle) twTitle.setAttribute('content', title);
+
+  const twDesc = root.querySelector('meta[name="twitter:description"]');
+  if (twDesc) twDesc.setAttribute('content', description);
+
+  const twImage = root.querySelector('meta[name="twitter:image"]');
+  if (twImage) twImage.setAttribute('content', metaImage);
+
+  const headEl = root.querySelector('head');
+  if (headEl) {
+    headEl.appendChild(parse(`<script type="application/ld+json">${safeSchema}</script>`));
+  }
+
+  const articleBoxEl = root.querySelector('article#articleBox') || root.querySelector('#articleBox');
+  if (articleBoxEl) {
+    articleBoxEl.setAttribute('itemscope', '');
+    articleBoxEl.setAttribute('itemtype', 'https://schema.org/NewsArticle');
+    articleBoxEl.set_content(articleBoxHtml);
+  }
+
+  return new Response(root.toString(), {
+    status: 200,
+    headers: {
+      'content-type': 'text/html; charset=UTF-8',
+      'cache-control': 'public, max-age=60, s-maxage=300'
     }
-  })
-
-  .on('meta[name="description"]', {
-    element(el) {
-      el.setAttribute('content', description);
-    }
-  })
-
-  .on('meta[name="robots"]', {
-    element(el) {
-      el.setAttribute(
-        'content',
-        'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
-      );
-    }
-  })
-
-  .on('link[id="canonicalUrl"]', {
-    element(el) {
-      el.setAttribute('href', canonical);
-    }
-  })
-
-  .on('meta[property="og:title"]', {
-    element(el) {
-      el.setAttribute('content', title);
-    }
-  })
-
-  .on('meta[property="og:description"]', {
-    element(el) {
-      el.setAttribute('content', description);
-    }
-  })
-
-  .on('meta[property="og:url"]', {
-    element(el) {
-      el.setAttribute('content', canonical);
-    }
-  })
-
-  .on('meta[property="og:image"]', {
-    element(el) {
-      el.setAttribute('content', metaImage);
-    }
-  })
-
-  .on('meta[name="twitter:title"]', {
-    element(el) {
-      el.setAttribute('content', title);
-    }
-  })
-
-  .on('meta[name="twitter:description"]', {
-    element(el) {
-      el.setAttribute('content', description);
-    }
-  })
-
-  .on('meta[name="twitter:image"]', {
-    element(el) {
-      el.setAttribute('content', metaImage);
-    }
-  })
-
-  .on('head', {
-    element(el) {
-      el.append(
-        `<script type="application/ld+json">${safeSchema}</script>`,
-        { html: true }
-      );
-    }
-  })
-
-  .on('article#articleBox', {
-    element(el) {
-      el.setAttribute('itemscope', '');
-      el.setAttribute(
-        'itemtype',
-        'https://schema.org/NewsArticle'
-      );
-
-      el.setInnerContent(
-        articleBoxHtml,
-        { html: true }
-      );
-    }
-  });
-
-  const modifiedResponse = rewriter.transform(templateResponse);
-  const responseHeaders = new Headers(modifiedResponse.headers);
-  responseHeaders.set('content-type', 'text/html; charset=UTF-8');
-  responseHeaders.set('cache-control', 'public, max-age=60, s-maxage=300');
-
-  return new Response(modifiedResponse.body, {
-    status: modifiedResponse.status || 200,
-    headers: responseHeaders
   });
 };

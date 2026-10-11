@@ -25,6 +25,7 @@
     "xss": "^1.0.15"
   },
   "dependencies": {
-    "html-rewriter-wasm": "^0.4.1"
+    "html-rewriter-wasm": "^0.4.1",
+    "node-html-parser": "^9.0.4"
   }
 }

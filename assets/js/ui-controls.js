@@ -65,7 +65,10 @@ function translateUI(lang) {
       'about_us': 'About Us',
       'contact_us': 'Contact Us',
       'settings': 'Settings',
-      'read_mode': 'Read Mode'
+      'read_mode': 'Read Mode',
+      'read_more': 'Read More',
+      'see_all': 'See All →',
+      'category_empty': 'No published articles in this category today.'
     },
     'hi': {
       'brand_p': 'जो वायरल है, उसकी सच्ची जानकारी',
@@ -78,11 +81,40 @@ function translateUI(lang) {
       'about_us': 'About Us',
       'contact_us': 'Contact Us',
       'settings': 'Settings',
-      'read_mode': 'Read Mode'
+      'read_mode': 'Read Mode',
+      'read_more': 'Read More',
+      'see_all': 'सभी देखें →',
+      'category_empty': 'इस category में आज कोई प्रकाशित खबर नहीं है।'
+    }
+  };
+
+  const categoryNames = {
+    'en': {
+      'news': 'News',
+      'fact-check': 'Fact Check',
+      'tech-education': 'Tech & Education',
+      'rashifal': 'Horoscope',
+      'viral-news': 'Viral News',
+      'trending': 'Trending',
+      'jobs': 'Jobs',
+      'entertainment': 'Entertainment',
+      'sports': 'Sports'
+    },
+    'hi': {
+      'news': 'न्यूज़',
+      'fact-check': 'फैक्ट चेक',
+      'tech-education': 'टेक और शिक्षा',
+      'rashifal': 'राशिफल',
+      'viral-news': 'वायरल न्यूज़',
+      'trending': 'ट्रेंडिंग',
+      'jobs': 'सरकारी नौकरी',
+      'entertainment': 'मनोरंजन',
+      'sports': 'खेल'
     }
   };
 
   const texts = dict[lang] || dict['hi'];
+  const catDict = categoryNames[lang] || categoryNames['hi'];
 
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
@@ -96,6 +128,24 @@ function translateUI(lang) {
       }
     }
   });
+
+  document.querySelectorAll('[data-i18n-cat-name]').forEach(el => {
+    const slug = (el.getAttribute('data-i18n-cat-name') || '').toLowerCase();
+    if (catDict[slug]) {
+      el.innerText = catDict[slug];
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-cat]').forEach(el => {
+    const slug = (el.getAttribute('data-i18n-cat') || '').toLowerCase();
+    if (catDict[slug]) {
+      el.innerText = catDict[slug];
+    }
+  });
+
+  try {
+    window.dispatchEvent(new CustomEvent('bv:languageChanged', { detail: { lang } }));
+  } catch (e) {}
 }
 
 window.addEventListener('DOMContentLoaded', () => {

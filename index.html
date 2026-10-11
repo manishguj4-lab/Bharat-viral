@@ -843,7 +843,7 @@ async function loadPublishedArticles(){
   const K=window.SUPABASE_KEY || "sb_publishable_LTmMKlt5saAsFIlnF87_6A_75FFCvK0";
   const H={apikey:K,Authorization:"Bearer "+K};
 
-  const norm=v=>String(v??"").toLowerCase().trim().replace(/[\s_-]+/g,"-");
+  const norm=v=>String(v??"").toLowerCase().trim().replace(/&/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
   const catsOf=(a,categoryList)=>{
     let v=[];
     const add=value=>{
@@ -902,7 +902,7 @@ async function loadPublishedArticles(){
         {headers:H,cache:"default"}
       ),
       fetch(
-        U+"/rest/v1/articles?select=*&order=created_at.desc&limit=50",
+        U+"/rest/v1/articles?select=*&order=created_at.desc&limit=100",
         {headers:H,cache:"default"}
       )
     ]);
@@ -997,17 +997,22 @@ async function loadPublishedArticles(){
       const title=escLocal(a.title||"बड़ी खबर");
       const excerpt=escLocal(a.excerpt||a.summary||stripHtml(a.content||"").slice(0,120)||"पूरी खबर पढ़ें");
       const cat=escLocal(a.category||a.article_type||"News");
+      const catSlug=escLocal(a.category_slug||a.category||"news");
       const image=a.image_url
         ? '<div class="news-img"><img src="'+escLocal(a.image_url)+'" alt="'+title+'" loading="lazy" decoding="async" width="400" height="225"></div>'
         : '';
       const id=String(a.id||"").replace(/'/g,"\\'");
+      const dateStr = timeAgo(a.published_at || a.created_at);
       return `<article class="news-card"><a href="${a.slug ? '/article/'+encodeURIComponent(a.slug) : 'article.html?id='+encodeURIComponent(id)}" class="bv-card-link-wrapper" style="display:block;height:100%;text-decoration:none;color:inherit;">
         ${image}
         <div class="news-body">
-          <span class="news-category">${cat}</span>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span class="news-category" data-i18n-cat="${catSlug}">${cat}</span>
+            <span style="font-size:10px;color:#777;">${escLocal(dateStr)}</span>
+          </div>
           <h3>${title}</h3>
           <p>${excerpt}</p>
-          <span class="read-btn">Read More</span>
+          <span class="read-btn" data-i18n="read_more">Read More</span>
         </div>
       </a></article>`;
     };
@@ -1048,17 +1053,18 @@ async function loadPublishedArticles(){
           // Every homepage category shows its latest Top 4 by views, horizontally.
           const items=articles.filter(a=>
             (catsOf(a,window.bvHomepageCategories).includes(norm(c.slug)) ||
-             catsOf(a,window.bvHomepageCategories).includes(norm(c.id))))
+             catsOf(a,window.bvHomepageCategories).includes(norm(c.id)) ||
+             catsOf(a,window.bvHomepageCategories).includes(norm(c.name))))
             .sort((a,b)=>publishedTime(b)-publishedTime(a))
             .slice(0,4);
 
           const cards=items.map(card).join("")||
-            '<div class="dynamic-empty">इस category में आज कोई प्रकाशित खबर नहीं है।</div>';
+            '<div class="dynamic-empty" data-i18n="category_empty">इस category में आज कोई प्रकाशित खबर नहीं है।</div>';
 
           return `<section class="section bv-dynamic-section" id="cat-${escLocal(norm(c.slug))}">
             <div class="section-head">
-              <h2 class="section-title"><a class="bv-section-link" href="/category/${encodeURIComponent(c.slug)}">${escLocal(c.icon||"📰")} ${escLocal(c.name)}</a></h2>
-              <a class="bv-section-more" href="/category/${encodeURIComponent(c.slug)}">सभी देखें →</a>
+              <h2 class="section-title"><a class="bv-section-link" href="/category/${encodeURIComponent(c.slug)}">${escLocal(c.icon||"📰")} <span data-i18n-cat-name="${escLocal(c.slug)}">${escLocal(c.name)}</span></a></h2>
+              <a class="bv-section-more" href="/category/${encodeURIComponent(c.slug)}" data-i18n="see_all">सभी देखें →</a>
             </div>
             <div class="news-grid">${cards}</div>
           </section>`;

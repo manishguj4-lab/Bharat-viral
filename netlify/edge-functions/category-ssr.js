@@ -1,3 +1,5 @@
+import { parse } from 'node-html-parser';
+
 export default async (request, context) => {
   const url = new URL(request.url);
 
@@ -263,89 +265,61 @@ export default async (request, context) => {
     return createErrorResponse(503, "Service Unavailable", "Network error loading template.");
   }
 
-  const rewriter = new HTMLRewriter()
-  .on('title', {
-    element(el) {
-      el.setInnerContent(title);
-    }
-  })
-  .on('meta[name="description"]', {
-    element(el) {
-      el.setAttribute('content', categoryDescription);
-    }
-  })
-  .on('link[rel="canonical"]', {
-    element(el) {
-      el.setAttribute('href', canonical);
-    }
-  })
-  .on('meta[property="og:title"]', {
-    element(el) {
-      el.setAttribute('content', title);
-    }
-  })
-  .on('meta[property="og:description"]', {
-    element(el) {
-      el.setAttribute('content', categoryDescription);
-    }
-  })
-  .on('meta[property="og:url"]', {
-    element(el) {
-      el.setAttribute('content', canonical);
-    }
-  })
-  .on('meta[name="twitter:title"]', {
-    element(el) {
-      el.setAttribute('content', title);
-    }
-  })
-  .on('meta[name="twitter:description"]', {
-    element(el) {
-      el.setAttribute('content', categoryDescription);
-    }
-  })
-  .on('head', {
-    element(el) {
-      el.append(
-        `<script type="application/ld+json">${safeSchema}</script>`,
-        { html: true }
-      );
-      if (page > 1) {
-          el.append(`<link rel="prev" href="${site}/category/${encodeURIComponent(slug)}${page - 1 > 1 ? '?page=' + (page - 1) : ''}">`, { html: true });
-      }
-      if (page < totalPages) {
-          el.append(`<link rel="next" href="${site}/category/${encodeURIComponent(slug)}?page=${page + 1}">`, { html: true });
-      }
-    }
-  })
-  .on('#heading', {
-      element(el) {
-          el.setInnerContent(`${categoryIcon} ${categoryName}`);
-      }
-  })
-  .on('#sub', {
-      element(el) {
-          el.setInnerContent(categoryDescription);
-      }
-  })
-  .on('#grid', {
-      element(el) {
-          el.setInnerContent(gridHtml, { html: true });
-      }
-  })
-  .on('#pagination', {
-      element(el) {
-          el.setInnerContent(paginationHtml, { html: true });
-      }
-  });
+  const templateText = await templateResponse.text();
+  const root = parse(templateText);
 
-  const modifiedResponse = rewriter.transform(templateResponse);
-  const responseHeaders = new Headers(modifiedResponse.headers);
-  responseHeaders.set('content-type', 'text/html; charset=UTF-8');
-  responseHeaders.set('cache-control', 'public, max-age=60, s-maxage=300');
+  const titleEl = root.querySelector('title');
+  if (titleEl) titleEl.set_content(title);
 
-  return new Response(modifiedResponse.body, {
-    status: modifiedResponse.status || 200,
-    headers: responseHeaders
+  const descEl = root.querySelector('meta[name="description"]');
+  if (descEl) descEl.setAttribute('content', categoryDescription);
+
+  const canonicalEl = root.querySelector('link[rel="canonical"]') || root.querySelector('link[id="canonical"]');
+  if (canonicalEl) canonicalEl.setAttribute('href', canonical);
+
+  const ogTitle = root.querySelector('meta[property="og:title"]');
+  if (ogTitle) ogTitle.setAttribute('content', title);
+
+  const ogDesc = root.querySelector('meta[property="og:description"]');
+  if (ogDesc) ogDesc.setAttribute('content', categoryDescription);
+
+  const ogUrl = root.querySelector('meta[property="og:url"]');
+  if (ogUrl) ogUrl.setAttribute('content', canonical);
+
+  const twTitle = root.querySelector('meta[name="twitter:title"]');
+  if (twTitle) twTitle.setAttribute('content', title);
+
+  const twDesc = root.querySelector('meta[name="twitter:description"]');
+  if (twDesc) twDesc.setAttribute('content', categoryDescription);
+
+  const headEl = root.querySelector('head');
+  if (headEl) {
+    headEl.appendChild(parse(`<script type="application/ld+json">${safeSchema}</script>`));
+    if (page > 1) {
+      headEl.appendChild(parse(`<link rel="prev" href="${site}/category/${encodeURIComponent(slug)}${page - 1 > 1 ? '?page=' + (page - 1) : ''}">`));
+    }
+    if (page < totalPages) {
+      headEl.appendChild(parse(`<link rel="next" href="${site}/category/${encodeURIComponent(slug)}?page=${page + 1}">`));
+    }
+  }
+
+  const headingEl = root.querySelector('#heading');
+  if (headingEl) headingEl.set_content(`${categoryIcon} ${categoryName}`);
+
+  const subEl = root.querySelector('#sub');
+  if (subEl) subEl.set_content(categoryDescription);
+
+  const gridEl = root.querySelector('#grid');
+  if (gridEl) gridEl.set_content(gridHtml);
+
+  const paginationEl = root.querySelector('#pagination');
+  if (paginationEl) paginationEl.set_content(paginationHtml);
+
+  return new Response(root.toString(), {
+    status: 200,
+    headers: {
+      'content-type': 'text/html; charset=UTF-8',
+      'cache-control': 'public, max-age=60, s-maxage=300'
+    }
   });
 };

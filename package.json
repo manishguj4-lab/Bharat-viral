@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "acorn": "^8.18.0",
+    "node-html-parser": "^9.0.4",
     "xss": "^1.0.15"
   }
 }

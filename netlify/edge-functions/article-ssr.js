@@ -134,20 +134,30 @@ const metaImage =
   const rawContent = article.content || article.body || article.article_content || "";
 
   // Sanitize the content server-side
-  const sanitizedContent = xss(rawContent, {
-    whiteList: {
-      p: [], div: ['class', 'id'], h1: [], h2: [], h3: [], h4: [], h5: [], h6: [],
-      strong: [], b: [], em: [], i: [], u: [], ul: [], ol: [], li: [],
-      a: ['href', 'target', 'rel'], br: [], blockquote: [],
-      table: [], thead: [], tbody: [], tr: [], th: [], td: [],
-      img: ['src', 'alt', 'width', 'height', 'loading'], figure: [], figcaption: [],
-      iframe: ['src', 'width', 'height', 'allowfullscreen', 'frameborder', 'allow'],
-      video: ['src', 'controls', 'width', 'height', 'poster', 'autoplay', 'muted', 'loop'],
-      source: ['src', 'type']
-    },
-    stripIgnoreTag: true,
-    stripIgnoreTagBody: ['script']
-  });
+  let sanitizedContent = "";
+  try {
+    const xssFn = typeof xss === 'function' ? xss : (xss && typeof xss.default === 'function' ? xss.default : null);
+    if (xssFn) {
+      sanitizedContent = xssFn(rawContent, {
+        whiteList: {
+          p: [], div: ['class', 'id'], h1: [], h2: [], h3: [], h4: [], h5: [], h6: [],
+          strong: [], b: [], em: [], i: [], u: [], ul: [], ol: [], li: [],
+          a: ['href', 'target', 'rel'], br: [], blockquote: [],
+          table: [], thead: [], tbody: [], tr: [], th: [], td: [],
+          img: ['src', 'alt', 'width', 'height', 'loading'], figure: [], figcaption: [],
+          iframe: ['src', 'width', 'height', 'allowfullscreen', 'frameborder', 'allow'],
+          video: ['src', 'controls', 'width', 'height', 'poster', 'autoplay', 'muted', 'loop'],
+          source: ['src', 'type']
+        },
+        stripIgnoreTag: true,
+        stripIgnoreTagBody: ['script']
+      });
+    } else {
+      sanitizedContent = esc(rawContent);
+    }
+  } catch {
+    sanitizedContent = esc(rawContent);
+  }
 
   const schema = {
     "@context": "https://schema.org",
@@ -217,7 +227,15 @@ const metaImage =
     .replace(/&/g, '\\u0026');
 
   // Fetch the actual article-template.html file to act as the template
-  const templateResponse = await fetch(new URL("/article-template.html", request.url));
+  let templateResponse;
+  try {
+    templateResponse = await fetch(new URL("/article-template.html", request.url));
+    if (!templateResponse.ok) {
+      return createErrorResponse(503, "Service Unavailable", "Failed to load template.");
+    }
+  } catch {
+    return createErrorResponse(503, "Service Unavailable", "Network error loading template.");
+  }
 
   // Fetch related articles for SSR internal linking
   let relatedHtml = '';
@@ -361,10 +379,12 @@ const metaImage =
   });
 
   const modifiedResponse = rewriter.transform(templateResponse);
-  const finalResponse = new Response(modifiedResponse.body, modifiedResponse);
+  const responseHeaders = new Headers(modifiedResponse.headers);
+  responseHeaders.set('content-type', 'text/html; charset=UTF-8');
+  responseHeaders.set('cache-control', 'public, max-age=60, s-maxage=300');
 
-  finalResponse.headers.set('content-type', 'text/html; charset=UTF-8');
-  finalResponse.headers.set('cache-control', 'public, max-age=60, s-maxage=300');
-
-  return finalResponse;
+  return new Response(modifiedResponse.body, {
+    status: modifiedResponse.status || 200,
+    headers: responseHeaders
+  });
 };

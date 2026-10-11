@@ -253,7 +253,15 @@ export default async (request, context) => {
     .replace(/>/g, '\\u003e')
     .replace(/&/g, '\\u0026');
 
-  const templateResponse = await fetch(new URL("/category-template.html", request.url));
+  let templateResponse;
+  try {
+    templateResponse = await fetch(new URL("/category-template.html", request.url));
+    if (!templateResponse.ok) {
+      return createErrorResponse(503, "Service Unavailable", "Failed to load template.");
+    }
+  } catch {
+    return createErrorResponse(503, "Service Unavailable", "Network error loading template.");
+  }
 
   const rewriter = new HTMLRewriter()
   .on('title', {
@@ -332,10 +340,12 @@ export default async (request, context) => {
   });
 
   const modifiedResponse = rewriter.transform(templateResponse);
-  const finalResponse = new Response(modifiedResponse.body, modifiedResponse);
+  const responseHeaders = new Headers(modifiedResponse.headers);
+  responseHeaders.set('content-type', 'text/html; charset=UTF-8');
+  responseHeaders.set('cache-control', 'public, max-age=60, s-maxage=300');
 
-  finalResponse.headers.set('content-type', 'text/html; charset=UTF-8');
-  finalResponse.headers.set('cache-control', 'public, max-age=60, s-maxage=300');
-
-  return finalResponse;
+  return new Response(modifiedResponse.body, {
+    status: modifiedResponse.status || 200,
+    headers: responseHeaders
+  });
 };
